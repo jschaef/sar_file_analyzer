@@ -1,6 +1,6 @@
 # sar_file_analyzer
 this site is still under construction. The app is using streamlit, altair, pandas and other great python modules   
-to graphical display data from ascii sar files.
+for graphical presentation of various metrics from ascii sar files.
 
 ## requirements
 * pyhton3 
