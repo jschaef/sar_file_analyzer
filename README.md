@@ -1,5 +1,6 @@
 # sar_file_analyzer
-Still under construction
+this site is still under construction. The app is using streamlit, altair, pandas and other great python modules   
+to graphical display data from ascii sar files.
 
 ## requirements
 * pyhton3 
