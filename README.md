@@ -14,8 +14,12 @@ for graphical presentation of various metrics from ascii sar files.
 * pip install nodejs
 * npm install vega-lite vega-cli canvas
 
+## configure
+* edit config.py
 ## run
 streamlit run first_st.py
 
 ## access
 open a webbrowser and navigate to the page displayed before
+username admin/password
+upload your first sar file "Manage Sar Files"
