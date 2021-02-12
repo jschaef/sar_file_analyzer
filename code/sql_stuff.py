@@ -102,6 +102,13 @@ def add_userdata(username, password, role='user'):
     session.commit()
     return True
 
+def change_password(username, password):    
+    user = session.query(User).filter(User.username == username)
+    if user.first():
+        hpassword = hash.hash_password(password)
+        user.first().password = hpassword
+        session.commit()
+
 def modify_user(username, role):
     user = session.query(User).filter(User.username == username)
     role_id = session.query(Role.id).filter(Role.role == role)

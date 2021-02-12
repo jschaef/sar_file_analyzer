@@ -5,7 +5,7 @@ import pandas as pd
 
 def db_mgmt(username, col):
     widget = col.selectbox(
-        'Data', ['metrics', 'headers', 'users'])
+        'Data', ['metrics', 'headers'])
     if widget == 'metrics':
         action = col.selectbox(
             'Actions', ['Show', 'Add', 'Delete'])
@@ -75,27 +75,3 @@ def db_mgmt(username, col):
 
             if st.button('Submit'):
                 sql_stuff.update_header(u_sel, header=u_content, alias=a_content, description=d_content, keyword=k_content)
-
-
-    elif widget == 'users':
-        action = col.selectbox(
-            'Actions', ['Show', 'Modify', 'Delete'])
-
-        if action == 'Show':
-            st.write(pd.DataFrame(sql_stuff.view_all_users('show'), columns=["Username", "Role"]))    
-        elif action == 'Modify':
-            u_ph = st.empty()
-            u_content = u_ph.selectbox('Chosse User to modify', sql_stuff.view_all_users('return'), key='um_key')
-            r_content = st.selectbox('Choose role', sql_stuff.ret_all_roles())
-            if st.button('Submit'):
-                sql_stuff.modify_user(u_content, r_content)
-                u_content = u_ph.selectbox('Chosse User to modify', sql_stuff.view_all_users('return'))
-
-        elif action == 'Delete':
-            u_ph = st.empty()
-            u_content = u_ph.selectbox(
-                'Choose a user to delete', sql_stuff.view_all_users('return'), key='ud_key')
-            if st.button('Submit'):
-                sql_stuff.delete_user(u_content)
-                u_content = u_ph.selectbox(
-                    'Choose a user to delete', sql_stuff.view_all_users())

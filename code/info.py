@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import streamlit as st
+from config import Config
 
 def info():
     st.header("Info Page")
@@ -31,8 +32,8 @@ built on top of the Python programming language. Used as easy to compute format 
 
 def usage():
     st.header("FAQ")
-    st.markdown("""___How can I reset my password?___  
-        Not implemented at the moment. But planned.""")
+    st.markdown(f"""___I forgot my password___  
+        Please contact the admin. {Config.admin_email} """)
     st.markdown("""__What can I do with diagrams?__   
         There are some features with this diagrams which are not visible in the first place.
         E.g if you scroll inside a diagram you will change the dimension. You could also click
@@ -56,5 +57,9 @@ def usage():
         into picle format on disk or within reddis. Next time the data needs to be presented it loads 
         the ready to use pickled data structure only. Only a few calculations are needed to finally present the data.""")
     
-    st.markdown("""___Whom to contact in case of an error?___  
-        jochen.schaefer@suse.com via email or ping me on teams.""")
+    st.markdown(f"""___Whom to contact in case of an error?___  
+        {Config.admin_email} via email or ping me on teams.""")
+
+def code():
+    st.header("Code")
+    st.markdown("Find the code on githup https://github.com/jschaef/sar_file_analyzer")

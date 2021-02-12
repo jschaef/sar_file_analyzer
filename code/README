@@ -1,0 +1,7 @@
+python3 -m venv venv
+source venv/bin/activate
+pip install -U pip
+pip install -r requirements
+pip install nodejs
+npm install vega-lite vega-cli canvas
+

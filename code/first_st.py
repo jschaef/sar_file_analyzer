@@ -14,6 +14,7 @@ import redis_mng
 import beta
 import help
 import info
+import self_service as ss
 
 start_time = time.perf_counter()
 
@@ -44,9 +45,9 @@ def start():
                     'sar_files':sar_files, 'cols':[col1, col2]})
                 if sql_stuff.get_role(username) == "admin":
                     task = st.sidebar.selectbox("Tasks", ["Analyze Data", "Manage Sar Files", "DB Management",
-                    "Redis Management", "Beta", "TODO", "Self Service", "Info"])
+                    "Redis Management", "TODO", "Self Service", "User Management", "Info"])
                 else:
-                    task = st.sidebar.selectbox("Tasks", ["Analyze Data", "Manage Sar Files", "Info"])
+                    task = st.sidebar.selectbox("Tasks", ["Analyze Data", "Manage Sar Files", "Self Service", "Info"])
 
                 if task == "Manage Sar Files":
                     mng_sar.file_mng(upload_dir, col2, username)
@@ -62,12 +63,15 @@ def start():
                     except:
                         #st.markdown('Redis server seeems to be offline')
                         ''
-                elif task == "Beta":
-                    beta.test_dia()
                 elif task == "Info":
                     info.info()
                     info.usage()
+                    info.code()
 
+                elif task == 'Self Service':
+                    ss.self_service(username)
+                elif task == 'User Management':
+                    ss.admin_service() 
 
             else:
                 st.warning("You don't exist or your password does not match")
