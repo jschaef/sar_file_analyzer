@@ -11,6 +11,8 @@ for graphical presentation of various metrics from ascii sar files.
 * source venv/bin/activate 
 * pip install -U pip 
 * pip install -r requirments.txt 
+* pip install nodejs
+* npm install vega-lite vega-cli canvas
 
 ## run
 streamlit run first_st.py
