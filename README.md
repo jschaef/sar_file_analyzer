@@ -17,7 +17,7 @@ for graphical presentation of various metrics from ascii sar files.
 ## configure
 * edit config.py
 ## run
-streamlit run first_st.py
+* streamlit run first_st.py
 
 ## access
 * open a webbrowser and navigate to the page displayed before
