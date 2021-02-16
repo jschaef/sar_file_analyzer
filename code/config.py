@@ -14,5 +14,5 @@ class Config(object):
     redis_port = 6379
     rkey_pref = 'user'
     pdf_name = 'sar_chart.pdf'
-    admin_email = 'jochen.schaefer@suse.com'
+    admin_email = 'admin@example-org.com'
 
