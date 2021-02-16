@@ -21,4 +21,5 @@ for graphical presentation of various metrics from ascii sar files.
 ## access
 * open a webbrowser and navigate to the page displayed before
 * username admin/password
+* change password of admin
 * upload your first sar file "Manage Sar Files"
