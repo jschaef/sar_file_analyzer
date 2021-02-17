@@ -11,7 +11,6 @@ import db_mng
 import helpers
 import todo
 import redis_mng
-import beta
 import help
 import info
 import self_service as ss
