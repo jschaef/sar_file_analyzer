@@ -12,7 +12,7 @@ for graphical presentation of various metrics from ascii sar files.
 * source venv/bin/activate 
 * pip install -U pip 
 * pip install six appdirs packaging ordered_set
-* pip install -r requirments.txt 
+* pip install -r requirements.txt 
 * install nodejs-common via your package manager (you need the npm binary) 
 * npm install vega-lite vega-cli canvas
 
