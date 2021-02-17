@@ -40,9 +40,6 @@ def usage():
         and move which will vertically/horizontally move the diagram. At the right side you can save
         the diagram. There is also a button to maximize it.
         """)
-    st.markdown("""__Can I save a diagram as PDF?__  
-        Not at the moment. I'm relying on the features supported by streamlit/altair. Which 
-        do not easily support it at the moment.""")
     st.markdown("""__Can this app be containerized?__  
         Yes please - do it.""")
 
