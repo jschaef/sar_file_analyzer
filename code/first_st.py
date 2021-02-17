@@ -13,7 +13,7 @@ import todo
 import redis_mng
 import help
 import info
-import self_service as ss 
+import self_service as ss
 
 start_time = time.perf_counter()
 
