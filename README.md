@@ -6,6 +6,7 @@ for graphical presentation of various metrics from ascii sar files.
 * pyhton3 
 * python3x-pip
 * sar files with '.' as decimal separator (LC_NUMERIC en,us)
+* 8GB RAM for better user experience
 
 ## build
 * python -m venv venv 
