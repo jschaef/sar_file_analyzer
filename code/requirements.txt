@@ -7,7 +7,6 @@ autopep8
 backcall
 base58
 bleach
-blinker
 boto3
 botocore
 cachetools
