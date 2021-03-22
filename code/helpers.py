@@ -104,10 +104,7 @@ def translate_headers(field):
     for header in field:
         if reg_linux_restart.search(header):
             continue
-        if len(header.split()) > 1:
-            search_strings = header.split()
-        else:
-            search_strings = header.split()
+        search_strings = header.split()
         alias = sql_stuff.get_header_prop(search_strings, 'alias')
         if alias:
             aliases[header] = alias
@@ -116,22 +113,43 @@ def translate_headers(field):
 
     return aliases
 
-def translate_aliases(field):
+st.cache(allow_output_mutation=True)
+def translate_aliases(alias_field, sar_headers):
     '''
     takes a list of aliases and returns the related headers
     as a dictionary {alias:header,...}
     '''
     headers = {}
-    for alias in field:
+    for alias in alias_field:
         header = sql_stuff.get_header_from_alias(alias)
         if not header:
             header = alias
-        
+        if header not in sar_headers: 
+            header = aliases_2_header(sar_headers, header)      
         # refurbish whitespaces in db
         header = " ".join(header.split())
         headers[alias] = header
     return headers
 
+# In case there is no alias because header differs a little bit
+def aliases_2_header(header_field, alias_header):
+    result_dict = {}
+    result_header = ""
+    for metric in alias_header.split():
+        result_dict[metric] = {}
+        for header in header_field:
+            result_dict[metric][header] = 0 
+            if metric in header.split():
+                result_dict[metric][header] += 1 
+    tmp_count = 0
+    for metric in result_dict.keys():
+        for header in result_dict[metric].keys():
+            if result_dict[metric][header] > tmp_count:
+                result_header = header
+    return result_header
+
+
+    None
 
 ###################################################
 # Helpers regarding app organization
@@ -184,9 +202,7 @@ def get_metric_desc_from_manpage():
                 m_hit= 0
 
     for metric in mh_dict.keys():
-    #   print(f'{metric}:   {" ".join(mh_dict[metric]).rstrip()}')
         yield (metric, " ".join(mh_dict[metric]).rstrip())
-    #return mh_dict
 
 def metric_expander(prop, expand=False):
     description = sql_stuff.ret_metric_description(prop)

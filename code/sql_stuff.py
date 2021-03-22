@@ -173,17 +173,37 @@ def get_header_prop(header, property):
         unlist_header = " ".join(repr(e) for e in header).replace("'","")
         query = session.query(Headings).filter(Headings.header.ilike(f'{unlist_header}%'))
         if query.first():
+            # multiple header with same metric, e.g. %usr
             if len(query.all()) > 1:
+                # helper vars if header has no related alias
+                col_field = []
                 for col in query:
                     counter = 0
                     result_dict = object_as_dict(col)
+                    header_len = len(result_dict['header'].split())
                     for item in result_dict['header'].split():
                         if item not in org_header:
-                            counter = 1
+                            # count how much different items compared to header
+                            counter += 1
                     if counter == 0:
                         return result_dict['alias']
+                    # save alias for each len of header field
                     else:
-                        continue
+                        col_field.append([result_dict['alias'], counter])
+
+                # try to find the nearest alias
+                # header differs by one metric
+                l_counter = 1
+                index = 0
+                for entry in col_field:
+                    counter = entry[1]
+                    if counter <= l_counter:
+                        l_counter = counter
+                        index = col_field.index(entry)
+                if len(org_header) - header_len <= abs(2):
+                        return col_field[index][0]
+
+            # header differs by more than one metric
             else:
                 return query.first().alias
     else:

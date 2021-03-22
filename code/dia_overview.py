@@ -63,7 +63,7 @@ def show_dia_overview(username):
                         sel_field.append(label)
 
     st.markdown('___')                
-    headers = helpers.translate_aliases(sel_field)
+    headers = helpers.translate_aliases(sel_field, sar_structure.keys())
 
     # pick time frame
     time_expander = st.beta_expander(label='Change Start and End Time',expanded=False)
@@ -71,7 +71,9 @@ def show_dia_overview(username):
         col5, col6 = st.beta_columns(2)
         for entry in headers:
             skey = headers[entry]
-            first_item = list(sar_structure.get(skey).keys())[0]
+            if sar_structure.get(skey, None):
+                first_item = list(sar_structure.get(skey).keys())[0]
+
             date_df = sar_structure.get(skey).get(first_item, None) 
             if date_df is not None:
                 hours = dff.translate_dates_into_list(date_df)
