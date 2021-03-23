@@ -132,25 +132,21 @@ def translate_aliases(alias_field, sar_headers):
     return headers
 
 # In case there is no alias because header differs a little bit
+# from headers saved in DB
 def aliases_2_header(header_field, alias_header):
     result_dict = {}
     result_header = ""
-    for metric in alias_header.split():
-        result_dict[metric] = {}
-        for header in header_field:
-            result_dict[metric][header] = 0 
+    for header in header_field:
+        result_dict[header] = 0
+        for metric in alias_header.split():
             if metric in header.split():
-                result_dict[metric][header] += 1 
+                result_dict[header] += 1 
     tmp_count = 0
-    for metric in result_dict.keys():
-        for header in result_dict[metric].keys():
-            if result_dict[metric][header] > tmp_count:
-                result_header = header
+    for header in result_dict.keys():
+        if result_dict[header] > tmp_count:
+           tmp_count = result_dict[header]
+           result_header = header
     return result_header
-
-
-    None
-
 ###################################################
 # Helpers regarding app organization
 def get_selected_header(select_box_title, headers, col=None):
