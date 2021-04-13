@@ -82,14 +82,16 @@ def show_dia_overview(username):
                 end = col6.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
                 break
 
+
+    if st.sidebar.checkbox('Show Metric descriptions from man page'):
+        show_metric = 1
+    else:
+        show_metric = 0
+    wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
+        'IFACE older distributions', 'Block Devices (older SAR versions)']
+
     st.markdown('')
     if st.checkbox('Show'):
-        if st.sidebar.checkbox('Show Metric descriptions from man page'):
-            show_metric = 1
-        else:
-            show_metric = 0
-        wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
-            'IFACE older distributions', 'Block Devices (older SAR versions)']
         for entry in sel_field:
             df_field = []
             if sar_structure.get(headers[entry], None):
