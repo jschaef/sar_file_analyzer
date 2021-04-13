@@ -29,14 +29,13 @@ def data_cooker_multi(file, sar_data_dict, username):
     pds = get_data_frames(file, username)
     sar_data_dict[file] = pds
 
-def set_data_frames(file_name, user_name):
+def set_data_frames(file_name, user_name, sar_structure):
     """
     Write structure containing data frames to pickle and redis
     Replaces the further pickle/redis data 
     """
     st.info('It might be the first time that this file has been opened.\n\
         Such it needs some time to serialize the data. Next time will be much faster.')
-    sar_structure = data_cooker(file_name, user_name)
     # save to pickle
     real_path = Path(file_name)
     pickle_file = Path(f'{file_name}.df')
@@ -92,15 +91,14 @@ def get_data_frames(file_name, user_name):
         else:
             sar_structure = data_cooker(full_path, user_name)
             if sar_structure:
-                set_data_frames(full_path, user_name)
-                #os.system(f'rm -rf {full_path}')
+                set_data_frames(full_path, user_name, sar_structure)
     elif pickle_file.exists():
         sar_structure = pickle.load(open(pickle_file, 'rb'))
     else:
+        st.write('no redis')
         sar_structure = data_cooker(full_path, user_name)
         if sar_structure:
-            set_data_frames(full_path, user_name)
-            #os.system(f'rm -rf {full_path}')
+            set_data_frames(full_path, user_name, sar_structure)
 
     return sar_structure
 
