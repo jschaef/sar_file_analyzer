@@ -5,18 +5,28 @@ import alt
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
+import mp_defs
+import time
 from config import Config
 
-
+sar_structure = []
+os_details = ""
+file_choosen = ""
 def show_dia_overview(username):
+    global sar_structure, os_details, file_choosen
     st.subheader('Overview of important metrics from SAR data')
     col1, col2 = st.beta_columns(2)
     sar_file = helpers.get_sar_files(username, col=col2)
+    if sar_file != file_choosen:
+        sar_structure = []
+        file_choosen = sar_file
+
     sar_file = f'{Config.upload_dir}/{username}/{sar_file}'
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'
-    sar_structure = sdc.get_data_frames(sar_file, username)
-    os_details = sar_structure.pop('os_details')
+    if not sar_structure:
+        sar_structure = sdc.get_data_frames(sar_file, username)
+        os_details = sar_structure.pop('os_details')
     headers = [header for header in sar_structure.keys()]
 
     initial_aliases = ['CPU', 'Kernel tables', 'Load', 'Memory utilization',
@@ -83,15 +93,21 @@ def show_dia_overview(username):
                 break
 
 
-    if st.sidebar.checkbox('Show Metric descriptions from man page'):
+    st.markdown('___')                
+    col7, col8 = st.beta_columns(2)
+    if col7.checkbox('Show Metric descriptions from man page'):
         show_metric = 1
     else:
         show_metric = 0
+    if col8.checkbox('Enable PDF saving'):
+        pdf_saving = 1
+    else:
+        pdf_saving = 0
     wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
         'IFACE older distributions', 'Block Devices (older SAR versions)']
 
     st.markdown('')
-    if st.checkbox('Show'):
+    if st.sidebar.checkbox('Show'):
         for entry in sel_field:
             df_field = []
             if sar_structure.get(headers[entry], None):
@@ -126,8 +142,8 @@ def show_dia_overview(username):
                     df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                     st.altair_chart(alt.overview_v1(df))
                     # new
-                    helpers.pdf_download(pdf_name, alt.overview_v1(df))
-                    #st.write(df1)
+                    if pdf_saving:
+                        helpers.pdf_download(pdf_name, alt.overview_v1(df))
 
                     metrics = df['metrics'].drop_duplicates().tolist()
                     if show_metric:
