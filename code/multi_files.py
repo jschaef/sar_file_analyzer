@@ -30,7 +30,17 @@ def single_multi(config_dict, username):
             sel_field.append(sar_files[sar_files.index(file)])
 
     st.markdown('___')
-    answer = st.checkbox('Proceed')
+
+    col3, col4 = st.beta_columns(2)
+    man_check_box = col3.empty()
+    man_check = man_check_box.checkbox('Show Metric description from man page')
+    pdf_check = col4.empty()
+    if pdf_check.checkbox('Enable PDF saving'):
+        pdf_saving = 1
+    else:
+        pdf_saving = 0
+    
+    answer = st.checkbox('Show')
     if answer:
         if sel_field:
             multi_sar_dict = {}
@@ -61,7 +71,10 @@ def single_multi(config_dict, username):
             headers = helpers.merge_headers(all_headers)
             headers = helpers.check_sub_items(headers, multi_sar_dict)
 
+            st.sidebar.markdown('---')
             selected, ph_1 = helpers.get_selected_header('Sar Headings', headers)
+            aitem = helpers.translate_headers([selected])
+
 
             # find data frames
             sub_item_field = []
@@ -80,10 +93,12 @@ def single_multi(config_dict, username):
                 generic_items = []
             else:
                 generic_items = helpers.merge_headers(generic_item_field)
+                header_add = ''
 
             if not generic_items:
                 sub_item = st.sidebar.selectbox(
                     'Choose devices', [key for key in sub_items], key='sub')
+                header_add = sub_item
 
             for sar_data in multi_sar_dict:
                 #if "generic" in multi_sar_dict[sar_data][selected].keys():
@@ -94,7 +109,8 @@ def single_multi(config_dict, username):
 
                 x.append({sar_data: df})
 
-            prop = st.sidebar.selectbox(
+            prop_box = st.sidebar.empty()
+            prop = prop_box.selectbox(
                 'metric', [col for col in df.columns], key='prop')
 
 
@@ -141,6 +157,9 @@ def single_multi(config_dict, username):
                             collect_field)-1][file].append(alt.overview_v1(df))
 
                 if pd_or_dia == 'Summary':
+                    prop_box.empty()
+                    pdf_check.empty()
+                    man_check_box.empty()
                     st.subheader('Dataset Overview')
                     for data in sum_field:
                         for key in data:
@@ -148,10 +167,10 @@ def single_multi(config_dict, username):
                             st.subheader(f'{key.split("/")[-1]}')
                             df = data[key][0]
                             ds = df.describe()
-                            st.markdown('Statistics')
+                            st.markdown(f'Statistics for {aitem[selected]} {header_add}')
                             st.write(ds)
-                            st.markdown('Raw Data')
-                            st.write(df)
+                            st.markdown(f'Data for {aitem[selected]} {header_add}')
+                            st.write(helpers.set_stile(df))
                     st.subheader('Diagram Overview')
 
                     for data in collect_field:
@@ -159,7 +178,8 @@ def single_multi(config_dict, username):
                             st.text('')
                             st.subheader(f'{key.split("/")[-1]}')
                             st.altair_chart(data[key][1])
-                            helpers.pdf_download(pdf_name, data[key][1])
+                            if pdf_saving:
+                                helpers.pdf_download(pdf_name, data[key][1])
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:
@@ -182,9 +202,10 @@ def single_multi(config_dict, username):
                                 item[0], item[1], width, hight,  yfactor * 5, xfactor * 20)
                             multi_chart.append(chart)
                         layer = alt.draw_multi_chart(multi_chart,
-                                                            y_shared='shared', title='Compare Files', x_shared='shared')
+                                                            y_shared='shared', title=f'{aitem[selected]} {header_add} {prop}', x_shared='shared')
                         st.write(layer)
-                        helpers.pdf_download(pdf_name, layer) 
+                        if pdf_saving:
+                            helpers.pdf_download(pdf_name, layer) 
                     
-                        if st.sidebar.checkbox('Show Metric description'):
+                        if man_check:
                             helpers.metric_expander(prop, expand=True)
