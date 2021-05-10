@@ -18,6 +18,17 @@ def diff_metrics(config_dict, username):
     multi_sar_dict = {}
     os_field = []
 
+    col3, col4 = st.beta_columns(2)
+    pdf_check = col3.empty()
+    man_check_box = col4.empty()
+    man_check = man_check_box.checkbox('Show Metric description from man page')
+
+    if pdf_check.checkbox('Enable PDF saving'):
+        pdf_saving = 1
+    else:
+        pdf_saving = 0
+
+
     answer = st.checkbox('Show')
     if answer:
         st.markdown('___')
@@ -94,10 +105,11 @@ def diff_metrics(config_dict, username):
 
         if chart_field:
             chart = alt.draw_multi_chart(chart_field,
-                                            x_shared='shared', title='Compare metrics')
+                                            x_shared='shared', title=f'Compare {prop_1} vs {prop_2}')
             st.write(chart)
-            helpers.pdf_download(pdf_name, chart)
+            if pdf_saving:
+                helpers.pdf_download(pdf_name, chart)
 
-            if st.sidebar.checkbox('Show Metric description'):
+            if man_check:
                 helpers.metric_expander(prop_1, expand=True)
                 helpers.metric_expander(prop_2, expand=True)
