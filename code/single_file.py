@@ -14,7 +14,8 @@ def single_f(config_obj, username):
     col2 = config_obj['cols'][1]
     selection = helpers.get_sar_files(username, col=col2)
 
-    if st.checkbox('Show'):
+    if st.sidebar.checkbox('Show'):
+        st.sidebar.markdown('---')
         col3, col4 = st.beta_columns(2)
         # parse data from file
         sar_file = f'{upload_dir}/{selection}'
@@ -40,13 +41,13 @@ def single_f(config_obj, username):
         selected_content = st.selectbox(
                 'Sumary/Details', ['Summary', 'Details'], key='diagr')
 
-        if selected_content == 'Summary':
-            if sub_item:
-                header_add = sub_item
-            else:
-                header_add =''
+        aitem = helpers.translate_headers([selected])
+        if sub_item:
+            header_add = sub_item
+        else:
+            header_add =''
 
-            aitem = helpers.translate_headers([selected])
+        if selected_content == 'Summary':
             st.subheader(f'Statistics for {aitem[selected]} {header_add}')
             st.text('')
             st.write(df.describe())
@@ -64,7 +65,7 @@ def single_f(config_obj, username):
             st.text('')
 
             st.subheader('Dataset')
-            st.write(df)
+            st.write(helpers.set_stile(df))
             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
             st.text('')
             st.subheader('Graphical overview')
@@ -72,10 +73,9 @@ def single_f(config_obj, username):
             helpers.pdf_download(pdf_name, alt.overview_v1(df))
 
 
-            if st.sidebar.checkbox('Show Metric descriptions from man page'):
-                metrics = df['metrics'].drop_duplicates().tolist()
-                for metric in metrics:
-                    helpers.metric_expander(metric)
+            metrics = df['metrics'].drop_duplicates().tolist()
+            for metric in metrics:
+                helpers.metric_expander(metric)
 
         elif selected_content == 'Details':
 
@@ -91,10 +91,11 @@ def single_f(config_obj, username):
             df = df.rename(columns={'index':'date'})
             df_part = df[[prop]].copy()
             col5, col6 = st.beta_columns(2)
-            col5.subheader(f'Statistics for {prop}')
-            col6.subheader(f'Dataset for {prop}')
+            alias = aitem[selected]
+            col5.subheader(f'Statistics for {aitem[selected]} {header_add} {prop}')
+            col6.subheader(f'Dataset for {aitem[selected]} {header_add} {prop}')
             col5.dataframe(df_part.describe())
-            col6.dataframe(df_part)
+            col6.dataframe(helpers.set_stile(df_part))
 
             df_part['file'] = os_details.split()[2].strip('()')
             df_part['date'] = df_part.index
