@@ -325,7 +325,6 @@ def rename_sar_file(file_path):
     except:
         print(f'file {file_path} could not be renamed to {renamed_name}')
 
-
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def pdf_download(file, dia):
     my_file = file
@@ -342,6 +341,37 @@ def pdf_download(file, dia):
     download_button_str = dow.download_button(
         s, filename, f'Click here to download PDF')
     st.markdown(download_button_str, unsafe_allow_html=True)
+
+def set_stile(df):
+    def color_null_bg(val):
+        is_null = val == 0
+        return ['background-color: "",' if v else '' for v in is_null]
+    
+    def color_null_fg(val):
+        is_null = val == 0
+        return ['color: "",' if v else '' for v in is_null]
+
+    df = df.style.apply(highlight_ind, dim='min').apply(highlight_ind).\
+        highlight_min(color='yellow').\
+        highlight_max(color='lightblue').apply(color_null_bg).apply(
+            color_null_fg).set_precision(2)
+    return(df)
+
+def highlight_ind(data, dim='max', color='black'):
+    '''
+    highlight the maximum in a Series or DataFrame
+    '''
+    attr = f'color: {color}'
+    if data.ndim == 1:
+        if dim == 'max':
+            quant = data == data.max()
+        elif dim == 'min':
+            quant = data == data.min()
+        else:
+            attr = f'color: "red"'
+            quant = data
+        return [attr if v else '' for v in quant]
+
 
 if __name__ == '__main__':
     pass

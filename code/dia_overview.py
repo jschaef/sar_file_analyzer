@@ -5,7 +5,6 @@ import alt
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
-import mp_defs
 import time
 from config import Config
 
@@ -15,6 +14,7 @@ file_choosen = ""
 def show_dia_overview(username):
     global sar_structure, os_details, file_choosen
     st.subheader('Overview of important metrics from SAR data')
+
     col1, col2 = st.beta_columns(2)
     sar_file = helpers.get_sar_files(username, col=col2)
     if sar_file != file_choosen:
@@ -72,6 +72,10 @@ def show_dia_overview(username):
                     if selected:
                         sel_field.append(label)
 
+    if st.checkbox('Show Metric descriptions from man page'):
+        show_metric = 1
+    else:
+        show_metric = 0
     st.markdown('___')                
     headers = helpers.translate_aliases(sel_field, sar_structure.keys())
 
@@ -94,58 +98,60 @@ def show_dia_overview(username):
 
 
     st.markdown('___')                
-    col7, col8 = st.beta_columns(2)
-    if col7.checkbox('Show Metric descriptions from man page'):
-        show_metric = 1
-    else:
-        show_metric = 0
-    if col8.checkbox('Enable PDF saving'):
+    if st.checkbox('Enable PDF saving'):
         pdf_saving = 1
     else:
         pdf_saving = 0
-    wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
-        'IFACE older distributions', 'Block Devices (older SAR versions)']
+        
+    with st.form(key='main_section'):
+        wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
+            'IFACE older distributions', 'Block Devices (older SAR versions)']
 
-    st.markdown('')
-    if st.sidebar.checkbox('Show'):
-        for entry in sel_field:
-            df_field = []
-            if sar_structure.get(headers[entry], None):
-                st.subheader(entry)
-                if 'generic' in sar_structure[headers[entry]].keys():
-                    df = sar_structure[headers[entry]]['generic']
-                    df_field.append([df,0])
-                else:
-                    device_list = list(sar_structure[headers[entry]].keys())
-                    device_list.sort()
-                    if entry in wanted_sub_devices:
-                        for device in device_list:
+        st.markdown('')
+        submitted = st.form_submit_button('Submit')
+        if submitted:
+            for entry in sel_field:
+                df_field = []
+                if sar_structure.get(headers[entry], None):
+                    st.subheader(entry)
+                    if 'generic' in sar_structure[headers[entry]].keys():
+                        df = sar_structure[headers[entry]]['generic']
+                        df_field.append([df,0])
+                    else:
+                        device_list = list(sar_structure[headers[entry]].keys())
+                        device_list.sort()
+                        if entry in wanted_sub_devices:
+                            for device in device_list:
+                                df = sar_structure[headers[entry]][device]
+                                df_field.append([df, device])
+
+                        elif 'all' in device_list:
+                            device = 'all'
+                            st.write(f'all of {len(device_list) -1}')
+                            df = sar_structure[headers[entry]][device]
+                            df_field.append([df, device])
+                        else:
+                            device = device_list[0]
                             df = sar_structure[headers[entry]][device]
                             df_field.append([df, device])
 
-                    elif 'all' in device_list:
-                        device = 'all'
-                        st.write(f'all of {len(device_list) -1}')
-                        df = sar_structure[headers[entry]][device]
-                        df_field.append([df, device])
-                    else:
-                        device = device_list[0]
-                        df = sar_structure[headers[entry]][device]
-                        df_field.append([df, device])
+                    for df_tuple in df_field:
+                        if df_tuple[1]:
+                            st.write(df_tuple[1])
+                        df = df_tuple[0]
+                        df = df[start:end]
+                        st.write(helpers.set_stile(df))
+                        code = '''max: lightblue\nmin: green '''
+                        st.code(code)
+                        st.text('')
+                        st.text('')
+                        df = df.reset_index().melt('date', var_name='metrics', value_name='y')
+                        st.altair_chart(alt.overview_v1(df))
+                        # new
+                        if pdf_saving:
+                            helpers.pdf_download(pdf_name, alt.overview_v1(df))
 
-                for df_tuple in df_field:
-                    if df_tuple[1]:
-                        st.write(df_tuple[1])
-                    df = df_tuple[0]
-                    df = df[start:end]
-                    st.write(df)
-                    df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                    st.altair_chart(alt.overview_v1(df))
-                    # new
-                    if pdf_saving:
-                        helpers.pdf_download(pdf_name, alt.overview_v1(df))
-
-                    metrics = df['metrics'].drop_duplicates().tolist()
-                    if show_metric:
-                        for metric in metrics:
-                            helpers.metric_expander(metric)
+                        metrics = df['metrics'].drop_duplicates().tolist()
+                        if show_metric:
+                            for metric in metrics:
+                                helpers.metric_expander(metric)
