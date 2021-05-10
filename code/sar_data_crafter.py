@@ -34,7 +34,8 @@ def set_data_frames(file_name, user_name, sar_structure):
     Write structure containing data frames to pickle and redis
     Replaces the further pickle/redis data 
     """
-    st.info('It might be the first time that this file has been opened.\n\
+    base_name = os.path.basename(file_name)
+    st.info(f'It might be the first time that {base_name} has been opened.\n\
         Such it needs some time to serialize the data. Next time will be much faster.')
     # save to pickle
     real_path = Path(file_name)
@@ -46,8 +47,7 @@ def set_data_frames(file_name, user_name, sar_structure):
     rs = redis_mng.get_redis_conn()
     if rs:
         r_item = f"{Config.rkey_pref}:{user_name}"
-        file_name = file_name.split('/')[-1]
-        file_name_df = f'{file_name}_df'
+        file_name_df = f'{base_name}_df'
         p_obj = redis_mng.get_redis_val(
             r_item, decode=False, property=file_name_df)
         if not p_obj:
@@ -57,7 +57,6 @@ def set_data_frames(file_name, user_name, sar_structure):
                 print(f'{r_item}, {file_name_df} saved to redis')
             except:
                 print(f'could not connect to redis server or save {file_name_df} to redis server')
-    #JS!
     os.system(f'rm -rf {real_path}')
 
 
@@ -69,10 +68,10 @@ def get_data_frames(file_name, user_name):
     rs = redis_mng.get_redis_conn(decode=False)
     pickle_file = Path(f'{file_name}.df')
     full_path = file_name
+    basename = os.path.basename(file_name)
     if rs:
         r_item = f"{Config.rkey_pref}:{user_name}"
-        file_name = file_name.split('/')[-1]
-        file_name_df = f'{file_name}_df'
+        file_name_df = f'{basename}_df'
         p_obj = redis_mng.get_redis_val(
             r_item, decode=False, property=file_name_df)
         if p_obj:
