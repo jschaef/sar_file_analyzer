@@ -15,6 +15,12 @@ import help
 import info
 import self_service as ss
 
+st.set_page_config(
+    page_title="Happy SAR Analyzer",
+    layout='wide',
+    page_icon="wiki_pictures/kisspng-penguin-download-ico-icon-penguin-5a702cc04e5fc1.8432243315173009283211.png",
+)
+
 start_time = time.perf_counter()
 
 def start():
