@@ -4,8 +4,7 @@ for graphical presentation of various metrics from ascii sar files.
 
 ## requirements
 * pyhton3 
-* python3x-pip
-* streamlit >=0.81.1
+* python3x-pip* 
 * sar files with '.' as decimal separator (LC_NUMERIC en,us)
 * 8GB RAM for better user experience
 
