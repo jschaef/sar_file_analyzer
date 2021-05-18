@@ -43,6 +43,9 @@ def parse_sar_file(content, myfile, username):
         if mark == 1:
             fields = line.split()
             if not reg_fibre.search(line):
+                if reg_linux_restart.search(line):
+                    fields.append(f' {line.split()[0]}')
+
                 mykey = " ".join(fields[1:])
             else:
                 fchost = fields.pop()
@@ -72,10 +75,7 @@ def parse_sar_file(content, myfile, username):
         if not line:
             # headings follow empty lines, such we set a mark on empty line
             mark = 1
-        # Linux Restart (reboot)
-        if reg_linux_restart.search(line):
-            continue
-             
+
     return mydict
 
 
