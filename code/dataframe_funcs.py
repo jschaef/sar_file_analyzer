@@ -2,10 +2,10 @@
 
 import re
 import pandas as pd
+import numpy as np
 
-def df_reset_date(df, os_details):
-    new_index = []
 
+def format_date(os_details):
     # presume format 2020-XX-XX for sar operating system details
     date_reg = re.compile('[0-9]{4}-[0-9]{2}-[0-9]{2}')
     date_reg2 = re.compile('[0-9]{2}/[0-9]{2}/[0-9]{2}')
@@ -23,7 +23,11 @@ def df_reset_date(df, os_details):
             # add fake item
             format='%Y-%m-%d'
             date_str = '2000-01-01'
-    #date_str = os_details[3]
+    return(date_str, format)
+
+def df_reset_date(df, os_details):
+    new_index = []
+    date_str, format = format_date(os_details)
     for x in range(len(df.index)):
         old_val = df.index[x]
         z = pd.to_datetime(
@@ -34,7 +38,6 @@ def df_reset_date(df, os_details):
     df.set_index('date', new_index, inplace=True,
                 verify_integrity=False)
     
-
     return df
 
 def extract_hours_for_labels(df):
@@ -63,3 +66,38 @@ def translate_dates_into_list(df):
     hours.append(df.index[-1])
     return hours
 
+def insert_restarts_into_df(os_details, df, restart_headers):
+    # date_str like 2020-09-17
+    date_str, format = format_date(os_details)
+    new_rows = []
+    for header in restart_headers:
+        # restart_headers have time of restart appended as last string
+        # hour time, e.g.: 10:13:47
+        h_time = header.split()[-1]
+        z = pd.to_datetime(f'{date_str} {h_time}', format=format)
+        ind = 0
+        for x in range(len(df.index)):
+            # check if date - z is the minimum
+                if (z - df.index[x]).total_seconds() >= 0:
+                    continue
+                else:
+                    ind = x - 1
+                    break
+        rind = df.index[ind]
+        # copy last line before restart, reindex it and insert the reboot str
+        reset_row = df.loc[[rind]]
+        reset_row = reset_row.reindex([z])
+        reset_row.loc[z] = 'reboot'
+        new_rows.append(reset_row)
+        df = insert_row(ind, df, reset_row)
+    return df, new_rows 
+
+# example from https://pythoninoffice.com/insert-rows-into-a-dataframe/
+def insert_row(row_num, orig_df, row_to_add):
+    # split original data frame into two parts and insert the restart pd.series
+    row_num= min(max(0, row_num), len(orig_df))
+    df_part_1 = orig_df[orig_df.index[0]: orig_df.index[row_num]]
+    df_part_2 = orig_df[orig_df.index[row_num +1]: orig_df.index[-1]]
+    df_final = df_part_1.append(row_to_add, ignore_index = False)
+    df_final = df_final.append(df_part_2, ignore_index = False)
+    return df_final
