@@ -14,7 +14,7 @@ from streamlit.report_thread import add_report_ctx
 from config import Config
 import sql_stuff
 import download as dow
-
+import dataframe_funcs as dff
 
 reg_linux_restart = re.compile('LINUX RESTART', re.IGNORECASE)
 
@@ -92,7 +92,7 @@ def check_sub_items(headers, multi_sarfile_dict):
     
     return headers
 
-st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def translate_headers(field):
     '''
     takes list of headers , db lookup for the aliases
@@ -113,7 +113,7 @@ def translate_headers(field):
 
     return aliases
 
-st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def translate_aliases(alias_field, sar_headers):
     '''
     takes a list of aliases and returns the related headers
@@ -342,7 +342,7 @@ def pdf_download(file, dia):
         s, filename, f'Click here to download PDF')
     st.markdown(download_button_str, unsafe_allow_html=True)
 
-def set_stile(df):
+def set_stile(df, restart_rows=None):
     def color_null_bg(val):
         is_null = val == 0
         return ['background-color: "",' if v else '' for v in is_null]
@@ -351,26 +351,89 @@ def set_stile(df):
         is_null = val == 0
         return ['color: "",' if v else '' for v in is_null]
 
-    df = df.style.apply(highlight_ind, dim='min').apply(highlight_ind).\
-        highlight_min(color='yellow').\
-        highlight_max(color='lightblue').apply(color_null_bg).apply(
-            color_null_fg).set_precision(2)
+    if restart_rows:
+        multi_index = [ x.index[0] for x in restart_rows ]
+    else:
+        multi_index = []
+    sub_index = [ x for x in df.index if x not in multi_index ]
+    df = df.style.apply(highlight_ind, dim='min',
+        subset=pd.IndexSlice[sub_index, :]).apply(highlight_ind,
+        subset=pd.IndexSlice[sub_index,:]).\
+        apply(highlight_min_ind, subset=pd.IndexSlice[sub_index, :]).\
+        apply(highlight_max_ind, subset=pd.IndexSlice[sub_index, :]).\
+        apply(color_null_bg, subset=pd.IndexSlice[sub_index, :]).\
+        apply(color_null_fg, subset=pd.IndexSlice[sub_index, :]).\
+        apply(color_restart, subset=pd.IndexSlice[multi_index, :]).\
+        set_precision(4)
+   
     return(df)
 
-def highlight_ind(data, dim='max', color='black'):
+def highlight_ind(data,  dim='max', color='black'):
     '''
     highlight the maximum in a Series or DataFrame
     '''
     attr = f'color: {color}'
     if data.ndim == 1:
+
         if dim == 'max':
             quant = data == data.max()
+
         elif dim == 'min':
             quant = data == data.min()
-        else:
-            attr = f'color: "red"'
-            quant = data
+        
         return [attr if v else '' for v in quant]
+
+
+def highlight_max_ind(data, color='lightblue'):
+    '''
+    highlight the maximum in a Series yellow.
+    '''
+    is_max = data == data.max()
+    return [f'background-color: {color}' if v else '' for v in is_max]
+
+
+def highlight_min_ind(data, color='yellow'):
+    '''
+    highlight the minimum in a Series yellow.
+    '''
+    is_min = data == data.min()
+
+    return [f'background-color: {color}' if v else '' for v in is_min]
+
+def color_restart(data):
+
+    result = data == data.str.contains("reboot", case=False)
+    return ['color: red'  for v in result]
+
+def extract_restart_header(headers):
+    return [header for header in headers if reg_linux_restart.search(
+        header) ]
+
+def write_legend(restart_headers=None):
+    code1 = '''max:\tlightblue\nmin:\tyellow'''
+    if restart_headers:
+        code2 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+    else:
+        code2 = ""
+    st.code(code1 + code2)
+    st.text('')
+    st.text('')
+
+def restart_headers(df, os_details, restart_headers=None):
+    if restart_headers:
+        rdf = df.copy()
+        rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
+            restart_headers)
+        st.write(set_stile(rdf, restart_rows=new_rows))
+        code2 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+    else:
+        st.write(set_stile(df))
+        code2 = ""
+
+    code1 = '''max:\tlightblue\nmin:\tyellow'''
+    st.code(code1 + code2)
+    st.text('')
+    st.text('')
 
 
 if __name__ == '__main__':
