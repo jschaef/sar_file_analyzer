@@ -409,16 +409,6 @@ def extract_restart_header(headers):
     return [header for header in headers if reg_linux_restart.search(
         header) ]
 
-def write_legend(restart_headers=None):
-    code1 = '''max:\tlightblue\nmin:\tyellow'''
-    if restart_headers:
-        code2 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
-    else:
-        code2 = ""
-    st.code(code1 + code2)
-    st.text('')
-    st.text('')
-
 def restart_headers(df, os_details, restart_headers=None):
     if restart_headers:
         rdf = df.copy()

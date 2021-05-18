@@ -2,8 +2,6 @@
 
 import re
 import pandas as pd
-import numpy as np
-
 
 def format_date(os_details):
     # presume format 2020-XX-XX for sar operating system details
