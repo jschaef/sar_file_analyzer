@@ -4,6 +4,7 @@ import alt
 import pandas as pd
 import sar_data_crafter as sdc
 import helpers
+import dataframe_funcs as ddf
 from config import Config
 
 def single_f(config_obj, username):
@@ -13,6 +14,7 @@ def single_f(config_obj, username):
     col1 = config_obj['cols'][0]
     col2 = config_obj['cols'][1]
     selection = helpers.get_sar_files(username, col=col2)
+
 
     if st.sidebar.checkbox('Show'):
         st.sidebar.markdown('---')
@@ -24,6 +26,7 @@ def single_f(config_obj, username):
         os_details = sar_structure.pop('os_details')
         st.text(os_details)
         headers = [header for header in sar_structure.keys()]
+        restart_headers = helpers.extract_restart_header(headers)
 
         selected, _ = helpers.get_selected_header('Sar Headings', headers)
         # find data frames
@@ -65,14 +68,13 @@ def single_f(config_obj, username):
             st.text('')
 
             st.subheader('Dataset')
-            st.write(helpers.set_stile(df))
+            helpers.restart_headers(df, os_details, restart_headers=restart_headers)
             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-            st.text('')
+
+
             st.subheader('Graphical overview')
             st.altair_chart(alt.overview_v1(df))
             helpers.pdf_download(pdf_name, alt.overview_v1(df))
-
-
             metrics = df['metrics'].drop_duplicates().tolist()
             for metric in metrics:
                 helpers.metric_expander(metric)
@@ -90,12 +92,12 @@ def single_f(config_obj, username):
             #df = df.reset_index()
             df = df.rename(columns={'index':'date'})
             df_part = df[[prop]].copy()
-            col5, col6 = st.beta_columns(2)
             alias = aitem[selected]
-            col5.subheader(f'Statistics for {aitem[selected]} {header_add} {prop}')
-            col6.subheader(f'Dataset for {aitem[selected]} {header_add} {prop}')
-            col5.dataframe(df_part.describe())
-            col6.dataframe(helpers.set_stile(df_part))
+            st.subheader(f'Statistics for {aitem[selected]} {header_add} {prop}')
+            st.dataframe(df_part.describe())
+            st.subheader(f'Dataset for {aitem[selected]} {header_add} {prop}')
+            helpers.restart_headers(
+                df_part, os_details, restart_headers=restart_headers)
 
             df_part['file'] = os_details.split()[2].strip('()')
             df_part['date'] = df_part.index
