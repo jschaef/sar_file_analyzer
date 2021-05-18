@@ -40,6 +40,7 @@ def single_multi(config_dict, username):
     else:
         pdf_saving = 0
     
+    st.markdown('___')
     answer = st.checkbox('Show')
     if answer:
         if sel_field:
@@ -62,10 +63,13 @@ def single_multi(config_dict, username):
             # merge headers of all sar files to be able to compare them
             all_headers = []
             os_field = []
+            reboot_headers = []
             for sar_file in multi_sar_dict.keys():
                 os_details = multi_sar_dict[sar_file].pop('os_details')
                 os_field.append(os_details)
                 f_headers = [header for header in multi_sar_dict[sar_file]]
+                restart_headers = helpers.extract_restart_header(f_headers)
+                reboot_headers.append([restart_headers, os_details])
                 all_headers.append(f_headers)
 
             headers = helpers.merge_headers(all_headers)
@@ -164,13 +168,20 @@ def single_multi(config_dict, username):
                     for data in sum_field:
                         for key in data:
                             st.text('')
-                            st.subheader(f'{key.split("/")[-1]}')
+                            filename = (f'{key.split("/")[-1]}')
+                            st.subheader(f'{filename}')
+                            reboot_header = []
+                            for header in reboot_headers:
+                                hostname = header[1].split()[2].strip("'(',')")
+                                if hostname in filename:
+                                    reboot_header = header[0]
+                                    os_details = header[1]
                             df = data[key][0]
                             ds = df.describe()
                             st.markdown(f'Statistics for {aitem[selected]} {header_add}')
                             st.write(ds)
                             st.markdown(f'Data for {aitem[selected]} {header_add}')
-                            st.write(helpers.set_stile(df))
+                            helpers.restart_headers(df, os_details, restart_headers=reboot_header)
                     st.subheader('Diagram Overview')
 
                     for data in collect_field:

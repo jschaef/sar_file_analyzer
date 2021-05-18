@@ -28,6 +28,7 @@ def show_dia_overview(username):
         sar_structure = sdc.get_data_frames(sar_file, username)
         os_details = sar_structure.pop('os_details')
     headers = [header for header in sar_structure.keys()]
+    restart_headers = helpers.extract_restart_header(headers)
 
     initial_aliases = ['CPU', 'Kernel tables', 'Load', 'Memory utilization',
     'Swap utilization']
@@ -140,14 +141,9 @@ def show_dia_overview(username):
                             st.write(df_tuple[1])
                         df = df_tuple[0]
                         df = df[start:end]
-                        st.write(helpers.set_stile(df))
-                        code = '''max: lightblue\nmin: green '''
-                        st.code(code)
-                        st.text('')
-                        st.text('')
+                        helpers.restart_headers(df, os_details, restart_headers=restart_headers)
                         df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                         st.altair_chart(alt.overview_v1(df))
-                        # new
                         if pdf_saving:
                             helpers.pdf_download(pdf_name, alt.overview_v1(df))
 
