@@ -1,7 +1,9 @@
 #!/usr/bin/python3
+import os
 import streamlit as st
 import sql_stuff
 import pandas as pd
+from config import Config
 
 def self_service(username):
     menu_items = ['Password Change']
@@ -42,9 +44,12 @@ def admin_service():
             sql_stuff.modify_user(user, r_content)
             st.info(f'Role {r_content} for {user} has been set')
     elif choice == 'Delete User':
+        upload_dir = f'{Config.upload_dir}/{user}'
         st.subheader(f'Delete User {user}')
         if st.button('Submit'):
             sql_stuff.delete_user(user)
+            if user in upload_dir:
+                os.system(f'rm -rf {upload_dir}')
             st.info(f'User {user} has been deleted')
 
         
