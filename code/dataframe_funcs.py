@@ -58,7 +58,7 @@ def set_unique_date(dataframe, time_obj):
     dataframe.index.name = 'date'
     
     return dataframe
-
+    
 def translate_dates_into_list(df):
     hours = [date for date in df.index if date.minute == 0]
     hours.append(df.index[-1])
@@ -76,26 +76,38 @@ def insert_restarts_into_df(os_details, df, restart_headers):
         ind = 0
         for x in range(len(df.index)):
             # check if date - z is the minimum
-                if (z - df.index[x]).total_seconds() >= 0:
-                    continue
-                else:
-                    ind = x - 1
-                    break
-        rind = df.index[ind]
-        # copy last line before restart, reindex it and insert the reboot str
-        reset_row = df.loc[[rind]]
-        reset_row = reset_row.reindex([z])
-        reset_row.loc[z] = 'reboot'
-        new_rows.append(reset_row)
-        df = insert_row(ind, df, reset_row)
+            if (z - df.index[x]).total_seconds() >= 0:
+                continue
+            else:
+                ind = x - 1
+                break
+        # Reboot is last entry
+        if len(df.index) > 0:
+            if ind == 0:
+                ind = len(df.index) -1
+            # restart row date first entry
+            elif ind < 0:
+                ind = 0
+            rind = df.index[ind]
+            # copy last line before restart, reindex it and insert the reboot str
+            reset_row = df.loc[[rind]]
+            reset_row = reset_row.reindex([z])
+            reset_row.loc[z] = 'reboot'
+            new_rows.append(reset_row)
+            df = insert_row(ind, df, reset_row)
     return df, new_rows 
 
 # example from https://pythoninoffice.com/insert-rows-into-a-dataframe/
 def insert_row(row_num, orig_df, row_to_add):
-    # split original data frame into two parts and insert the restart pd.series
-    row_num= min(max(0, row_num), len(orig_df))
-    df_part_1 = orig_df[orig_df.index[0]: orig_df.index[row_num]]
-    df_part_2 = orig_df[orig_df.index[row_num +1]: orig_df.index[-1]]
-    df_final = df_part_1.append(row_to_add, ignore_index = False)
-    df_final = df_final.append(df_part_2, ignore_index = False)
+    if row_num == 0:
+        df_final = row_to_add.append(orig_df)
+    elif len(orig_df.index) -1 > row_num:
+        # split original data frame into two parts and insert the restart pd.series
+        row_num= min(max(0, row_num), len(orig_df))
+        df_part_1 = orig_df[orig_df.index[0]: orig_df.index[row_num]]
+        df_part_2 = orig_df[orig_df.index[row_num +1]: orig_df.index[-1]]
+        df_final = df_part_1.append(row_to_add, ignore_index = False)
+        df_final = df_final.append(df_part_2, ignore_index = False)
+    else:
+        df_final = orig_df.append(row_to_add, ignore_index = False)
     return df_final

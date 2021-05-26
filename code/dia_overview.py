@@ -87,14 +87,26 @@ def show_dia_overview(username):
         for entry in headers:
             skey = headers[entry]
             if sar_structure.get(skey, None):
-                first_item = list(sar_structure.get(skey).keys())[0]
-
-            date_df = sar_structure.get(skey).get(first_item, None) 
-            if date_df is not None:
+                device_l = list(sar_structure.get(skey).keys())
+            df_len = 0
+            tmp_dict = {}
+            # findout longest hour range if in rare cases it
+            # differs since a new device occured after reboot (persistent
+            # rules network device)
+            for item in device_l:
+                date_df = sar_structure.get(skey).get(item, None) 
                 hours = dff.translate_dates_into_list(date_df)
-                start = col5.selectbox('Choose Start Time', hours, index=0)
+                if len(hours) >= df_len:
+                    tmp_dict[df_len] = item
+                    df_len = len(hours)
+            date_df = sar_structure.get(skey).get(tmp_dict[df_len], None) 
+            if date_df is not None:
+                start_box = col5.empty()
+                end_box = col5.empty()
+                hours = dff.translate_dates_into_list(date_df)
+                start = start_box.selectbox('Choose Start Time', hours, index=0)
                 time_len = len(hours) - hours.index(start) -1
-                end = col6.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
+                end = end_box.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
                 break
 
 
@@ -140,7 +152,8 @@ def show_dia_overview(username):
                         if df_tuple[1]:
                             st.write(df_tuple[1])
                         df = df_tuple[0]
-                        df = df[start:end]
+                        if start in df.index and end in df.index:
+                            df = df[start:end]
                         helpers.restart_headers(df, os_details, restart_headers=restart_headers)
                         df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                         st.altair_chart(alt.overview_v1(df))
