@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import altair as alt
+import dataframe_funcs as ddf
+import pandas as pd
+import streamlit as st
 
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
 alt.data_transformers.disable_max_rows()
@@ -192,3 +195,66 @@ def overview_v1(df):
     ).properties(
         width=800, height=400
     )
+
+def overview_v2(df, restart_headers, os_details):
+    # position for reboot text
+    y_pos = df['y'].max()/2
+    rule_field = []
+    z_field = []
+    for header in restart_headers:
+        xval = header.split()[-1]
+        date_str, format = ddf.format_date(os_details)
+        z = pd.to_datetime(
+            f'{date_str} {xval}', format=format)
+        z_field.append(z)
+        rule = alt.Chart(pd.DataFrame({'x': [z]})).mark_rule(color='black').encode(
+            x='x', size=alt.value(1), strokeDash=(alt.value([5,5])))
+        
+        rule_field.append(rule)
+
+    selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
+
+    # Create a selection that chooses the nearest point & selects based on x-value
+    # not working here
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    color_x = alt.condition(selection_new,
+                            alt.Color('metrics:N'),
+                            alt.value('white',))
+
+    tooltip = [
+        alt.Tooltip(field="date",
+                    type="temporal",
+                    title="Time",
+                    format="%I:%M:%S %p",),
+        alt.Tooltip(field='metrics',
+                    title='metric',
+                    type="ordinal",),
+        alt.Tooltip(field='y',
+                    title='value',
+                    type="ordinal",),
+    ]
+
+    opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
+    line = alt.Chart(df).mark_line(interpolate='linear').encode(
+        alt.X('date:T'),
+        alt.Y('y:Q'),
+        opacity=opacity_x,
+        color=color_x,
+        tooltip=tooltip
+    ).add_selection(
+        selection_new
+    ).properties(
+        width=1200, height=400
+    )
+
+    for rule in rule_field:
+        line += rule
+
+    reboot_text = alt.Chart(pd.DataFrame({'Date': z_field, 'y': y_pos})).mark_text(
+        text='RESTART', angle=90, color='black', fontSize=11).encode(x='Date:T', y='y:Q'
+    )
+    line += reboot_text
+
+    return line.interactive()
