@@ -152,13 +152,11 @@ def single_multi(config_dict, username):
                         # append  df[prop] to chart_field
                         chart_field.append(
                             [df_part, prop])
-                        collect_field.append({file: [df]})
                         sum_field.append({file: [df1]})
 
-                        # whole df to dia
-                        df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                        collect_field[len(
-                            collect_field)-1][file].append(alt.overview_v1(df))
+                        # for diagram
+                        df1 = df1.reset_index().melt('date', var_name='metrics', value_name='y')
+                        collect_field.append({file: [df1]})
 
                 if pd_or_dia == 'Summary':
                     prop_box.empty()
@@ -172,7 +170,7 @@ def single_multi(config_dict, username):
                             st.subheader(f'{filename}')
                             reboot_header = []
                             for header in reboot_headers:
-                                hostname = header[1].split()[2].strip("'(',')")
+                                hostname = header[1].split()[2].strip("()")
                                 if hostname in filename:
                                     reboot_header = header[0]
                                     os_details = header[1]
@@ -187,8 +185,18 @@ def single_multi(config_dict, username):
                     for data in collect_field:
                         for key in data:
                             st.text('')
-                            st.subheader(f'{key.split("/")[-1]}')
-                            st.altair_chart(data[key][1])
+                            st.subheader(key)
+                            restart_headers = []
+                            df = data[key][0]
+                            for event in reboot_headers:
+                                hostname = event[1].split()[2].strip("()")
+                                date = event[1].split()[3]
+                                if hostname in key and date in key:
+                                    restart_headers = event[0]
+                                    os_details = event[1]
+                                    break
+
+                            st.altair_chart(alt.overview(df, restart_headers, os_details))
                             if pdf_saving:
                                 helpers.pdf_download(pdf_name, data[key][1])
 

@@ -73,8 +73,8 @@ def single_f(config_obj, username):
 
 
             st.subheader('Graphical overview')
-            st.altair_chart(alt.overview_v1(df))
-            helpers.pdf_download(pdf_name, alt.overview_v1(df))
+            st.altair_chart(alt.overview(df, restart_headers, os_details))
+            helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
             metrics = df['metrics'].drop_duplicates().tolist()
             for metric in metrics:
                 helpers.metric_expander(metric)
@@ -105,8 +105,8 @@ def single_f(config_obj, username):
             # choose diagram size
             width, hight = helpers.diagram_expander(800, 400, 'Diagram Width', 'Diagram Hight')
 
-            chart = alt.draw_single_chart(
-                df_part, prop, width, hight)
+            chart = alt.draw_single_chart_v1(
+                df_part, prop, restart_headers, os_details, width, hight)
 
             st.altair_chart(chart)
             helpers.pdf_download(pdf_name, chart)

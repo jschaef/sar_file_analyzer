@@ -83,13 +83,13 @@ def show_dia_overview(username):
     # pick time frame
     time_expander = st.beta_expander(label='Change Start and End Time',expanded=False)
     with time_expander:
+        df_len = 0
+        tmp_dict = {}
         col5, col6 = st.beta_columns(2)
         for entry in headers:
             skey = headers[entry]
             if sar_structure.get(skey, None):
                 device_l = list(sar_structure.get(skey).keys())
-            df_len = 0
-            tmp_dict = {}
             # findout longest hour range if in rare cases it
             # differs since a new device occured after reboot (persistent
             # rules network device)
@@ -99,7 +99,8 @@ def show_dia_overview(username):
                 if len(hours) >= df_len:
                     tmp_dict[df_len] = item
                     df_len = len(hours)
-            date_df = sar_structure.get(skey).get(tmp_dict[df_len], None) 
+            if len(device_l) > 1:
+                date_df = sar_structure.get(skey).get(tmp_dict[df_len], None) 
             if date_df is not None:
                 start_box = col5.empty()
                 end_box = col5.empty()
@@ -107,7 +108,7 @@ def show_dia_overview(username):
                 start = start_box.selectbox('Choose Start Time', hours, index=0)
                 time_len = len(hours) - hours.index(start) -1
                 end = end_box.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
-                break
+            break
 
 
     st.markdown('___')                
@@ -156,10 +157,9 @@ def show_dia_overview(username):
                             df = df[start:end]
                         helpers.restart_headers(df, os_details, restart_headers=restart_headers)
                         df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                        #st.altair_chart(alt.overview_v1(df))
-                        st.altair_chart(alt.overview_v2(df, restart_headers, os_details))
+                        st.altair_chart(alt.overview(df, restart_headers, os_details))
                         if pdf_saving:
-                            helpers.pdf_download(pdf_name, alt.overview_v1(df))
+                            helpers.pdf_download(pdf_name, alt.overview_v2(df, restart_headers, os_details))
 
                         metrics = df['metrics'].drop_duplicates().tolist()
                         if show_metric:

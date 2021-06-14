@@ -44,6 +44,8 @@ def diff_metrics(config_dict, username):
         headers = sorted(
                 [header for header in multi_sar_dict[rand_file].keys()])
 
+        restart_headers = helpers.extract_restart_header(headers)
+
         selected_1, ph_1 = helpers.get_selected_header('Header1', headers, col=col3)
         selected_2, ph_2 = helpers.get_selected_header('Header2', headers, col=col4)
 
@@ -93,15 +95,14 @@ def diff_metrics(config_dict, username):
                 df_part['file'] = prop
                 df_part['metric'] = prop
 
-                #df = df.reset_index()
                 if len(tmp_map) > 1:
                     factor = 0
                 else:
                     factor = 1
                 tmp_map.pop(0)
 
-                chart_field.append(alt.draw_single_chart(
-                    df_part, prop, width, hight, ylabelpadd=0, xlabelpadd=factor * 40,))
+                chart_field.append(alt.draw_single_chart_v1(
+                    df_part, prop, restart_headers, os_details,  width, hight, ylabelpadd=0, xlabelpadd=factor * 40,))
 
         if chart_field:
             chart = alt.draw_multi_chart(chart_field,
