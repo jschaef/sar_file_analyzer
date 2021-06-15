@@ -10,16 +10,16 @@ from config import Config
 
 sar_structure = []
 os_details = ""
-file_choosen = ""
+file_chosen = ""
 def show_dia_overview(username):
-    global sar_structure, os_details, file_choosen
+    global sar_structure, os_details, file_chosen
     st.subheader('Overview of important metrics from SAR data')
 
     col1, col2 = st.beta_columns(2)
     sar_file = helpers.get_sar_files(username, col=col2)
-    if sar_file != file_choosen:
+    if sar_file != file_chosen:
         sar_structure = []
-        file_choosen = sar_file
+        file_chosen = sar_file
 
     sar_file = f'{Config.upload_dir}/{username}/{sar_file}'
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
