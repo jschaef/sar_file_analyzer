@@ -7,7 +7,11 @@ import helpers
 import dataframe_funcs as ddf
 from config import Config
 
+sar_structure = []
+file_chosen = ""
+os_details = ""
 def single_f(config_obj, username):
+    global sar_structure, file_chosen, os_details
     upload_dir = config_obj['upload_dir']
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'
@@ -15,15 +19,21 @@ def single_f(config_obj, username):
     col2 = config_obj['cols'][1]
     selection = helpers.get_sar_files(username, col=col2)
 
-
+    if st.checkbox('Enable PDF saving'):
+        pdf_saving = 1
+    else:
+        pdf_saving = 0
     if st.sidebar.checkbox('Show'):
         st.sidebar.markdown('---')
         col3, col4 = st.beta_columns(2)
         # parse data from file
         sar_file = f'{upload_dir}/{selection}'
         st.subheader("Operating System Details")
-        sar_structure = sdc.get_data_frames(sar_file, username)
-        os_details = sar_structure.pop('os_details')
+        if sar_file != file_chosen:
+            sar_structure = sdc.get_data_frames(sar_file, username)
+            file_chosen = sar_file
+            os_details = sar_structure.pop('os_details')
+
         st.text(os_details)
         headers = [header for header in sar_structure.keys()]
         restart_headers = helpers.extract_restart_header(headers)
@@ -74,7 +84,8 @@ def single_f(config_obj, username):
 
             st.subheader('Graphical overview')
             st.altair_chart(alt.overview(df, restart_headers, os_details))
-            helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
+            if pdf_saving:
+                helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
             metrics = df['metrics'].drop_duplicates().tolist()
             for metric in metrics:
                 helpers.metric_expander(metric)
@@ -109,6 +120,7 @@ def single_f(config_obj, username):
                 df_part, prop, restart_headers, os_details, width, hight)
 
             st.altair_chart(chart)
-            helpers.pdf_download(pdf_name, chart)
+            if pdf_saving:
+                helpers.pdf_download(pdf_name, chart)
 
             helpers.metric_expander(prop)
