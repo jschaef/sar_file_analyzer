@@ -22,4 +22,5 @@ def todo():
     st.markdown("* Display who is currently logged in")
     st.markdown('* Enhance "Update Header" functionality :heavy_check_mark:')
     st.markdown("* Implement password change :heavy_check_mark:")
+    st.markdown("* Implement display reboot in dia and data frames:heavy_check_mark:")
     
