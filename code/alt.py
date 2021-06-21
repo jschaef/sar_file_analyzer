@@ -177,6 +177,8 @@ def draw_multi_chart(charts, y_shared='independent', x_shared='independent', tit
                 strokeDash='shared',
                 strokeWidth='shared',
 
+            ).configure_legend(
+                labelLimit=250,
             )
             
         for dia in charts:
