@@ -7,6 +7,7 @@ import streamlit as st
 import pandas as pd
 import time
 import re
+from datetime import datetime
 from altair_saver import save
 from threading import Thread
 from streamlit import cache as st_cache
@@ -315,15 +316,18 @@ def rename_sar_file(file_path):
     hostname = os_details[2].strip("(|)")
     date = os_details[3]
     date = date.replace('/','-')
-    fshort_name = file_path.split("/")[-1]
-    short_rename_name = f'{fshort_name}_{hostname}_{date}'
+    today = datetime.today().strftime("%Y-%m-%d")
+    base_name = os.path.basename(file_path)
+    dir_name = os.path.dirname(file_path)
+    rename_name = f'{today}_{hostname}_{date}'
+    renamed_name = f'{dir_name}/{rename_name}'
     try:
-        renamed_name = f'{file_path}_{hostname}_{date}'
-        os.system(f'mv {file_path} {renamed_name}')
-        st.markdown(f'{fshort_name} has been renamed to {short_rename_name}')
-        return short_rename_name
+        os.system(f'mv {file_path} {dir_name}/{rename_name}')
+        st.info(f'{base_name} has been renamed to {rename_name}\n    \
+            which means: <date_of_upload>\_<hostname>\_<sar file creation date>')
+        return rename_name
     except:
-        print(f'file {file_path} could not be renamed to {renamed_name}')
+        st.warning(f'file {file_path} could not be renamed to {renamed_name}')
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def pdf_download(file, dia):
