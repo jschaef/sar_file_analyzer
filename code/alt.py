@@ -228,6 +228,8 @@ def overview(df, restart_headers, os_details):
         width=1200, height=400
     )
 
+    #line.configure_legend(orient='left')
+
     for rule in rule_field:
         line += rule
     reboot_text = return_reboot_text(z_field, y_pos)
