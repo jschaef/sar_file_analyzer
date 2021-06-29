@@ -39,11 +39,10 @@ def start():
         password = st.sidebar.text_input("Password", type='password')
         if st.sidebar.checkbox("Login"):
             if sql_stuff.login_user(username, password):
-                userl = username
                 upload_dir = f'{Config.upload_dir}/{username}'
                 os.system(f'mkdir -p {upload_dir}')
                 sar_files = os.listdir(upload_dir)
-                st.sidebar.success("Logged in as {}".format(username))
+                st.sidebar.success(f"Logged in as {username}")
                 
                 col1, col2 = st.beta_columns(2)
                 config_c.update_conf({'username': username, 'upload_dir': upload_dir,
@@ -57,7 +56,7 @@ def start():
                 if task == "Manage Sar Files":
                     mng_sar.file_mng(upload_dir, col2, username)
                 elif task == "Analyze Data":
-                    analyze.analize(upload_dir, config_c, username)
+                    analyze.analyze(upload_dir, config_c, username)
                 elif task == "DB Management":
                     db_mng.db_mgmt(username, col2)
                 elif task == "TODO":

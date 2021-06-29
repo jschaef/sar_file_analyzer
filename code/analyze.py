@@ -6,7 +6,7 @@ import multi_files
 import different_metrics
 import dia_overview
 
-def analize(upload_dir, config_c, username):
+def analyze(upload_dir, config_c, username):
     config = config_c.get_dict()
     col1 = config['cols'][0]
     col2 = config['cols'][1]
