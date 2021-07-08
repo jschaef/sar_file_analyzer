@@ -45,7 +45,7 @@ def show_dia_overview(username):
     if count_lines > 0:
         count_lines = int(count_lines + 1)
     
-    h_expander = st.beta_expander(label='Select additional Sections',expanded=False)
+    h_expander = st.beta_expander(label='Select SAR Metrics to display',expanded=False)
     with h_expander:
         col3, col4 = st.beta_columns(2)
         ph_col3 = col3.empty()
