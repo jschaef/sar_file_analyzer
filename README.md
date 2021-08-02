@@ -33,3 +33,20 @@ Newer versions of sar_file_analyzer may rely on the latest streamlit version.
 Such when pulling the newest git changes it might be that it is not working
 within your old virtual environment.   
 In this case do a <code>pip install -U streamlit</code>
+
+## configuring streamlit
+below a sample config.toml. Put it into code/.streamlit/config.toml
+```
+[global]
+dataFrameSerialization = "legacy"
+
+[server]
+maxUploadSize = 300
+
+[theme]
+primaryColor="#6eb52f"
+backgroundColor="#f0f0f5"
+secondaryBackgroundColor="#e0e0ef"
+textColor="#262730"
+font="sans serif"
+```
