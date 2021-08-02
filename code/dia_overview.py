@@ -67,9 +67,8 @@ def show_dia_overview(username):
                         value = False
 
                     ph_sel = cols[x].empty()
-                    #selected = cols[x].checkbox(label, value=value)
                     index = range(len(cols)).index(x)
-                    selected = ph_sel.checkbox(label, value=value, key=f'chbx{index}')
+                    selected = ph_sel.checkbox(label, value=value)
                     if selected:
                         sel_field.append(label)
 
