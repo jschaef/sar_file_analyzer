@@ -1,9 +1,11 @@
 #!/usr/bin/python3
+import time
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
 import streamlit as st
 
+my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
 alt.data_transformers.disable_max_rows()
 
@@ -149,16 +151,26 @@ def create_reboot_rule(df, property, restart_headers, os_details):
         z = pd.to_datetime(
             f'{date_str} {xval}', format=format)
         z_field.append(z)
-        rule = alt.Chart(pd.DataFrame({'x': [z]})).mark_rule(color='red').encode(
-            x=alt.X('x', axis=alt.Axis(title='date')), size=alt.value(1), strokeDash=(alt.value([5, 5])))
+        mdf = pd.DataFrame({'x': [z]})
+        # apache arrows is displaying localtime hence we need to consider the 
+        # actual timezone of the user displaying the data
+        mdf['x_utc'] = mdf['x'].dt.tz_localize(my_tz)
+        #rule = alt.Chart(pd.DataFrame({'x': [z]})).mark_rule(color='red').encode(
+        rule = alt.Chart(mdf).mark_rule(color='red').encode(
+            x=alt.X('x_utc', axis=alt.Axis(title='date')), size=alt.value(1), strokeDash=(alt.value([5, 5])))
 
         rule_field.append(rule)
     return rule_field, z_field, y_pos
 
 def return_reboot_text(z_field, y_pos):
-    reboot_text = alt.Chart(pd.DataFrame({'date': z_field, '': y_pos})).mark_text(
-        text='RESTART', angle=90, color='black', fontSize=11).\
-        encode(x='date:T', y=':Q')
+    if z_field:
+        mdf = pd.DataFrame({'date': z_field, '': y_pos})
+        mdf['date_utc'] = mdf['date'].dt.tz_localize(my_tz)
+        reboot_text = alt.Chart(mdf).mark_text(
+            text='RESTART', angle=90, color='black', fontSize=11).\
+            encode(x='date_utc:T', y=':Q')
+    else:
+        reboot_text = None
     return reboot_text
 
 def draw_multi_chart(charts, y_shared='independent', x_shared='independent', title=None):
@@ -233,6 +245,7 @@ def overview(df, restart_headers, os_details):
     for rule in rule_field:
         line += rule
     reboot_text = return_reboot_text(z_field, y_pos)
-    line += reboot_text
+    if reboot_text:
+        line += reboot_text
 
     return line.interactive()
