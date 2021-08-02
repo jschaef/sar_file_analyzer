@@ -92,7 +92,7 @@ def insert_restarts_into_df(os_details, df, restart_headers):
             # copy last line before restart, reindex it and insert the reboot str
             reset_row = df.loc[[rind]]
             reset_row = reset_row.reindex([z])
-            reset_row.loc[z] = 'reboot'
+            reset_row.loc[z] = 0.00
             new_rows.append(reset_row)
             df = insert_row(ind, df, reset_row)
     return df, new_rows 

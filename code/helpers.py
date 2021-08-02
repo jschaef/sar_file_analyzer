@@ -405,8 +405,7 @@ def highlight_min_ind(data, color='yellow'):
     return [f'background-color: {color}' if v else '' for v in is_min]
 
 def color_restart(data):
-
-    result = data == data.str.contains("reboot", case=False)
+    result = data == 0.00
     return ['color: red'  for v in result]
 
 def extract_restart_header(headers):
