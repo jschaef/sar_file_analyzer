@@ -368,7 +368,7 @@ def set_stile(df, restart_rows=None):
         apply(color_null_bg, subset=pd.IndexSlice[sub_index, :]).\
         apply(color_null_fg, subset=pd.IndexSlice[sub_index, :]).\
         apply(color_restart, subset=pd.IndexSlice[multi_index, :]).\
-        set_precision(4)
+        format(precision=4)
    
     return(df)
 
@@ -418,7 +418,7 @@ def restart_headers(df, os_details, restart_headers=None):
         rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
             restart_headers)
         st.write(set_stile(rdf, restart_rows=new_rows))
-        code2 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+        code2 = f'''\nreboot:\tred\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
     else:
         st.write(set_stile(df))
         code2 = ""
