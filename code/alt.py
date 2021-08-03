@@ -136,8 +136,9 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
 
     for rule in rule_field:
         c += rule
-    
-    c += reboot_text
+
+    if reboot_text: 
+        c += reboot_text
 
     return(c)
 
