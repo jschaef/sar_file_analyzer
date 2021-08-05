@@ -62,7 +62,7 @@ def file_mng(upload_dir, col, username):
         if sar_files:
             dfiles_ph = st.empty()
             dfiles = dfiles_ph.multiselect(
-                'Choose your Files to delete', sar_files, key='dfiles')
+                'Choose your Files to delete', sar_files)
             if st.button('Delete selected Files'):
                 for file in dfiles:
                     r_item = f'{file}_df'
