@@ -6,7 +6,7 @@ import pandas as pd
 def format_date(os_details):
     # presume format 2020-XX-XX for sar operating system details
     date_reg = re.compile('[0-9]{4}-[0-9]{2}-[0-9]{2}')
-    date_reg2 = re.compile('[0-9]{2}/[0-9]{2}/[0-9]{2}')
+    date_reg2 = re.compile('[0-9]{2}/[0-9]{2}/[0-9]{2}$')
     date_reg3 = re.compile('[0-9]{2}/[0-9]{2}/[0-9]{4}')
     date_str = ''
     for item in os_details.split():
@@ -15,10 +15,10 @@ def format_date(os_details):
             format='%Y-%m-%d'
             break
         elif date_reg2.search(item):
-            format='%m/%d/%Y %H:%M:%S'
-            break
-        elif date_reg2.search(item):
             format='%m/%d/%y %H:%M:%S'
+            break
+        elif date_reg3.search(item):
+            format='%m/%d/%Y %H:%M:%S'
             break
         else:
             # add fake item
