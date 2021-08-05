@@ -15,7 +15,7 @@ def format_date(os_details):
             break
         elif date_reg2.search(item):
             date_str = item
-            format='%m/%d/%y %H:%M:%S'
+            format='%m/%d/%Y %H:%M:%S'
             break
         else:
             # add fake item
