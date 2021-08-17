@@ -7,4 +7,5 @@ class Config(object):
     rkey_pref = 'user'
     pdf_name = 'sar_chart.pdf'
     admin_email = 'admin@example-org.com'
+    timezone = "Europe/Berlin"
 

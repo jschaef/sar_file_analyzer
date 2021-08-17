@@ -3,6 +3,7 @@ import time
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
+from config import Config
 
 my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
@@ -11,6 +12,7 @@ alt.data_transformers.disable_max_rows()
 def draw_single_chart(df, property, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
     
+    df['date'] = df['date'].dt.tz_localize(Config.timezone)
 
     tooltip=[
         alt.Tooltip(field="date",
@@ -73,6 +75,7 @@ def draw_single_chart(df, property, width, hight,
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
 
+    df['date'] = df['date'].dt.tz_localize(Config.timezone)
     rule_field, z_field, y_pos = create_reboot_rule(df, property, restart_headers, os_details)
 
     tooltip=[
@@ -202,8 +205,8 @@ def overview(df, restart_headers, os_details):
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
 
-    # set timezone for DUS
-    df['date'] = df['date'].dt.tz_localize('Europe/Berlin')
+    # set timezone for your app
+    df['date'] = df['date'].dt.tz_localize(Config.timezone)
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
     # Create a selection that chooses the nearest point & selects based on x-value
