@@ -203,7 +203,8 @@ def overview(df, restart_headers, os_details):
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
 
-
+    # set timezone for DUS
+    df['date'] = df['date'].dt.tz_localize('Europe/Berlin')
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
     # Create a selection that chooses the nearest point & selects based on x-value
@@ -227,7 +228,6 @@ def overview(df, restart_headers, os_details):
                     title='value',
                     type="ordinal",),
     ]
-
     opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
     line = alt.Chart(df).mark_line(interpolate='linear').encode(
         alt.X('date:T'),
