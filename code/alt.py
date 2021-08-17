@@ -3,7 +3,6 @@ import time
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
-import streamlit as st
 
 my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
