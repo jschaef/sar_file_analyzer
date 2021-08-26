@@ -3,6 +3,7 @@ import time
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
+import streamlit as st
 from config import Config
 
 my_tz = time.tzname[0]
@@ -206,7 +207,9 @@ def overview(df, restart_headers, os_details):
         df, 'y', restart_headers, os_details)
 
     # set timezone for your app
-    df['date'] = df['date'].dt.tz_localize(Config.timezone)
+    if not df['date'][0].tzinfo:
+        df['date'] = df['date'].dt.tz_localize(Config.timezone)
+
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
     # Create a selection that chooses the nearest point & selects based on x-value
