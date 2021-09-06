@@ -25,7 +25,7 @@ def single_f(config_obj, username):
         pdf_saving = 0
     if st.sidebar.checkbox('Show'):
         st.sidebar.markdown('---')
-        col3, col4 = st.beta_columns(2)
+        col3, col4 = st.columns(2)
         # parse data from file
         sar_file = f'{upload_dir}/{selection}'
         st.subheader("Operating System Details")

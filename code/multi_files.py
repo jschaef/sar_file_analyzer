@@ -31,7 +31,7 @@ def single_multi(config_dict, username):
 
     st.markdown('___')
 
-    col3, col4 = st.beta_columns(2)
+    col3, col4 = st.columns(2)
     man_check_box = col3.empty()
     man_check = man_check_box.checkbox('Show Metric description from man page')
     pdf_check = col4.empty()
@@ -45,7 +45,7 @@ def single_multi(config_dict, username):
     if answer:
         if sel_field:
             multi_sar_dict = {}
-            col3, col4 = st.beta_columns(2)
+            col3, col4 = st.columns(2)
 
             threads = []
             for file in sel_field:
@@ -123,7 +123,7 @@ def single_multi(config_dict, username):
                 chart_field = []
                 pd_or_dia = st.selectbox('', ['Diagram', 'Summary'])
                 count = len(x)
-                column_table = st.beta_columns(len(x))
+                column_table = st.columns(len(x))
                 collect_field = []
                 sum_field = []
                 time_obj_field = []

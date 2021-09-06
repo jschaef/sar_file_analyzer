@@ -206,7 +206,7 @@ def metric_expander(prop, expand=False):
     exp_desc = f"{prop}"
 
     ph_expander = st.empty()
-    my_expander = ph_expander.beta_expander(
+    my_expander = ph_expander.expander(
         exp_desc, expanded=expand)
     with my_expander:
         if description:
@@ -301,7 +301,7 @@ def get_sar_files(user_name, col=None):
 
 def diagram_expander(default_width, default_hight, text1, text2):
     st.markdown('___')
-    dia_expander = st.beta_expander('Change Size')
+    dia_expander = st.expander('Change Size')
     st.markdown('')
     with dia_expander:
         width = st.slider(text1,

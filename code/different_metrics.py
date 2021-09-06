@@ -18,7 +18,7 @@ def diff_metrics(config_dict, username):
     multi_sar_dict = {}
     os_field = []
 
-    col3, col4 = st.beta_columns(2)
+    col3, col4 = st.columns(2)
     pdf_check = col3.empty()
     man_check_box = col4.empty()
     man_check = man_check_box.checkbox('Show Metric description from man page')
@@ -38,7 +38,7 @@ def diff_metrics(config_dict, username):
         os_details = multi_sar_dict[file].pop('os_details')
         os_field.append({file: os_details})
         x = []
-        col3, col4 = st.beta_columns(2)
+        col3, col4 = st.columns(2)
 
         rand_file = "".join([key for key in multi_sar_dict.keys()])
         headers = sorted(

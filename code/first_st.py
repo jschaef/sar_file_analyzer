@@ -44,7 +44,7 @@ def start():
                 sar_files = os.listdir(upload_dir)
                 st.sidebar.success(f"Logged in as {username}")
                 
-                col1, col2 = st.beta_columns(2)
+                col1, col2 = st.columns(2)
                 config_c.update_conf({'username': username, 'upload_dir': upload_dir,
                     'sar_files':sar_files, 'cols':[col1, col2]})
                 if sql_stuff.get_role(username) == "admin":

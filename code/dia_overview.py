@@ -15,7 +15,7 @@ def show_dia_overview(username):
     global sar_structure, os_details, file_chosen
     st.subheader('Overview of important metrics from SAR data')
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     sar_file = helpers.get_sar_files(username, col=col2)
     if sar_file != file_chosen:
         sar_structure = []
@@ -45,9 +45,9 @@ def show_dia_overview(username):
     if count_lines > 0:
         count_lines = int(count_lines + 1)
     
-    h_expander = st.beta_expander(label='Select SAR Metrics to display',expanded=False)
+    h_expander = st.expander(label='Select SAR Metrics to display',expanded=False)
     with h_expander:
-        col3, col4 = st.beta_columns(2)
+        col3, col4 = st.columns(2)
         ph_col3 = col3.empty()
         ph_col4 = col4.empty()
         if ph_col3.checkbox('Select All'):
@@ -57,7 +57,7 @@ def show_dia_overview(username):
         st.write('  \n')
         st.markdown('***')
         for line in range(count_lines):
-            cols = st.beta_columns(boxes_per_line)
+            cols = st.columns(boxes_per_line)
             for x in range(len(cols)):
                 if len(full_alias_l) > 0:
                     label = full_alias_l.pop()
@@ -80,11 +80,11 @@ def show_dia_overview(username):
     headers = helpers.translate_aliases(sel_field, sar_structure.keys())
 
     # pick time frame
-    time_expander = st.beta_expander(label='Change Start and End Time',expanded=False)
+    time_expander = st.expander(label='Change Start and End Time',expanded=False)
     with time_expander:
         df_len = 0
         tmp_dict = {}
-        col5, col6 = st.beta_columns(2)
+        col5, col6 = st.columns(2)
         for entry in headers:
             skey = headers[entry]
             if sar_structure.get(skey, None):
