@@ -166,6 +166,7 @@ def object_as_dict(obj):
     return {c.key: getattr(obj, c.key)
             for c in inspect(obj).mapper.column_attrs}
 
+@st.experimental_singleton
 def get_header_prop(header, property):
     if property == 'alias':
         org_header = header
@@ -214,6 +215,7 @@ def get_header_prop(header, property):
             elif property == 'keywd':
                 return query.first().keywd
 
+@st.experimental_singleton
 def get_header_from_alias(alias):
     header = session.query(Headings).filter(Headings.alias == alias)
     if header.first():

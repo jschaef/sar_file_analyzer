@@ -11,7 +11,7 @@ import pandas as pd
 """
 https://gist.github.com/chad-m/6be98ed6cf1c4f17d09b7f6e5ca2978f
 """
-@st.cache(allow_output_mutation=True)
+@st.experimental_memo
 def download_button(object_to_download, download_filename, button_text):
     """
     Generates a link to download the given object_to_download.

@@ -41,7 +41,7 @@ def get_osdetails(file):
     os_details = " ".join(extract_os_details(file))
     return os_details
 
-@st.cache(allow_output_mutation=True)
+@st.experimental_memo
 def merge_headers(header_field):
     # initialize with first field
     first = set(header_field[0])
@@ -93,7 +93,7 @@ def check_sub_items(headers, multi_sarfile_dict):
     
     return headers
 
-#@st.cache(allow_output_mutation=True)
+@st.experimental_memo
 def translate_headers(field):
     '''
     takes list of headers , db lookup for the aliases
@@ -176,6 +176,7 @@ def get_selected_header(select_box_title, headers, col=None):
     return (selected, ph)
 
 
+@st.experimental_singleton
 def get_metric_desc_from_manpage():
     metric_reg = re.compile('^\.IP\s+(.*$)')
     content = re.compile('^[^\.].*$')
@@ -329,7 +330,7 @@ def rename_sar_file(file_path):
     except:
         st.warning(f'file {file_path} could not be renamed to {renamed_name}')
 
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+@st.experimental_memo
 def pdf_download(file, dia):
     my_file = file
     save_dir = os.path.dirname(file)
