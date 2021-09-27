@@ -31,12 +31,14 @@ class configuration(object):
     def get_dict(self):
         return self.conf_d
 
+@st.experimental_memo
 def extract_os_details(file):
     with open(file, 'r') as sar_file:
         for nr, line in enumerate(sar_file):
             if "Linux" in line:
                 return line.split()
 
+@st.experimental_memo
 def get_osdetails(file):
     os_details = " ".join(extract_os_details(file))
     return os_details
@@ -330,7 +332,7 @@ def rename_sar_file(file_path):
     except:
         st.warning(f'file {file_path} could not be renamed to {renamed_name}')
 
-@st.experimental_memo
+# - not possible @st.experimental_memo
 def pdf_download(file, dia):
     my_file = file
     save_dir = os.path.dirname(file)

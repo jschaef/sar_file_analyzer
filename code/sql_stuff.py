@@ -133,6 +133,7 @@ def add_metric(metric, description):
         session.add(new_metric)
         session.commit()
 
+@st.experimental_singleton
 def ret_metric_description(metric):
     metric = session.query(Metrics).filter(Metrics.metric == metric)
     if metric.first():
@@ -151,6 +152,8 @@ def delete_metric(metric):
     x = session.commit()
     return x
 
+
+@st.experimental_singleton
 def ret_all_headers(kind='return'):
     h_list = []
     for instance in session.query(Headings).order_by(Headings.header):
