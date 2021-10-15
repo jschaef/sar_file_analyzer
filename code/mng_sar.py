@@ -9,7 +9,7 @@ from config import Config
 
 
 def file_mng(upload_dir, col, username):
-    manage_files = ['Show Sar Files','Add Sar File', 'Delete Sar Files']
+    manage_files = ['Show Sar Files','Add Sar Files', 'Delete Sar Files']
     #sar_files = os.listdir(upload_dir)
     sar_files = [ x for x in os.listdir(upload_dir) if os.path.isfile(f'{upload_dir}/{x}')]
     sar_files_uploaded =[x for x in sar_files if not x.endswith(('.df'))]
