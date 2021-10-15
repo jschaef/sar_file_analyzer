@@ -25,39 +25,41 @@ def file_mng(upload_dir, col, username):
             'deprecation.showfileUploaderEncoding', False)
         sar_files = [st.file_uploader(
             "Please upload your SAR file", key='sar_uploader',
-            accept_multiple_files=False)]
+            #accept_multiple_files=False)]
+            accept_multiple_files=True)]
         if st.button('Submit'):
             if sar_files:
-                for u_file in sar_files:
-                    if u_file is not None:
-                        #st.write(dir(sar_file))
-                        f_check = Magic()
-                        #stringio = io.StringIO(sar_file.decode("utf-8"))
-                        bytes_data = u_file.read()
-                        res = f_check.from_buffer(bytes_data)
-                        if not "ASCII text" in res:
-                            st.warning(
-                                f'File is not a valid sar ASCII data file. Instead {res}')
-                            continue
-                        else:
-                            #TODO check if Linux Header is present and if sar sections are present
-                            st.write(
-                                f"Sar file is valid. Renaming {u_file.name}")
-                            with open(f'{upload_dir}/{u_file.name}', 'wb') as targetf:
-                                targetf.write(bytes_data)
-                            #remove name
-                            renamed_name = helpers.rename_sar_file(f'{upload_dir}/{u_file.name}')
-                        # remove old redis data
-                        r_hash = f"{Config.rkey_pref}:{username}"
-                        r_key = f"{renamed_name}_df"
+                for multi_files in sar_files:
+                    for u_file in multi_files:
+                        if u_file is not None:
+                            #st.write(dir(sar_file))
+                            f_check = Magic()
+                            #stringio = io.StringIO(sar_file.decode("utf-8"))
+                            bytes_data = u_file.read()
+                            res = f_check.from_buffer(bytes_data)
+                            if not "ASCII text" in res:
+                                st.warning(
+                                    f'File is not a valid sar ASCII data file. Instead {res}')
+                                continue
+                            else:
+                                #TODO check if Linux Header is present and if sar sections are present
+                                st.write(
+                                    f"Sar file is valid. Renaming {u_file.name}")
+                                with open(f'{upload_dir}/{u_file.name}', 'wb') as targetf:
+                                    targetf.write(bytes_data)
+                                #remove name
+                                renamed_name = helpers.rename_sar_file(f'{upload_dir}/{u_file.name}')
+                            # remove old redis data
+                            r_hash = f"{Config.rkey_pref}:{username}"
+                            r_key = f"{renamed_name}_df"
 
-                        try:
-                            redis_mng.delete_redis_key(r_hash, r_key)
-                        except:
-                            print(f'{renamed_name} key not in redis db or redis db offline')
-                        # remove old pickle from disk
-                        df_file = f'{upload_dir}/{renamed_name}.df'
-                        os.system(f'rm -rf {df_file}')
+                            try:
+                                redis_mng.delete_redis_key(r_hash, r_key)
+                            except:
+                                print(f'{renamed_name} key not in redis db or redis db offline')
+                            # remove old pickle from disk
+                            df_file = f'{upload_dir}/{renamed_name}.df'
+                            os.system(f'rm -rf {df_file}')
     elif managef_options == 'Delete Sar Files':
         if sar_files:
             dfiles_ph = st.empty()
