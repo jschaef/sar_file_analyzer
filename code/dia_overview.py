@@ -123,44 +123,45 @@ def show_dia_overview(username):
         st.markdown('')
         submitted = st.form_submit_button('Submit')
         if submitted:
-            for entry in sel_field:
-                df_field = []
-                if sar_structure.get(headers[entry], None):
-                    st.subheader(entry)
-                    if 'generic' in sar_structure[headers[entry]].keys():
-                        df = sar_structure[headers[entry]]['generic']
-                        df_field.append([df,0])
-                    else:
-                        device_list = list(sar_structure[headers[entry]].keys())
-                        device_list.sort()
-                        if entry in wanted_sub_devices:
-                            for device in device_list:
+            with st.spinner(text='Please be patient until all graphs are constructed ...'):
+                for entry in sel_field:
+                    df_field = []
+                    if sar_structure.get(headers[entry], None):
+                        st.subheader(entry)
+                        if 'generic' in sar_structure[headers[entry]].keys():
+                            df = sar_structure[headers[entry]]['generic']
+                            df_field.append([df,0])
+                        else:
+                            device_list = list(sar_structure[headers[entry]].keys())
+                            device_list.sort()
+                            if entry in wanted_sub_devices:
+                                for device in device_list:
+                                    df = sar_structure[headers[entry]][device]
+                                    df_field.append([df, device])
+
+                            elif 'all' in device_list:
+                                device = 'all'
+                                st.write(f'all of {len(device_list) -1}')
+                                df = sar_structure[headers[entry]][device]
+                                df_field.append([df, device])
+                            else:
+                                device = device_list[0]
                                 df = sar_structure[headers[entry]][device]
                                 df_field.append([df, device])
 
-                        elif 'all' in device_list:
-                            device = 'all'
-                            st.write(f'all of {len(device_list) -1}')
-                            df = sar_structure[headers[entry]][device]
-                            df_field.append([df, device])
-                        else:
-                            device = device_list[0]
-                            df = sar_structure[headers[entry]][device]
-                            df_field.append([df, device])
+                        for df_tuple in df_field:
+                            if df_tuple[1]:
+                                st.write(df_tuple[1])
+                            df = df_tuple[0]
+                            if start in df.index and end in df.index:
+                                df = df[start:end]
+                            helpers.restart_headers(df, os_details, restart_headers=restart_headers)
+                            df = df.reset_index().melt('date', var_name='metrics', value_name='y')
+                            st.altair_chart(alt.overview(df, restart_headers, os_details))
+                            if pdf_saving:
+                                helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
 
-                    for df_tuple in df_field:
-                        if df_tuple[1]:
-                            st.write(df_tuple[1])
-                        df = df_tuple[0]
-                        if start in df.index and end in df.index:
-                            df = df[start:end]
-                        helpers.restart_headers(df, os_details, restart_headers=restart_headers)
-                        df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                        st.altair_chart(alt.overview(df, restart_headers, os_details))
-                        if pdf_saving:
-                            helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
-
-                        metrics = df['metrics'].drop_duplicates().tolist()
-                        if show_metric:
-                            for metric in metrics:
-                                helpers.metric_expander(metric)
+                            metrics = df['metrics'].drop_duplicates().tolist()
+                            if show_metric:
+                                for metric in metrics:
+                                    helpers.metric_expander(metric)
