@@ -20,11 +20,11 @@ def file_mng(upload_dir, col, username):
         'Add/Delete', manage_files)
 
     st.markdown('___')
-    if managef_options == 'Add Sar File':
+    if managef_options == 'Add Sar Files':
         st.set_option(
             'deprecation.showfileUploaderEncoding', False)
         sar_files = [st.file_uploader(
-            "Please upload your SAR file", key='sar_uploader',
+            "Please upload your SAR files", key='sar_uploader',
             #accept_multiple_files=False)]
             accept_multiple_files=True)]
         if st.button('Submit'):
