@@ -79,6 +79,8 @@ def start():
 
             else:
                 st.warning("You don't exist or your password does not match")
+        else:
+            st.header("Please login to use this app")
 
     elif (choice) == "Signup":
         st.subheader("Create an Account")
