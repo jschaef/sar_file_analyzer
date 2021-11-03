@@ -208,7 +208,7 @@ def overview(df, restart_headers, os_details):
 
     # set timezone for your app
     if not df['date'][0].tzinfo:
-        df['date'] = df['date'].dt.tz_localize(Config.timezone)
+        df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
 
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
