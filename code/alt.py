@@ -13,7 +13,7 @@ alt.data_transformers.disable_max_rows()
 def draw_single_chart(df, property, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
     
-    df['date'] = df['date'].dt.tz_localize(Config.timezone)
+    df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
 
     tooltip=[
         alt.Tooltip(field="date",
@@ -76,7 +76,7 @@ def draw_single_chart(df, property, width, hight,
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
 
-    df['date'] = df['date'].dt.tz_localize(Config.timezone)
+    df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
     rule_field, z_field, y_pos = create_reboot_rule(df, property, restart_headers, os_details)
 
     tooltip=[
