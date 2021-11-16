@@ -33,21 +33,12 @@ def df_reset_date(df, os_details):
         old_val = df.index[x]
         z = pd.to_datetime(
             f'{date_str} {old_val}', format=format)
-        #z = z.strftime('%H:%M')
         new_index.append(z)
     df['date'] = new_index
     df.set_index('date', new_index, inplace=True,
                 verify_integrity=False)
     
     return df
-
-def extract_hours_for_labels(df):
-    measures = len(df) -1
-    start_time = df['date'][0]
-    end_time = df['date'][measures]
-    x_hours = [x for x in df['date'] if x.minute == 0]
-    return x_hours
-
 
 def set_unique_date(dataframe, time_obj):
     """
