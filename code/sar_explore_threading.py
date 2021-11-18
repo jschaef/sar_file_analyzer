@@ -21,7 +21,6 @@ reg_average = re.compile('average|durchsch|\<sum\>', re.IGNORECASE)
 
 ### program code
 
-
 def parse_sar_file(content, myfile, username):
     mydict = {}
     mark = 0

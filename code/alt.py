@@ -13,7 +13,7 @@ alt.data_transformers.disable_max_rows()
 def draw_single_chart(df, property, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
     
-    df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
+    df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
 
     tooltip=[
         alt.Tooltip(field="date",
@@ -52,18 +52,16 @@ def draw_single_chart(df, property, width, hight,
     opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
 
     c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
-        alt.X(f'date:T',
+        alt.X('utchoursminutes(date)', type='temporal',
               scale=alt.Scale(zero=False),
               axis=alt.Axis(domain=True, labelBaseline='line-top',
-                            )),
-                            #title=f'date {df.at[0,"file"]}')),
+                    title='date')),
         alt.Y(property, scale=alt.Scale(zero=False),
               axis=alt.Axis(labelPadding=ylabelpadd,
                             titlePadding=5,
                             ),
               ),
-        #tooltip=['date', property, 'file'],
-        tooltip=tooltip,
+        #tooltip=tooltip,
         color=color_x,
         opacity=opacity_x,
     ).properties(
@@ -76,14 +74,16 @@ def draw_single_chart(df, property, width, hight,
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
 
-    df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
+    df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
     rule_field, z_field, y_pos = create_reboot_rule(df, property, restart_headers, os_details)
 
     tooltip=[
         alt.Tooltip(field="date",
         type="temporal",
         title="Time",
-        format="%I:%M:%S %p",),
+        format="%I:%M:%S %p",
+        timeUnit="hoursminutes"
+        ),
         alt.Tooltip(field=property,
         type="ordinal",),
         alt.Tooltip(field='file',
@@ -94,7 +94,9 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
         alt.Tooltip(field="date",
         type="temporal",
         title="Time",
-        format="%I:%M:%S %p",),
+        format="%I:%M:%S %p",
+        timeUnit="utchoursminutes"
+        ),
         alt.Tooltip(field=property,
         type="ordinal",),
     ]
@@ -116,18 +118,16 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
 
     c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
-        alt.X(f'date:T',
+        alt.X('utchoursminutes(date)', type='temporal',
               scale=alt.Scale(zero=False),
               axis=alt.Axis(domain=True, labelBaseline='line-top',
-                            )),
-                            #title=f'date {df.at[0,"file"]}')),
+                title='date')),
         alt.Y(property, scale=alt.Scale(zero=False),
               axis=alt.Axis(labelPadding=ylabelpadd,
                             titlePadding=5,
                             ),
               ),
-        #tooltip=['date', property, 'file'],
-        tooltip=tooltip,
+        #tooltip=tooltip,
         color=color_x,
         opacity=opacity_x,
     ).properties(
@@ -154,14 +154,12 @@ def create_reboot_rule(df, property, restart_headers, os_details):
         date_str, format = ddf.format_date(os_details)
         z = pd.to_datetime(
             f'{date_str} {xval}', format=format)
+        z = z.tz_localize('UTC')
         z_field.append(z)
         mdf = pd.DataFrame({'x': [z]})
-        # apache arrows is displaying localtime hence we need to consider the 
-        # actual timezone of the user displaying the data
-        mdf['x_utc'] = mdf['x'].dt.tz_localize(my_tz)
-        #rule = alt.Chart(pd.DataFrame({'x': [z]})).mark_rule(color='red').encode(
         rule = alt.Chart(mdf).mark_rule(color='red').encode(
-            x=alt.X('x_utc', axis=alt.Axis(title='date')), size=alt.value(1), strokeDash=(alt.value([5, 5])))
+             x=alt.X('utchoursminutes(x)', type='temporal', axis=alt.Axis(title='date')), 
+             size=alt.value(2), strokeDash=(alt.value([5, 5])))
 
         rule_field.append(rule)
     return rule_field, z_field, y_pos
@@ -169,10 +167,9 @@ def create_reboot_rule(df, property, restart_headers, os_details):
 def return_reboot_text(z_field, y_pos):
     if z_field:
         mdf = pd.DataFrame({'date': z_field, '': y_pos})
-        mdf['date_utc'] = mdf['date'].dt.tz_localize(my_tz)
         reboot_text = alt.Chart(mdf).mark_text(
-            text='RESTART', angle=90, color='black', fontSize=11).\
-            encode(x='date_utc:T', y=':Q')
+            text='RESTART', angle=90, color='black', fontSize=12).\
+            encode(alt.X('utchoursminutes(date)', type='temporal'), y=':Q')
     else:
         reboot_text = None
     return reboot_text
@@ -203,12 +200,9 @@ def draw_multi_chart(charts, y_shared='independent', x_shared='independent', tit
 
 
 def overview(df, restart_headers, os_details):
+    df['date_utc'] = df['date'].dt.tz_localize('UTC')
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
-
-    # set timezone for your app
-    if not df['date'][0].tzinfo:
-        df['date'] = df['date'].dt.tz_localize(Config.timezone, ambiguous=True)
 
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
@@ -222,10 +216,11 @@ def overview(df, restart_headers, os_details):
                             alt.value('white',))
 
     tooltip = [
-        alt.Tooltip(field="date",
+        alt.Tooltip(field="date_utc",
                     type="temporal",
                     title="Time",
-                    format="%I:%M:%S %p",),
+                    format="%I:%M:%S %p",
+                    timeUnit="utchoursminutes",),
         alt.Tooltip(field='metrics',
                     title='metric',
                     type="ordinal",),
@@ -235,11 +230,11 @@ def overview(df, restart_headers, os_details):
     ]
     opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
     line = alt.Chart(df).mark_line(interpolate='linear').encode(
-        alt.X('date:T'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
         alt.Y('y:Q'),
         opacity=opacity_x,
         color=color_x,
-        tooltip=tooltip
+        #tooltip=tooltip
     ).add_selection(
         selection_new
     ).properties(
