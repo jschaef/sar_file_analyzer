@@ -50,3 +50,8 @@ secondaryBackgroundColor="#e0e0ef"
 textColor="#262730"
 font="sans serif"
 ```
+
+## bugs
+In case the app is throwing an error about helpers.py line 437 <code>format(precision=4)</code>
+correct it to <code>set_precision(4)</code>.
+Depending on the pandas version the second one is deprecated but the first one still not known.
