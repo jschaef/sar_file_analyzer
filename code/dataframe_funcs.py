@@ -2,7 +2,7 @@
 
 import re
 import pandas as pd
-from datetime import timezone
+from datetime import datetime, timedelta
 
 def format_date(os_details):
     # presume format 2020-XX-XX for sar operating system details
@@ -71,9 +71,11 @@ def insert_restarts_into_df(os_details, df, restart_headers):
         ind = 0
         for x in range(len(df.index)):
             # check if date - z is the minimum
-            #z = z.replace(tzinfo=timezone.utc)
-            if (z - df.index[x]).total_seconds() >= 0:
+            if (z - df.index[x]).total_seconds() > 0:
                 continue
+            # same index as restart exists
+            elif (z - df.index[x]).total_seconds() == 0:
+                z = z + timedelta(seconds=10)
             else:
                 ind = x - 1
                 break

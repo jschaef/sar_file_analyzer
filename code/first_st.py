@@ -81,9 +81,6 @@ def start():
                 st.warning("You don't exist or your password does not match")
         else:
             st.header("Please login to use this app")
-            st.warning("User from timezone different to Europe/Berlin will see wrong time data in diagrams.  \n\
-                       I'm working on it.")
-
     elif (choice) == "Signup":
         st.subheader("Create an Account")
         new_user = st.text_input("Username")
