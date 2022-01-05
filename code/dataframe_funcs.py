@@ -2,7 +2,7 @@
 
 import re
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 def format_date(os_details):
     # presume format 2020-XX-XX for sar operating system details

@@ -55,7 +55,8 @@ def set_data_frames(file_name, user_name, sar_structure):
             try:
                 redis_mng.set_redis_key(pickle.dumps(sar_structure), r_item, property=file_name_df,
                                         decode=False)
-                print(f'{r_item}, {file_name_df} saved to redis')
+                print(
+                    f'{r_item}, {file_name_df} saved to redis at {datetime.now().strftime("%m/%d/%y %H:%M:%S")}')
             except:
                 print(f'could not connect to redis server or save {file_name_df} to redis server')
     os.system(f'rm -rf {real_path}')

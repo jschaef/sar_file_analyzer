@@ -3,6 +3,7 @@ import os
 import pandas as df
 import streamlit as st
 from magic import Magic
+from datetime import datetime
 import redis_mng
 import helpers
 from config import Config
@@ -74,7 +75,8 @@ def file_mng(upload_dir, col, username):
                     os.system(f'rm -f {fs_file}')
                     try:
                         rkey = f"{Config.rkey_pref}:{username}"
-                        print(f'delete {rkey}, {r_item} from redis')
+                        print(
+                            f'delete {rkey}, {r_item} from redis at {datetime.now().strftime("%m/%d/%y %H:%M:%S")}')
                         redis_mng.del_redis_key_property(rkey, r_item)
                     except:
                         print(f'{rkey}, {r_item} not available in redis db or redis \
