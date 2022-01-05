@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import redis_mng
 import streamlit as st
+from datetime import datetime
 from sar_explore_threading import initialize, create_data_collection
 from config import Config
 from helpers import prepare_pd_data
@@ -76,13 +77,13 @@ def get_data_frames(file_name, user_name):
             r_item, decode=False, property=file_name_df)
         if p_obj:
             sar_structure = pickle.loads(p_obj)
-            print(f'{r_item}, {file_name_df} loaded from redis')
+            print(f'{r_item}, {file_name_df} loaded from redis at {datetime.now().strftime("%m/%d/%y %H:%M:%S")}')
         elif  pickle_file.exists():
             sar_structure = pickle.load(open(pickle_file, 'rb'))
             try:
                 redis_mng.set_redis_key(pickle.dumps(sar_structure), r_item, property=file_name_df,
                                         decode=False)
-                print(f'{r_item}, {file_name_df} saved to redis')
+                print(f'{r_item}, {file_name_df} saved to redis at {datetime.now().strftime("%m/%d/%y %H:%M:%S")}')
             except:
                 print(
                     f'could not connect to redis server or save {file_name_df} to redis server')
