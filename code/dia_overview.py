@@ -157,9 +157,9 @@ def show_dia_overview(username):
                                 df = df[start:end]
                             helpers.restart_headers(df, os_details, restart_headers=restart_headers)
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                            st.altair_chart(alt.overview(df, restart_headers, os_details))
+                            st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
                             if pdf_saving:
-                                helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
+                                helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
 
                             metrics = df['metrics'].drop_duplicates().tolist()
                             if show_metric:

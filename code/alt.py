@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import time
 import altair as alt
+from altair.vegalite.v4.schema.channels import Opacity, StrokeWidth
 import dataframe_funcs as ddf
 import pandas as pd
 import streamlit as st
@@ -71,7 +72,7 @@ def draw_single_chart(df, property, width, hight,
 
     return(c)
 
-def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
+def draw_single_chart_v9(df, property, restart_headers, os_details, width, hight,
                 ylabelpadd=10, xlabelpadd=10):
 
     df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
@@ -142,8 +143,72 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
 
     if reboot_text: 
         c += reboot_text
-
     return(c)
+
+def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
+                         ylabelpadd=10, xlabelpadd=10):
+
+    #df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
+    rule_field, z_field, y_pos = create_reboot_rule(
+        df, property, restart_headers, os_details)
+
+    if 'metric' in df.columns:
+        color_item = 'metric'
+    else:
+        color_item = 'file'
+
+    #selection = alt.selection_multi(fields=[color_item], bind='legend')
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(df).mark_point().encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
+        alt.X('utchoursminutes(date)', type='temporal',
+              scale=alt.Scale(zero=False),
+              axis=alt.Axis(domain=True, labelBaseline='line-top',
+                            title='date')),
+        alt.Y(property, scale=alt.Scale(zero=False),
+              axis=alt.Axis(labelPadding=ylabelpadd,
+                            titlePadding=5,
+                            ),
+              ),
+        color=f'{color_item}:N'
+    ).properties(
+    width = width,
+    height = hight,
+    )
+
+    rules = alt.Chart(df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    points = c.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+
+    text = c.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, f'{property}:Q', alt.value(' '))
+    )
+    
+    reboot_text = return_reboot_text(z_field, y_pos)
+
+    for rule in rule_field:
+        c += rule
+
+    if reboot_text:
+        c += reboot_text
+    mlayer = alt.layer(c, selectors,points, rules, text, ).interactive()
+    return(mlayer)
+
+
 
 def create_reboot_rule(df, property, restart_headers, os_details):
     y_pos = df[property].max()/2
@@ -206,13 +271,8 @@ def overview(df, restart_headers, os_details):
 
     selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
 
-    # Create a selection that chooses the nearest point & selects based on x-value
-    # not working here
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
-
     color_x = alt.condition(selection_new,
-                            alt.Color('metrics:N'),
+                           alt.Color('metrics:N'),
                             alt.value('white',))
 
     tooltip = [
@@ -227,18 +287,43 @@ def overview(df, restart_headers, os_details):
         alt.Tooltip(field='y',
                     title='value',
                     type="ordinal",),
-    ]
-    opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
+    ]  
+    #opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
     line = alt.Chart(df).mark_line(interpolate='linear').encode(
         alt.X('utchoursminutes(date_utc)', type='temporal'),
         alt.Y('y:Q'),
-        opacity=opacity_x,
-        color=color_x,
+    #    opacity=opacity_x,
+        #color=color_x,
+        color='metrics:N'
         #tooltip=tooltip
-    ).add_selection(
-        selection_new
+#    ).add_selection(
+#        selection_new
     ).properties(
         width=1200, height=400
+    )
+ 
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(df).mark_point().encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    rules = alt.Chart(df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    points = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+
+    text = line.mark_text(align='left', dx=5, dy=-5).encode(
+        text=alt.condition(nearest, 'y:Q', alt.value(' '))
     )
 
     #line.configure_legend(orient='left')
@@ -249,4 +334,90 @@ def overview(df, restart_headers, os_details):
     if reboot_text:
         line += reboot_text
 
-    return line.interactive()
+    mlayer = alt.layer(line, selectors, rules, points, text)
+    return mlayer.interactive()
+
+
+def overview_v1(df, restart_headers, os_details):
+    df['date_utc'] = df['date'].dt.tz_localize('UTC')
+    rule_field, z_field, y_pos = create_reboot_rule(
+        df, 'y', restart_headers, os_details)
+
+    selection_new = alt.selection_multi(fields=['metrics'])
+
+    color_x = alt.condition(selection_new,
+                            alt.Color('metrics:N', legend=None),
+                            alt.value(''))
+
+    opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
+    line = alt.Chart(df).encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+        alt.Y('y:Q'),
+        opacity = opacity_x
+    ).properties(
+        width=1200, height=400
+    )
+
+    final_line = line.mark_line(strokeWidth=2).add_selection(selection_new).encode(
+        color=color_x
+    )
+    
+    legend = alt.Chart(df).mark_point().encode(
+        y=alt.Y('metrics:N', axis=alt.Axis(orient='right')),
+        color=color_x
+    ).add_selection(
+        selection_new
+    )
+
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(df).mark_point().encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    rules = alt.Chart(df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    xpoints = alt.Chart(df).mark_point().encode(
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
+        alt.Y('y:Q',),
+        opacity=alt.condition(selection_new, alt.value(1), alt.value(0)),
+        color=color_x
+    ).transform_filter(
+        nearest
+    )
+
+    tooltip_text = line.mark_text(
+        align = "left",
+        dx = -30,
+        dy = -15,
+        fontSize = 11,
+        lineBreak = "\n",
+    ).encode(
+        text = alt.condition(nearest, 
+        alt.Text('y:Q',),
+        alt.value(' '),
+    ),
+        opacity=alt.condition(selection_new, alt.value(1), alt.value(0)),
+        color = color_x
+    )
+
+
+    for rule in rule_field:
+        line += rule
+    reboot_text = return_reboot_text(z_field, y_pos)
+    if reboot_text:
+        line += reboot_text
+    #line = line + selectors + rules + xpoints
+    mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
+    mlayer = mlayer|legend
+    return mlayer
+    #return mlayer.interactive()
+

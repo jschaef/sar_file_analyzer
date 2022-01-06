@@ -196,9 +196,11 @@ def single_multi(config_dict, username):
                                     os_details = event[1]
                                     break
 
-                            st.altair_chart(alt.overview(df, restart_headers, os_details))
+                            chart = alt.overview_v1(df, restart_headers, os_details)
+                            st.altair_chart(chart)
+                            #st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
                             if pdf_saving:
-                                helpers.pdf_download(pdf_name, data[key][1])
+                                helpers.pdf_download(pdf_name, chart)
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:

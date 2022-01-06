@@ -1,5 +1,4 @@
 import streamlit as st
-import altair
 import alt
 import pandas as pd
 import sar_data_crafter as sdc
@@ -83,9 +82,9 @@ def single_f(config_obj, username):
 
 
             st.subheader('Graphical overview')
-            st.altair_chart(alt.overview(df, restart_headers, os_details))
+            st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
             if pdf_saving:
-                helpers.pdf_download(pdf_name, alt.overview(df, restart_headers, os_details))
+                helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
             metrics = df['metrics'].drop_duplicates().tolist()
             for metric in metrics:
                 helpers.metric_expander(metric)
