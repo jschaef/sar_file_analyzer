@@ -411,10 +411,10 @@ def overview_v1(df, restart_headers, os_details):
 
 
     for rule in rule_field:
-        line += rule
+        final_line += rule
     reboot_text = return_reboot_text(z_field, y_pos)
     if reboot_text:
-        line += reboot_text
+        final_line += reboot_text
     #line = line + selectors + rules + xpoints
     mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
     mlayer = mlayer|legend
