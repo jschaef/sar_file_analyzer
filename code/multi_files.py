@@ -13,8 +13,6 @@ def single_multi(config_dict, username):
     upload_dir = config_dict['upload_dir']
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'
-    col1 = config_dict['cols'][0]
-    col2 = config_dict['cols'][1]
     st.subheader('Compare same metric on multiple Sar Files')
     sel_field = []
     sar_files = [ x for x in os.listdir(upload_dir) if os.path.isfile(f'{upload_dir}/{x}')]

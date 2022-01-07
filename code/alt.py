@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 import time
 import altair as alt
-from altair.vegalite.v4.schema.channels import Opacity, StrokeWidth
 import dataframe_funcs as ddf
 import pandas as pd
-import streamlit as st
-from config import Config
 
 my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
@@ -241,26 +238,10 @@ def return_reboot_text(z_field, y_pos):
 
 def draw_multi_chart(charts, y_shared='independent', x_shared='independent', title=None):
     if charts:
-        fin_obj = alt.layer(
-            title=title,
-        ).resolve_scale(
-            size="shared",
-            stroke="independent",
-            y=y_shared,
-            x=x_shared).resolve_scale(
-                size="independent",
-                x="shared",
-                fill="independent",
-                color="shared",
-                strokeDash='shared',
-                strokeWidth='shared',
-
-            ).configure_legend(
-                labelLimit=250,
-            )
-            
+        fin_obj = charts.pop(0)   
         for dia in charts:
             fin_obj = fin_obj + dia
+        
         return(fin_obj).interactive()
 
 
@@ -419,5 +400,4 @@ def overview_v1(df, restart_headers, os_details):
     mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
     mlayer = mlayer|legend
     return mlayer
-    #return mlayer.interactive()
 

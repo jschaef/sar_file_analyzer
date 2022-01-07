@@ -5,7 +5,6 @@ import alt
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
-import time
 from config import Config
 
 sar_structure = []

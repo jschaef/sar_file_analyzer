@@ -21,9 +21,15 @@ def analyze(upload_dir, config_c, username):
 
     st.markdown('___')
 
-    if len(sar_files) == 0:
+    files_exists = 0
+    for entry in sar_files:
+        if os.path.isfile(f"{upload_dir}/{entry}"):
+            files_exists = 1
+            break
+    if not len(sar_files) or not files_exists:
         st.write('')
-        st.write('Nothing to analyze at the moment. You currently have no sar file uploaded.')
+        st.warning('Nothing to analyze at the moment. You currently have no sar file uploaded.\n\
+                   Upload a file in the "Manage Sar Files" menu on the right frame')
     else:
         if single_multi == 'Graphical Overview':
             dia_overview.show_dia_overview(username)
