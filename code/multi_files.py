@@ -222,6 +222,7 @@ def single_multi(config_dict, username):
                             multi_chart.append(chart)
                         layer = alt.draw_multi_chart(multi_chart,
                                                             y_shared='shared', title=f'{aitem[selected]} {header_add} {prop}', x_shared='shared')
+                        layer = layer.configure_legend(labelLimit=400)
                         st.write(layer)
                         if pdf_saving:
                             helpers.pdf_download(pdf_name, layer) 
