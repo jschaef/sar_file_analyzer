@@ -7,7 +7,7 @@ from config import Config
 import metric_page_helpers as mph
 import layout_helper as lh
 
-def same_metrics(config_dict, username):
+def do_metrics(config_dict, username):
     upload_dir = config_dict['upload_dir']
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'

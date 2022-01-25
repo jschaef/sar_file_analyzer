@@ -46,4 +46,4 @@ def analyze(upload_dir, config_c, username):
             multi_files.single_multi(config, username)
 
         elif single_multi == 'Compare Metrics':
-            handle_metrics.same_metrics(config, username) 
+            handle_metrics.do_metrics(config, username) 
