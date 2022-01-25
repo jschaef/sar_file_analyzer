@@ -315,7 +315,8 @@ def diagram_expander(default_width, default_hight, text1, text2, col=None):
 
         return width, hight
 
-def rename_sar_file(file_path):
+def rename_sar_file(file_path, col=None):
+    col = col if col else st
     os_details = extract_os_details(file_path)
     hostname = os_details[2].strip("(|)")
     date = os_details[3]
@@ -327,11 +328,11 @@ def rename_sar_file(file_path):
     renamed_name = f'{dir_name}/{rename_name}'
     try:
         os.system(f'mv {file_path} {dir_name}/{rename_name}')
-        st.info(f'{base_name} has been renamed to {rename_name}\n    \
+        col.info(f'{base_name} has been renamed to {rename_name}\n    \
             which means: <date_of_upload>\_<hostname>\_<sar file creation date>')
         return rename_name
     except:
-        st.warning(f'file {file_path} could not be renamed to {renamed_name}')
+        col.warning(f'file {file_path} could not be renamed to {renamed_name}')
 
 # - not possible @st.experimental_memo
 def pdf_download(file, dia):
