@@ -3,7 +3,7 @@ import alt
 import pandas as pd
 import sar_data_crafter as sdc
 import helpers
-import dataframe_funcs as ddf
+import layout_helper as lh
 from config import Config
 
 sar_structure = []
@@ -14,24 +14,23 @@ def single_f(config_obj, username):
     upload_dir = config_obj['upload_dir']
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'
-    col2 = config_obj['cols'][1]
-    selection = helpers.get_sar_files(username, col=col2)
+    col1, col2, col3, col4 = st.columns([1,1,1, 1])
+    des_text = 'Show a Summary of the chosen header or Details of the chosen metric in the left frame'
+    selected_content = col1.selectbox(
+            des_text, ['Summary', 'Details'], key='diagr')
 
-    if st.checkbox('Enable PDF saving'):
-        pdf_saving = 1
-    else:
-        pdf_saving = 0
-   
+    col2.write('')
+    selection = helpers.get_sar_files(username, col=col3)
+    st.markdown('___')
+
     st.sidebar.markdown('---')
     # parse data from file
     sar_file = f'{upload_dir}/{selection}'
-    st.subheader("Operating System Details")
     if sar_file != file_chosen:
         sar_structure = sdc.get_data_frames(sar_file, username)
         file_chosen = sar_file
         os_details = sar_structure.pop('os_details')
 
-    st.text(os_details)
     headers = [header for header in sar_structure.keys()]
     restart_headers = helpers.extract_restart_header(headers)
 
@@ -47,10 +46,8 @@ def single_f(config_obj, username):
         sub_item = st.sidebar.selectbox('Choose devices', sub_list)
         df = sar_structure[selected][sub_item]
 
-    st.subheader('Selections')
-    selected_content = st.selectbox(
-            'Sumary/Details', ['Summary', 'Details'], key='diagr')
-
+    st.write("Operating System Details:")
+    st.text(os_details)
     aitem = helpers.translate_headers([selected])
     if sub_item:
         header_add = sub_item
@@ -58,34 +55,29 @@ def single_f(config_obj, username):
         header_add =''
 
     if selected_content == 'Summary':
-        st.subheader(f'Statistics for {aitem[selected]} {header_add}')
-        st.text('')
-        st.write(df.describe())
-        st.markdown("Min/Max at Time")
+        col1, col2, col3, col4 = st.columns(4)
+        df_displ = df.copy()
         x_list = []
         y_list = []
         for metric in df.columns.to_list():
             x_list.append(df[metric].idxmin())
             y_list.append(df[metric].idxmax())
 
-        stat_df = pd.DataFrame(data=[x_list,y_list], index=['min', 'max'],
-            columns=[m for m in df.columns.to_list()])
-
-        st.write(stat_df)
-        st.text('')
-
-        st.subheader('Dataset')
-        helpers.restart_headers(df, os_details, restart_headers=restart_headers)
+        helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
         df = df.reset_index().melt('date', var_name='metrics', value_name='y')
 
-
-        st.subheader('Graphical overview')
-        st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
-        if pdf_saving:
-            helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
+        st.write('Graphical overview')
+        chart = alt.overview_v1(df, restart_headers, os_details)
+        st.altair_chart(chart)
+        lh.pdf_download(pdf_name, chart)
+        if lh.show_checkbox('Show Statistical Data and Raw Sar Data', ):
+            st.markdown(f'###### Dataset for {aitem[selected]} {header_add}')
+            helpers.restart_headers(df_displ, os_details, restart_headers=restart_headers)
+            st.markdown(f'###### Statistics for {aitem[selected]} {header_add}')
+            st.text('')
+            st.write(df_displ.describe())
         metrics = df['metrics'].drop_duplicates().tolist()
-        for metric in metrics:
-            helpers.metric_expander(metric)
+        lh.show_metrics(metrics)
 
     elif selected_content == 'Details':
 
@@ -96,28 +88,30 @@ def single_f(config_obj, username):
         except NameError:
             sub_item = ''
 
-
         #df = df.reset_index()
         df = df.rename(columns={'index':'date'})
         df_part = df[[prop]].copy()
-        alias = aitem[selected]
-        st.subheader(f'Statistics for {aitem[selected]} {header_add} {prop}')
-        st.dataframe(df_part.describe())
-        st.subheader(f'Dataset for {aitem[selected]} {header_add} {prop}')
+        df_displ = df_part.copy()
         helpers.restart_headers(
-            df_part, os_details, restart_headers=restart_headers)
+            df_part, os_details, restart_headers=restart_headers, display=None)
 
         df_part['file'] = os_details.split()[2].strip('()')
         df_part['date'] = df_part.index
         df_part['metric'] = prop
         # choose diagram size
-        width, hight = helpers.diagram_expander(800, 400, 'Diagram Width', 'Diagram Hight')
+        width, hight = helpers.diagram_expander(1200, 400, 'Diagram Width', 'Diagram Hight')
 
         chart = alt.draw_single_chart_v1(
             df_part, prop, restart_headers, os_details, width, hight)
 
         st.altair_chart(chart)
-        if pdf_saving:
-            helpers.pdf_download(pdf_name, chart)
 
-        helpers.metric_expander(prop)
+        lh.pdf_download(pdf_name, chart)
+        if lh.show_checkbox('Show Statistical Data and Raw Sar Data', ):
+            st.markdown(f'###### Dataset for {aitem[selected]} {header_add} {prop}')
+            helpers.restart_headers(df_displ, os_details, restart_headers=restart_headers)
+            st.markdown(f'###### Statistics for {aitem[selected]} {header_add} {prop}')
+            st.dataframe(df_displ.describe())
+
+        lh.show_metrics([prop])
+

@@ -1,146 +1,14 @@
 #!/usr/bin/python3
 import time
+from turtle import title
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
+from helpers import restart_headers
 
 my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
 alt.data_transformers.disable_max_rows()
-
-def draw_single_chart(df, property, width, hight,
-                ylabelpadd=10, xlabelpadd=10):
-    
-    df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
-
-    tooltip=[
-        alt.Tooltip(field="date",
-        type="temporal",
-        title="Time",
-        format="%I:%M:%S %p",),
-        alt.Tooltip(field=property,
-        type="ordinal",),
-        alt.Tooltip(field='file',
-        type="ordinal",)
-    ]
-
-    tooltip1=[
-        alt.Tooltip(field="date",
-        type="temporal",
-        title="Time",
-        format="%I:%M:%S %p",),
-        alt.Tooltip(field=property,
-        type="ordinal",),
-    ]
-
-    if 'metric' in df.columns:
-        tooltip = tooltip1
-        color_item = 'metric'
-        lsel = 'metric'
-    else:
-        color_item = 'file'
-        lsel = 'file'
-
-
-    selection = alt.selection_multi(fields=[lsel], bind='legend')
-    color_x = alt.condition(selection,
-                            alt.Color(f'{color_item}:N'),
-                            alt.value('white',))
-
-    opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
-
-    c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal',
-              scale=alt.Scale(zero=False),
-              axis=alt.Axis(domain=True, labelBaseline='line-top',
-                    title='date')),
-        alt.Y(property, scale=alt.Scale(zero=False),
-              axis=alt.Axis(labelPadding=ylabelpadd,
-                            titlePadding=5,
-                            ),
-              ),
-        #tooltip=tooltip,
-        color=color_x,
-        opacity=opacity_x,
-    ).properties(
-        width=width,
-        height=hight,
-    ).add_selection(selection).interactive()
-
-    return(c)
-
-def draw_single_chart_v9(df, property, restart_headers, os_details, width, hight,
-                ylabelpadd=10, xlabelpadd=10):
-
-    df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
-    rule_field, z_field, y_pos = create_reboot_rule(df, property, restart_headers, os_details)
-
-    tooltip=[
-        alt.Tooltip(field="date",
-        type="temporal",
-        title="Time",
-        format="%I:%M:%S %p",
-        timeUnit="hoursminutes"
-        ),
-        alt.Tooltip(field=property,
-        type="ordinal",),
-        alt.Tooltip(field='file',
-        type="ordinal",)
-    ]
-
-    tooltip1=[
-        alt.Tooltip(field="date",
-        type="temporal",
-        title="Time",
-        format="%I:%M:%S %p",
-        timeUnit="utchoursminutes"
-        ),
-        alt.Tooltip(field=property,
-        type="ordinal",),
-    ]
-
-    if 'metric' in df.columns:
-        tooltip = tooltip1
-        color_item = 'metric'
-        lsel = 'metric'
-    else:
-        color_item = 'file'
-        lsel = 'file'
-
-
-    selection = alt.selection_multi(fields=[lsel], bind='legend')
-    color_x = alt.condition(selection,
-                            alt.Color(f'{color_item}:N'),
-                            alt.value('white',))
-
-    opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
-
-    c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal',
-              scale=alt.Scale(zero=False),
-              axis=alt.Axis(domain=True, labelBaseline='line-top',
-                title='date')),
-        alt.Y(property, scale=alt.Scale(zero=False),
-              axis=alt.Axis(labelPadding=ylabelpadd,
-                            titlePadding=5,
-                            ),
-              ),
-        #tooltip=tooltip,
-        color=color_x,
-        opacity=opacity_x,
-    ).properties(
-        width=width,
-        height=hight,
-    ).add_selection(selection).interactive()
-
-    reboot_text = return_reboot_text(z_field, y_pos)
-
-    for rule in rule_field:
-        c += rule
-
-    if reboot_text: 
-        c += reboot_text
-    return(c)
 
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
                          ylabelpadd=10, xlabelpadd=10):
@@ -154,7 +22,6 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     else:
         color_item = 'file'
 
-    #selection = alt.selection_multi(fields=[color_item], bind='legend')
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
                             fields=['date'], empty='none')
 
@@ -175,11 +42,17 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
                             titlePadding=5,
                             ),
               ),
-        color=f'{color_item}:N'
+        color=alt.Color(f'{color_item}:N', legend=None)
     ).properties(
     width = width,
     height = hight,
     )
+
+    legend = alt.Chart(df).mark_point().encode(
+        y=alt.Y(f'{color_item}:N', axis=alt.Axis(orient='right')),
+        color=alt.Color(f'{color_item}:N',)
+    )
+
 
     rules = alt.Chart(df).mark_rule(color='gray').encode(
         alt.X('utchoursminutes(date)', type='temporal'),
@@ -195,19 +68,28 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
         text=alt.condition(nearest, f'{property}:Q', alt.value(' '))
     )
     
-    reboot_text = return_reboot_text(z_field, y_pos)
+    reboot_text = return_reboot_text(z_field, y_pos, col='dummy', col_value='dummy')
+    if reboot_text:
+        reboot_text = reboot_text.encode(
+        color=alt.Color('dummy:N', legend=None)
+    )
+
+
 
     for rule in rule_field:
+        rule = rule.encode(
+            color=alt.Color('dummy:N', legend=None)
+        )
         c += rule
 
     if reboot_text:
         c += reboot_text
     mlayer = alt.layer(c, selectors,points, rules, text, ).interactive()
-    return(mlayer)
+    return mlayer|legend
 
 
 
-def create_reboot_rule(df, property, restart_headers, os_details):
+def create_reboot_rule(df, property, restart_headers, os_details, col=None, col_value=None):
     y_pos = df[property].max()/2
     rule_field = []
     z_field = []
@@ -218,7 +100,9 @@ def create_reboot_rule(df, property, restart_headers, os_details):
             f'{date_str} {xval}', format=format)
         z = z.tz_localize('UTC')
         z_field.append(z)
-        mdf = pd.DataFrame({'x': [z]})
+        if col == None:
+            col = 'dummy'
+        mdf = pd.DataFrame({'x': [z], col:col_value})
         rule = alt.Chart(mdf).mark_rule(color='red').encode(
              x=alt.X('utchoursminutes(x)', type='temporal', axis=alt.Axis(title='date')), 
              size=alt.value(2), strokeDash=(alt.value([5, 5])))
@@ -226,98 +110,16 @@ def create_reboot_rule(df, property, restart_headers, os_details):
         rule_field.append(rule)
     return rule_field, z_field, y_pos
 
-def return_reboot_text(z_field, y_pos):
+def return_reboot_text(z_field, y_pos, col=None, col_value=None):
     if z_field:
-        mdf = pd.DataFrame({'date': z_field, '': y_pos})
+        mdf = pd.DataFrame({'date': z_field, 'y': y_pos, col:col_value})
         reboot_text = alt.Chart(mdf).mark_text(
             text='RESTART', angle=90, color='black', fontSize=12).\
-            encode(alt.X('utchoursminutes(date)', type='temporal'), y=':Q')
+            encode(alt.X('utchoursminutes(date)', type='temporal'), y=':Q',
+                   )
     else:
         reboot_text = None
     return reboot_text
-
-def draw_multi_chart(charts, y_shared='independent', x_shared='independent', title=None):
-    if charts:
-        fin_obj = charts.pop(0)   
-        for dia in charts:
-            fin_obj = fin_obj + dia
-        
-        return(fin_obj).interactive()
-
-
-def overview(df, restart_headers, os_details):
-    df['date_utc'] = df['date'].dt.tz_localize('UTC')
-    rule_field, z_field, y_pos = create_reboot_rule(
-        df, 'y', restart_headers, os_details)
-
-    selection_new = alt.selection_multi(fields=['metrics'], bind='legend',)
-
-    color_x = alt.condition(selection_new,
-                           alt.Color('metrics:N'),
-                            alt.value('white',))
-
-    tooltip = [
-        alt.Tooltip(field="date_utc",
-                    type="temporal",
-                    title="Time",
-                    format="%I:%M:%S %p",
-                    timeUnit="utchoursminutes",),
-        alt.Tooltip(field='metrics',
-                    title='metric',
-                    type="ordinal",),
-        alt.Tooltip(field='y',
-                    title='value',
-                    type="ordinal",),
-    ]  
-    #opacity_x = alt.condition(selection_new, alt.value(1.0), alt.value(0))
-    line = alt.Chart(df).mark_line(interpolate='linear').encode(
-        alt.X('utchoursminutes(date_utc)', type='temporal'),
-        alt.Y('y:Q'),
-    #    opacity=opacity_x,
-        #color=color_x,
-        color='metrics:N'
-        #tooltip=tooltip
-#    ).add_selection(
-#        selection_new
-    ).properties(
-        width=1200, height=400
-    )
- 
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
-
-    selectors = alt.Chart(df).mark_point().encode(
-        alt.X('utchoursminutes(date_utc)', type='temporal'),
-        opacity=alt.value(0),
-    ).add_selection(
-        nearest
-    )
-
-    rules = alt.Chart(df).mark_rule(color='gray').encode(
-        alt.X('utchoursminutes(date_utc)', type='temporal'),
-    ).transform_filter(
-        nearest
-    )
-
-    points = line.mark_point().encode(
-        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
-    )
-
-    text = line.mark_text(align='left', dx=5, dy=-5).encode(
-        text=alt.condition(nearest, 'y:Q', alt.value(' '))
-    )
-
-    #line.configure_legend(orient='left')
-
-    for rule in rule_field:
-        line += rule
-    reboot_text = return_reboot_text(z_field, y_pos)
-    if reboot_text:
-        line += reboot_text
-
-    mlayer = alt.layer(line, selectors, rules, points, text)
-    return mlayer.interactive()
-
 
 def overview_v1(df, restart_headers, os_details):
     df['date_utc'] = df['date'].dt.tz_localize('UTC')
@@ -389,15 +191,346 @@ def overview_v1(df, restart_headers, os_details):
         opacity=alt.condition(selection_new, alt.value(1), alt.value(0)),
         color = color_x
     )
-
-
+    import streamlit as st
     for rule in rule_field:
+        rule = rule.encode(
+            color=alt.Color('dummy:N', legend=None)
+        )
+
         final_line += rule
-    reboot_text = return_reboot_text(z_field, y_pos)
+    reboot_text = return_reboot_text(
+        z_field, y_pos, col='dummy', col_value='dummy')
+
     if reboot_text:
+        reboot_text = reboot_text.encode(
+            color=alt.Color('dummy:N', legend=None)
+        )
+
         final_line += reboot_text
-    #line = line + selectors + rules + xpoints
+    
     mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
     mlayer = mlayer|legend
     return mlayer
 
+def overview_v3(collect_field, reboot_headers, width, height, lsel):
+    color_item = lsel
+    b_df = pd.DataFrame()
+    z_fields = []
+    rule_fields = []
+    for data in collect_field:
+        df = data[0]
+        property = data[1]
+        filename = df['file'][0]
+        for header in reboot_headers:
+            if header[0]:
+                hostname = header[1].split()[2].strip("()")
+                date = header[1].split()[3]
+                if hostname in filename and date in filename:
+                    rule_field, z_field, y_pos = create_reboot_rule(
+                        df, property, header[0], header[1], col=color_item, col_value=filename)
+                    rule_fields.append(rule_field)
+                    z_fields.append([z_field, filename])
+            
+        b_df = b_df.append(df)
+
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(b_df).mark_point().encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    selection = alt.selection_multi(fields=[color_item],)
+    color_x = alt.condition(selection,
+                            alt.Color(f'{color_item}:N', legend=None),
+                            alt.value('',))
+
+    opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
+
+    c = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
+        alt.X('utchoursminutes(date)', type='temporal',
+              scale=alt.Scale(zero=False),
+              axis=alt.Axis(domain=True, labelBaseline='line-top',
+                            title='date')),
+        alt.Y(property, type='quantitative', scale=alt.Scale(zero=False),
+              axis=alt.Axis(titlePadding=5,
+                            ),
+              ),
+        opacity=opacity_x
+    ).properties(
+        width=width, height=height
+    )
+
+    final_img = c.mark_line(strokeWidth=2).add_selection(selection).encode(
+        color=color_x
+    )
+
+    rules = alt.Chart(b_df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    legend = alt.Chart(b_df).mark_point().encode(
+        y=alt.Y('file:N', axis=alt.Axis(orient='right')),
+        color=color_x
+    ).add_selection(
+        selection
+    )
+    
+    xpoints = c.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+
+    tooltip_text = c.mark_text(
+        align="left",
+        dx=-10,
+        dy=-25,
+        fontSize=11,
+        lineBreak="\n",
+    ).encode(
+        text=alt.condition(nearest,
+                           alt.Text(f'{property}:Q',),
+                           alt.value(' '),
+                           ),
+        opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+    if z_fields:
+        while rule_fields:
+            rule_field = rule_fields.pop()
+            while rule_field:
+                rule = rule_field.pop()
+                rule = rule.encode(
+                    opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+                    color=color_x,
+                )
+                final_img += rule
+        while z_fields:
+            t_field = z_fields.pop()
+            z_field = t_field[0]
+            filename = t_field[1]
+            reboot_text = return_reboot_text(z_field, y_pos, col=color_item, col_value=filename)
+            reboot_text = reboot_text.encode(
+                opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+                color=color_x
+                )
+            final_img += reboot_text
+        mlayer = alt.layer(final_img, selectors, rules, xpoints,
+                       tooltip_text, ).interactive()
+    else:
+        mlayer = alt.layer(final_img, selectors, rules, xpoints,
+                       tooltip_text).interactive()
+    return mlayer|legend
+
+def overview_v4(collect_field, reboot_headers, width, height):
+    color_item = 'metric'
+    b_df = pd.DataFrame()
+    for data in collect_field:
+        z_field = []
+        df = data[0]
+        property = data[1]
+        filename = df['file'][0]
+        for header in reboot_headers:
+            if header[0]:
+                hostname = header[1].split()[2].strip("()")
+                date = header[1].split()[3]
+                if hostname in filename and date in filename:
+                    rule_field, z_field, y_pos = create_reboot_rule(
+                        df, property, header[0], header[1], col=color_item, col_value=filename)
+
+        b_df[property] = df[property]
+    
+    b_df = b_df.reset_index().melt('date', var_name='metrics', value_name='y')
+    
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(b_df).mark_point().encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    selection = alt.selection_multi(fields=['metrics'],)
+    color_x = alt.condition(selection,
+                            alt.Color(f'metrics:N',legend=None),
+                            alt.value('',))
+
+    opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
+
+    #line = alt.Chart(b_df).encode(
+    line = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
+        alt.X('utchoursminutes(date)', type='temporal', title='date'),
+        alt.Y('y:Q'),
+        opacity=opacity_x
+        ).properties(
+            width=width, height=height
+        )
+
+    final_line = line.mark_line(strokeWidth=2).add_selection(selection).encode(
+        color=color_x
+    )
+
+    rules = alt.Chart(b_df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    legend = alt.Chart(b_df).mark_point().encode(
+        y=alt.Y('metrics:N', axis=alt.Axis(orient='right')),
+        color=color_x
+    ).add_selection(
+        selection
+    )
+
+    xpoints = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+    
+    tooltip_text = line.mark_text(
+        align="left",
+        dx=-10,
+        dy=-25,
+        fontSize=11,
+        lineBreak="\n",
+    ).encode(
+        text=alt.condition(nearest,
+                           alt.Text('y:Q',),
+                           alt.value(' '),
+                           ),
+        opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+    if z_field:
+        while rule_field:
+            rule = rule_field.pop()
+            rule = rule.encode(
+                #opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+                color='filename:N'
+            )
+            final_line += rule
+
+        reboot_text = return_reboot_text(
+            z_field, y_pos, col=color_item, col_value=filename)
+        reboot_text = reboot_text.encode(
+            #opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+            color='filename:N',
+        )
+        mlayer = alt.layer(final_line, selectors, rules, 
+                           tooltip_text, reboot_text, xpoints).interactive()
+    else:
+        mlayer = alt.layer(final_line, selectors, rules, xpoints, 
+                           tooltip_text).interactive()
+    return mlayer|legend
+
+def overview_v5(collect_field, reboot_headers, width, height, lsel):
+    color_item = lsel
+    b_df = pd.DataFrame()
+    for data in collect_field:
+        z_field = []
+        df = data[0]
+        property = data[1]
+        filename = df['file'][0]
+        for header in reboot_headers:
+            if header[0]:
+                hostname = header[1].split()[2].strip("()")
+                date = header[1].split()[3]
+                if hostname in filename and date in filename:
+                    rule_field, z_field, y_pos = create_reboot_rule(
+                        df, property, header[0], header[1], col=color_item, col_value=filename)
+
+        b_df = b_df.append(df)
+
+    b_df['date'] = b_df.index
+    nearest = alt.selection(type='single', nearest=True, on='mouseover',
+                            fields=['date'], empty='none')
+
+    selectors = alt.Chart(b_df).mark_point().encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+        opacity=alt.value(0),
+    ).add_selection(
+        nearest
+    )
+
+    selection = alt.selection_multi(fields=[lsel],)
+    color_x = alt.condition(selection,
+                            alt.Color(f'{lsel}:N', legend=None),
+                            alt.value('',))
+
+    opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
+
+    line = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
+        alt.X('utchoursminutes(date)', type='temporal', title='date'),
+        alt.Y(f'{property}:Q'),
+        opacity=opacity_x
+    ).properties(
+        width=width, height=height
+    )
+
+    final_line = line.mark_line(strokeWidth=2).add_selection(selection).encode(
+        color=color_x
+    )
+    rules = alt.Chart(b_df).mark_rule(color='gray').encode(
+        alt.X('utchoursminutes(date)', type='temporal'),
+    ).transform_filter(
+        nearest
+    )
+
+    legend = alt.Chart(b_df).mark_point().encode(
+        y=alt.Y(f'{color_item}:N', axis=alt.Axis(orient='right')),
+        color=color_x
+    ).add_selection(
+        selection
+    )
+
+    xpoints = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+    tooltip_text = line.mark_text(
+        align="left",
+        dx=-10,
+        dy=-25,
+        fontSize=11,
+        lineBreak="\n",
+    ).encode(
+        text=alt.condition(nearest,
+                           alt.Text(f'{property}:Q',),
+                           alt.value(' '),
+                           ),
+        opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+        color=color_x
+    )
+
+    if z_field:
+        while rule_field:
+            rule = rule_field.pop()
+            rule = rule.encode(
+                color=f'{lsel}:N'
+            )
+            final_line += rule
+
+        reboot_text = return_reboot_text(
+            z_field, y_pos, col=color_item, col_value=filename)
+        reboot_text = reboot_text.encode(
+            color='filename:N',
+        )
+        mlayer = alt.layer(final_line, selectors, rules,
+                           tooltip_text, reboot_text, xpoints).interactive()
+    else:
+        mlayer = alt.layer(final_line, selectors, rules, xpoints,
+                           tooltip_text).interactive()
+    return mlayer | legend

@@ -3,21 +3,26 @@ import streamlit as st
 import os
 import single_file
 import multi_files
-import different_metrics
 import dia_overview
+import handle_metrics
 
 def analyze(upload_dir, config_c, username):
     config = config_c.get_dict()
-    col1 = config['cols'][0]
-    col2 = config['cols'][1]
+    #col1 = config['cols'][0]
+    #col2 = config['cols'][1]
+    
     upload_dir = config ['upload_dir']
+    col1, col2, col3 = st.columns([1,2, 1])
     #present existing files, default latest uploaded
     #TODO do sanity checks for size or number of files
     sar_files = os.listdir(upload_dir)
     # exclude pickle files
     #sar_files = [x for x in sar_files if x.endswith('.df')]
-    single_multi = col2.selectbox('Analyze/Compare', ['Graphical Overview',
-     'Detailed Metrics View', 'Multiple Sar Files', 'Compare Different Metrics'])
+    col2.write('')
+    col3.write('')
+    with col1:
+        single_multi = st.selectbox('Analyze/Compare', ['Graphical Overview',
+         'Detailed Metrics View', 'Multiple Sar Files', 'Compare Metrics'])
 
     st.markdown('___')
 
@@ -40,6 +45,5 @@ def analyze(upload_dir, config_c, username):
         elif single_multi == 'Multiple Sar Files':
             multi_files.single_multi(config, username)
 
-
-        elif single_multi == 'Compare Different Metrics':
-            different_metrics.diff_metrics(config, username)
+        elif single_multi == 'Compare Metrics':
+            handle_metrics.same_metrics(config, username) 

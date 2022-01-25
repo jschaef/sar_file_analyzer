@@ -16,6 +16,7 @@ from config import Config
 import sql_stuff
 import download as dow
 import dataframe_funcs as dff
+import layout_helper as lh
 
 reg_linux_restart = re.compile('LINUX RESTART', re.IGNORECASE)
 
@@ -152,7 +153,7 @@ def aliases_2_header(header_field, alias_header):
     return result_header
 ###################################################
 # Helpers regarding app organization
-def get_selected_header(select_box_title, headers, col=None):
+def get_selected_header(select_box_title, headers, col=None, key=None):
     '''
     select_box_title -> title for the selectbox
     headers -> field with headers
@@ -167,7 +168,7 @@ def get_selected_header(select_box_title, headers, col=None):
     else:
         ph = col.empty()
 
-    selected = ph.selectbox(select_box_title, selected_sorted,)
+    selected = ph.selectbox(select_box_title, selected_sorted,key=key)
 
     
     #retransform
@@ -292,25 +293,25 @@ def get_sar_files(user_name, col=None):
     sar_files_pre = [x for x in sar_files if not x.endswith('.df') ]
     sar_files = [x.rstrip('.df') for x in sar_files if x.endswith('.df')]
     sar_files.extend(sar_files_pre)
-    ph_sel = col.empty()
-    if col:
-        ph_sel = col.empty()
-        selection = ph_sel.selectbox('sar files', sar_files)
+    if not col:
+        col1, col2, col3 = st.columns([2,1, 1])
+        col1.write(''), col3.write('')
+        selection = col2.selectbox('sar files', sar_files)
     else:
-        selection = st.selectbox('sar files', sar_files)
-
+        selection = col.selectbox('sar files', sar_files)
     return selection
 
 
-def diagram_expander(default_width, default_hight, text1, text2):
+def diagram_expander(default_width, default_hight, text1, text2, col=None):
     st.markdown('___')
-    dia_expander = st.expander('Change Size')
+    col = col if col else st
+    dia_expander = col.expander('Change Size')
     st.markdown('')
     with dia_expander:
         width = st.slider(text1,
-            400, 1600, (1000), 200)
+            400, 1600, (1200), 200)
         hight = st.slider(text2,
-            400, 1600, (600), 200)
+            400, 1600, (400), 200)
 
         return width, hight
 
@@ -415,21 +416,43 @@ def extract_restart_header(headers):
     return [header for header in headers if reg_linux_restart.search(
         header) ]
 
-def restart_headers(df, os_details, restart_headers=None):
+def restart_headers(df, os_details, restart_headers=None, display=True):
+
     if restart_headers:
         rdf = df.copy()
         rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
             restart_headers)
-        st.write(set_stile(rdf, restart_rows=new_rows))
-        code2 = f'''\nreboot:\tred\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+        if display:
+            st.write(set_stile(rdf, restart_rows=new_rows))
+            col1, *_ = lh.create_columns(6, [1, 1, 0, 0,0,0])
+            code1 = '''max:\tlightblue\nmin:\tyellow'''
+            code2 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+            col1.code(code1 + code2)
+        else:
+            return(set_stile(rdf, restart_rows=new_rows))
     else:
-        st.write(set_stile(df))
-        code2 = ""
+        if display:
+            st.write(set_stile(df))
+            code2 = ""
+            code1 = '''max:\tlightblue\nmin:\tyellow'''
+            col1, *_ = lh.create_columns(6, [1, 1, 0, 0,0,0])
+            col1.code(code1 + code2)
+            col1.text('')
+            col1.text('')
+        else:
+            return(set_stile(df))
 
-    code1 = '''max:\tlightblue\nmin:\tyellow'''
-    st.code(code1 + code2)
-    st.text('')
-    st.text('')
+
+def restart_headers_v1(df, os_details, restart_headers=None):
+    if restart_headers:
+        rdf = df.copy()
+        rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
+                      restart_headers)
+        return set_stile(rdf, restart_rows=new_rows)
+        #code1 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
+    else:
+        return set_stile(df)
+
 
 
 if __name__ == '__main__':

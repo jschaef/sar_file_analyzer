@@ -5,6 +5,7 @@ import alt
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
+import layout_helper as lh
 from config import Config
 
 sar_structure = []
@@ -13,9 +14,14 @@ file_chosen = ""
 def show_dia_overview(username):
     global sar_structure, os_details, file_chosen
     st.subheader('Overview of important metrics from SAR data')
-
-    col1, col2 = st.columns(2)
-    sar_file = helpers.get_sar_files(username, col=col2)
+    col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 0])
+    sar_file = helpers.get_sar_files(username, col=col4)
+    op_ph = col1.empty()
+    op_ph1 = col1.empty()
+    col1, col2, col3, col4 = lh.create_columns(4, [0, 1, 1, 1])
+    #sar_file = helpers.get_sar_files(username, col=col4)
+    st.write('')
+    st.write('')
     if sar_file != file_chosen:
         sar_structure = []
         file_chosen = sar_file
@@ -26,6 +32,8 @@ def show_dia_overview(username):
     if not sar_structure:
         sar_structure = sdc.get_data_frames(sar_file, username)
         os_details = sar_structure.pop('os_details')
+    op_ph.text("Operating System Details:")
+    op_ph1.text(os_details)
     headers = [header for header in sar_structure.keys()]
     restart_headers = helpers.extract_restart_header(headers)
 
@@ -43,12 +51,28 @@ def show_dia_overview(username):
     count_lines = length / boxes_per_line
     if count_lines > 0:
         count_lines = int(count_lines + 1)
-    
+   
+    col1, col2, col3, col4 = st.columns(4)
+    col4.write('')
+    if col1.checkbox('Show Metric descriptions from man page'):
+        show_metric = 1
+    else:
+        show_metric = 0
+    if col2.checkbox('Enable PDF saving'):
+        pdf_saving = 1
+    else:
+        pdf_saving = 0
+    if lh.show_checkbox('Show Statistical Data and Raw Sar Data', col=col3 ):
+        statistics = 1
+    else:
+        statistics = 0
+
+    col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
     h_expander = st.expander(label='Select SAR Metrics to display',expanded=False)
     with h_expander:
-        col3, col4 = st.columns(2)
-        ph_col3 = col3.empty()
-        ph_col4 = col4.empty()
+        col5, col6 = st.columns(2)
+        ph_col3 = col5.empty()
+        ph_col4 = col6.empty()
         if ph_col3.checkbox('Select All'):
             initial_aliases = full_alias_l[:]
         elif ph_col4.checkbox('Deselect All'):
@@ -71,10 +95,6 @@ def show_dia_overview(username):
                     if selected:
                         sel_field.append(label)
 
-    if st.checkbox('Show Metric descriptions from man page'):
-        show_metric = 1
-    else:
-        show_metric = 0
     st.markdown('___')                
     headers = helpers.translate_aliases(sel_field, sar_structure.keys())
 
@@ -83,7 +103,7 @@ def show_dia_overview(username):
     with time_expander:
         df_len = 0
         tmp_dict = {}
-        col5, col6 = st.columns(2)
+        col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
         for entry in headers:
             skey = headers[entry]
             if sar_structure.get(skey, None):
@@ -100,20 +120,13 @@ def show_dia_overview(username):
             if len(device_l) > 1:
                 date_df = sar_structure.get(skey).get(tmp_dict[df_len], None) 
             if date_df is not None:
-                start_box = col5.empty()
-                end_box = col5.empty()
+                start_box = col1.empty()
+                end_box = col2.empty()
                 hours = dff.translate_dates_into_list(date_df)
                 start = start_box.selectbox('Choose Start Time', hours, index=0)
                 time_len = len(hours) - hours.index(start) -1
                 end = end_box.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
             break
-
-
-    st.markdown('___')                
-    if st.checkbox('Enable PDF saving'):
-        pdf_saving = 1
-    else:
-        pdf_saving = 0
         
     with st.form(key='main_section'):
         wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
@@ -126,7 +139,7 @@ def show_dia_overview(username):
                 for entry in sel_field:
                     df_field = []
                     if sar_structure.get(headers[entry], None):
-                        st.subheader(entry)
+                        st.markdown(f'#### {entry}')
                         if 'generic' in sar_structure[headers[entry]].keys():
                             df = sar_structure[headers[entry]]['generic']
                             df_field.append([df,0])
@@ -140,7 +153,7 @@ def show_dia_overview(username):
 
                             elif 'all' in device_list:
                                 device = 'all'
-                                st.write(f'all of {len(device_list) -1}')
+                                st.markdown(f'###### all of {len(device_list) -1}')
                                 df = sar_structure[headers[entry]][device]
                                 df_field.append([df, device])
                             else:
@@ -150,16 +163,23 @@ def show_dia_overview(username):
 
                         for df_tuple in df_field:
                             if df_tuple[1]:
-                                st.write(df_tuple[1])
+                                st.markdown(f'##### {df_tuple[1]}')
                             df = df_tuple[0]
                             if start in df.index and end in df.index:
                                 df = df[start:end]
-                            helpers.restart_headers(df, os_details, restart_headers=restart_headers)
+                            if statistics:
+                                df_display = df.copy()
+                            helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                             st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
                             if pdf_saving:
                                 helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
-
+                            if statistics:
+                                st.markdown(f'###### Sar Data')
+                                helpers.restart_headers(df_display, os_details, restart_headers=restart_headers, )
+                                st.markdown(f'###### Statistics')
+                                st.write(df_display.describe())
+                                
                             metrics = df['metrics'].drop_duplicates().tolist()
                             if show_metric:
                                 for metric in metrics:

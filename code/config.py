@@ -6,3 +6,6 @@ class Config(object):
     rkey_pref = 'user'
     pdf_name = 'sar_chart.pdf'
     admin_email = 'admin@example-org.com'
+    max_metric_header = 8
+    cols_per_line = 4
+    max_header_count = 6

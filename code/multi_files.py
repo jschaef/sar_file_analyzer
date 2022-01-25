@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import os
+
+from pyparsing import col
 import alt
 import streamlit as st
 from streamlit.report_thread import add_report_ctx
@@ -7,12 +9,14 @@ from threading import Thread
 import sar_data_crafter as sdc
 import helpers
 import dataframe_funcs as dff
+import layout_helper as lh
 from config import Config
 
 def single_multi(config_dict, username):
     upload_dir = config_dict['upload_dir']
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
     pdf_name = f'{pdf_dir}/{Config.pdf_name}'
+    display_field = []
     st.subheader('Compare same metric on multiple Sar Files')
     sel_field = []
     sar_files = [ x for x in os.listdir(upload_dir) if os.path.isfile(f'{upload_dir}/{x}')]
@@ -29,22 +33,14 @@ def single_multi(config_dict, username):
 
     st.markdown('___')
 
-    col3, col4 = st.columns(2)
-    man_check_box = col3.empty()
-    man_check = man_check_box.checkbox('Show Metric description from man page')
-    pdf_check = col4.empty()
-    if pdf_check.checkbox('Enable PDF saving'):
-        pdf_saving = 1
-    else:
-        pdf_saving = 0
-    
-    st.markdown('___')
-    answer = st.checkbox('Show')
+    col1, col2, col3, col4 = st.columns(4)
+    col2.write('')
+    col3.write('')
+    col4.write('')
+    answer = col1.checkbox('Show')
     if answer:
         if sel_field:
             multi_sar_dict = {}
-            col3, col4 = st.columns(2)
-
             threads = []
             for file in sel_field:
                 file = f'{upload_dir}/{file}'
@@ -118,8 +114,12 @@ def single_multi(config_dict, username):
 
             # choose diagram size
             if multi_sar_dict:
+                # col1, col2, col3, col4 = st.columns(4)
+                # col2.write('')
+                # col3.write('')
+                # col4.write('')
                 chart_field = []
-                pd_or_dia = st.selectbox('', ['Diagram', 'Summary'])
+                pd_or_dia = col1.selectbox('', ['Diagram', 'Summary'], index=0)
                 count = len(x)
                 column_table = st.columns(len(x))
                 collect_field = []
@@ -158,14 +158,10 @@ def single_multi(config_dict, username):
 
                 if pd_or_dia == 'Summary':
                     prop_box.empty()
-                    pdf_check.empty()
-                    man_check_box.empty()
-                    st.subheader('Dataset Overview')
                     for data in sum_field:
                         for key in data:
                             st.text('')
                             filename = (f'{key.split("/")[-1]}')
-                            st.subheader(f'{filename}')
                             reboot_header = []
                             for header in reboot_headers:
                                 hostname = header[1].split()[2].strip("()")
@@ -174,16 +170,15 @@ def single_multi(config_dict, username):
                                     os_details = header[1]
                             df = data[key][0]
                             ds = df.describe()
-                            st.markdown(f'Statistics for {aitem[selected]} {header_add}')
-                            st.write(ds)
-                            st.markdown(f'Data for {aitem[selected]} {header_add}')
-                            helpers.restart_headers(df, os_details, restart_headers=reboot_header)
-                    st.subheader('Diagram Overview')
+                            df_display = df.copy()
+                            display_field.append([key, df_display, ds, aitem, selected, header_add])
+                            helpers.restart_headers(df, os_details, restart_headers=reboot_header, display=False)
+                    st.write(f'Diagram Overview for selected files and selected heading')
 
                     for data in collect_field:
                         for key in data:
                             st.text('')
-                            st.subheader(key)
+                            st.markdown(f'##### {key}')
                             restart_headers = []
                             df = data[key][0]
                             for event in reboot_headers:
@@ -196,36 +191,56 @@ def single_multi(config_dict, username):
 
                             chart = alt.overview_v1(df, restart_headers, os_details)
                             st.altair_chart(chart)
-                            #st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
-                            if pdf_saving:
-                                helpers.pdf_download(pdf_name, chart)
+                            col1, col2, col3, col4 = st.columns(4)
+                            col2.write(''); col3.write(''), col4.write()
+                            lh.pdf_download(pdf_name, chart, col=col1, key=key)
+                            if lh.show_checkbox('Show Statistical Data and Raw Sar Data',col=col1,key=key ):
+                                for entry in display_field:
+                                    if entry[0] == key:
+                                        df_display = entry[1]
+                                        ds         = entry[2]
+                                        aitem      = entry[3]
+                                        selected   = entry[4]
+                                        header_add = entry[5]
+                                        st.markdown(f'###### Data for {aitem[selected]} {header_add}')
+                                        helpers.restart_headers(df_display, os_details, restart_headers=reboot_header)
+                                        st.markdown(f'###### Statistics for {aitem[selected]} {header_add}')
+                                        st.write(ds)
+                            for entry in display_field:
+                                if entry[0] == key:
+                                    df_display = entry[1]
+                                    lh.show_metrics(list(df_display.columns), key=key, col=col1)
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:
-
-                        multi_chart = []
+                        col1, col2, col3, col4 = st.columns(4)
+                        col3.write(''), col4.write()
                         width, hight = helpers.diagram_expander(
-                            800, 400, 'Diagram Width', 'Diagram Hight')
+                             800, 400, 'Diagram Width', 'Diagram Hight', col=col1)
+                        img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file')
+                        img = img.configure_axisY(labelLimit=400)
 
-                        tmp_map = [x for x in range(len(chart_field))]
-                        for item in chart_field:
-                            while len(tmp_map) < len(chart_field) - len(chart_field) - 2:
-                                xfactor = 1
-                                yfactor = 1
-                            else:
-                                factor = tmp_map.pop(0)
-                                xfactor = factor * 2.7
-                                yfactor = factor * 6
+                        st.write(img)
+                        col1, col2, col3, col4 = lh.create_columns(4,[0,1,1,1])
+                        lh.pdf_download(pdf_name, img, col=col1)
+                        if lh.show_checkbox('Show Statistical Data and Raw Sar Data',key=key):
+                            object_field = []
+                            for index in range(len(chart_field)):
+                                df_dia = chart_field[index][0]
+                                prop = chart_field[index][1]
+                                filename = (df_dia['file'][0])
+                                if 'file' in df_dia.columns:
+                                    df_dia = df_dia.drop(['file','date'], axis=1)
+                                for event in reboot_headers:
+                                    hostname = event[1].split()[2].strip("()")
+                                    date = event[1].split()[3]
+                                    if hostname in filename and date in filename:
+                                        restart_headers = event[0]
+                                        break
+                                stats = df_dia.describe()
+                                table = helpers.restart_headers(df_dia, os_details, restart_headers=restart_headers, display=False)
+                                header = filename
+                                object_field.append([table, stats, header])
+                            lh.arrange_grid_entries(object_field, 4)
+                        lh.show_metrics([prop]) 
 
-                            chart = alt.draw_single_chart(
-                                item[0], item[1], width, hight,  yfactor * 5, xfactor * 20)
-                            multi_chart.append(chart)
-                        layer = alt.draw_multi_chart(multi_chart,
-                                                            y_shared='shared', title=f'{aitem[selected]} {header_add} {prop}', x_shared='shared')
-                        layer = layer.configure_legend(labelLimit=400)
-                        st.write(layer)
-                        if pdf_saving:
-                            helpers.pdf_download(pdf_name, layer) 
-                    
-                        if man_check:
-                            helpers.metric_expander(prop, expand=True)
