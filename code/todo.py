@@ -6,7 +6,7 @@ def todo():
     st.markdown(
         "* implement a new page for displaying data at a given point in time :heavy_check_mark:")
     st.markdown("* replace compare different metrics by multiselection \
-        to display arbitrary metrics")
+            to display arbitrary metrics :heavy_check_mark:")
     st.markdown("* comment functions")
     st.markdown("* put further code into functions")
     st.markdown("* move some functions into other files")
@@ -23,4 +23,5 @@ def todo():
     st.markdown('* Enhance "Update Header" functionality :heavy_check_mark:')
     st.markdown("* Implement password change :heavy_check_mark:")
     st.markdown("* Implement display reboot in dia and data frames:heavy_check_mark:")
-    
+    st.markdown("* Enhance multiple files view by specifying start end times")
+    st.markdown("* Implement PDF download for multiple charts on summary page")
