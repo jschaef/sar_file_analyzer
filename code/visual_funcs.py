@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 def create_columns(number, write_field=None):
     """Create columns and write empty string into them
        if the column index in write_field is True

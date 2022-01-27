@@ -3,6 +3,7 @@ import helpers
 import streamlit as st
 from config import Config as config
 import layout_helper as lh
+import dataframe_funcs as dff
 from config import Config
 def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reboot_headers):
     """ 
@@ -289,3 +290,26 @@ def display_stats_data(collect_field):
                 #col.markdown(f'###### {collect_field[f_index][0].columns[0]}')
                 col.write(collect_field[f_index][0])
                 col.write(collect_field[f_index][1])
+
+# for future usage
+def change_start_end(df_list, col1, col2):
+    time_expander = st.expander(
+        label='Change Start and End Time', expanded=False)
+    with time_expander:
+        df_len = 24
+        tmp_dict = {}
+        col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
+        # findout shortest hour range 
+        for item in df_list:
+            hours = dff.translate_dates_into_list(item)
+            if len(hours) <= df_len:
+                tmp_dict[df_len] = item
+                df_len = len(hours)
+        start_box = col1.empty()
+        end_box = col2.empty()
+        hours = dff.translate_dates_into_list(tmp_dict[df_len])
+        start = start_box.selectbox('Choose Start Time', hours, index=0)
+        time_len = len(hours) - hours.index(start) -1
+        end = end_box.selectbox('Choose End Time',hours[hours.index(start):], index=time_len)
+        return(start, end)
+

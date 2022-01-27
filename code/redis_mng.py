@@ -1,10 +1,8 @@
 #!/usr/bin/python3
-
 import streamlit as st
 import redis
+import visual_funcs as visf
 from config import Config
-
-
 
 def get_redis_conn(decode=True):
     try:
@@ -29,8 +27,10 @@ def show_hash_keys(hash):
     return rs.hkeys(hash)
 
 def delete_redis_keys():
-    hash = st.selectbox('Select hash', show_keys())
-    hash_keys = st.multiselect('Select n keys', show_hash_keys(hash))
+    cols = visf.create_columns(4,[0,1,1,1])
+    col1 = cols[0]
+    hash = col1.selectbox('Select hash', show_keys())
+    hash_keys = col1.multiselect('Select n keys', show_hash_keys(hash))
     if st.button('Submit'):
         for hkey in hash_keys:
             rs.hdel(hash, hkey)
@@ -42,8 +42,10 @@ def delete_redis_key(rhash, rkey):
         print(f'could not delete {rkey} from {rhash} on Redis server')
 
 def redis_tasks(col):
+    cols = visf.create_columns(4,[0,1,1,1])
+    col1 = cols[0]
     redis_actions = ['Delete Redis Keys']
-    r_ph = col.empty()
+    r_ph = col1.empty()
     redis_sel = r_ph.selectbox('Redis Tasks', redis_actions, key="m_redis")
     if redis_sel == 'Delete Redis Keys':
         delete_redis_keys()
@@ -68,13 +70,15 @@ def set_redis_key(data, rkey, property=None, decode=False):
        key, e.g jschaef -> compounds to user:jschaef
        bytes -> None or something, sets decode to False
     """
+    cols = visf.create_columns(4,[0,1,1,1])
+    col1 = cols[0]
     rs = get_redis_conn(decode=decode)
 
     try:
         t_dict = {property:data}
         rs.hmset(rkey ,t_dict) 
     except:
-        st.markdown(f'Could not write {rkey}')
+        col1.markdown(f'Could not write {rkey}')
     
 
 def del_redis_key_property(rkey, property, decode=False):

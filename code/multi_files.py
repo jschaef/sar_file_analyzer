@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+from matplotlib.pyplot import axis
 
 from pyparsing import col
 import alt
@@ -10,6 +11,7 @@ import sar_data_crafter as sdc
 import helpers
 import dataframe_funcs as dff
 import layout_helper as lh
+import metric_page_helpers as mph
 from config import Config
 
 def single_multi(config_dict, username):
@@ -114,15 +116,10 @@ def single_multi(config_dict, username):
 
             # choose diagram size
             if multi_sar_dict:
-                # col1, col2, col3, col4 = st.columns(4)
-                # col2.write('')
-                # col3.write('')
-                # col4.write('')
                 chart_field = []
                 pd_or_dia = col1.selectbox('', ['Diagram', 'Summary'], index=0)
-                count = len(x)
-                column_table = st.columns(len(x))
                 collect_field = []
+                dia_collect_field = []
                 sum_field = []
                 time_obj_field = []
 
@@ -151,7 +148,8 @@ def single_multi(config_dict, username):
                         chart_field.append(
                             [df_part, prop])
                         sum_field.append({file: [df1]})
-
+                        # for diamgram statistics
+                        dia_collect_field.append([file, df1])
                         # for diagram
                         df1 = df1.reset_index().melt('date', var_name='metrics', value_name='y')
                         collect_field.append({file: [df1]})
@@ -213,6 +211,7 @@ def single_multi(config_dict, username):
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:
+                        date_collect_field = []
                         col1, col2, col3, col4 = st.columns(4)
                         col3.write(''), col4.write()
                         width, hight = helpers.diagram_expander(
@@ -223,24 +222,27 @@ def single_multi(config_dict, username):
                         st.write(img)
                         col1, col2, col3, col4 = lh.create_columns(4,[0,1,1,1])
                         lh.pdf_download(pdf_name, img, col=col1)
-                        if lh.show_checkbox('Show Statistical Data and Raw Sar Data',key=key):
+                        if lh.show_checkbox('Show Statistical Data and Raw Sar Data', col=col1):
                             object_field = []
-                            for index in range(len(chart_field)):
-                                df_dia = chart_field[index][0]
-                                prop = chart_field[index][1]
-                                filename = (df_dia['file'][0])
-                                if 'file' in df_dia.columns:
-                                    df_dia = df_dia.drop(['file','date'], axis=1)
-                                for event in reboot_headers:
-                                    hostname = event[1].split()[2].strip("()")
-                                    date = event[1].split()[3]
-                                    if hostname in filename and date in filename:
-                                        restart_headers = event[0]
-                                        break
-                                stats = df_dia.describe()
-                                table = helpers.restart_headers(df_dia, os_details, restart_headers=restart_headers, display=False)
-                                header = filename
-                                object_field.append([table, stats, header])
-                            lh.arrange_grid_entries(object_field, 4)
-                        lh.show_metrics([prop]) 
+                            if chart_field:
+                                prop = chart_field[0][1]
+                            
+                                for index in dia_collect_field:
+                                    filename = index[0]
+                                    df_stat = index[1]
+                                    df_new = df_stat[[prop]].copy()
+                                    date_collect_field.append(df_new)
 
+                                    for event in reboot_headers:
+                                        hostname = event[1].split()[2].strip("()")
+                                        date = event[1].split()[3]
+                                        if hostname in filename and date in filename:
+                                            restart_headers = event[0]
+                                            os_details = event[1]
+                                            break
+                                    stats = df_new.describe()
+                                    table = helpers.restart_headers(df_new, os_details, restart_headers=restart_headers, display=False)
+                                    header = filename
+                                    object_field.append([table, stats, header])
+                            lh.arrange_grid_entries(object_field, 4)
+                        lh.show_metrics([prop], col=col1) 
