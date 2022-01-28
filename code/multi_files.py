@@ -5,7 +5,7 @@ from matplotlib.pyplot import axis
 from pyparsing import col
 import alt
 import streamlit as st
-from streamlit.report_thread import add_report_ctx
+from streamlit.script_run_context import add_script_run_ctx
 from threading import Thread
 import sar_data_crafter as sdc
 import helpers
@@ -47,7 +47,7 @@ def single_multi(config_dict, username):
             for file in sel_field:
                 file = f'{upload_dir}/{file}'
                 th = Thread(target=sdc.data_cooker_multi, args=(file, multi_sar_dict, username))
-                add_report_ctx(th)
+                add_script_run_ctx(th)
                 th.start()
                 threads.append(th)
             for th in threads:
