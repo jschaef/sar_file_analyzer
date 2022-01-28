@@ -25,3 +25,4 @@ def todo():
     st.markdown("* Implement display reboot in dia and data frames:heavy_check_mark:")
     st.markdown("* Enhance multiple files view by specifying start end times")
     st.markdown("* Implement PDF download for multiple charts on summary page")
+    st.markdown("* Looking again into threading")
