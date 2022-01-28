@@ -133,7 +133,7 @@ def add_metric(metric, description):
         session.add(new_metric)
         session.commit()
 
-@st.experimental_singleton
+#@st.experimental_singleton
 def ret_metric_description(metric):
     metric = session.query(Metrics).filter(Metrics.metric == metric)
     if metric.first():
@@ -153,7 +153,7 @@ def delete_metric(metric):
     return x
 
 
-@st.experimental_singleton
+#@st.experimental_singleton
 def ret_all_headers(kind='return'):
     h_list = []
     for instance in session.query(Headings).order_by(Headings.header):
@@ -169,7 +169,7 @@ def object_as_dict(obj):
     return {c.key: getattr(obj, c.key)
             for c in inspect(obj).mapper.column_attrs}
 
-@st.experimental_singleton
+#@st.experimental_singleton
 def get_header_prop(header, property):
     if property == 'alias':
         org_header = header
@@ -218,7 +218,7 @@ def get_header_prop(header, property):
             elif property == 'keywd':
                 return query.first().keywd
 
-@st.experimental_singleton
+#@st.experimental_singleton
 def get_header_from_alias(alias):
     header = session.query(Headings).filter(Headings.alias == alias)
     if header.first():
