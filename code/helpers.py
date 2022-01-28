@@ -11,7 +11,7 @@ from datetime import datetime
 from altair_saver import save
 from threading import Thread
 from streamlit import cache as st_cache
-from streamlit.report_thread import add_report_ctx
+from streamlit.script_run_context import add_script_run_ctx
 from config import Config
 import sql_stuff
 import download as dow
@@ -32,19 +32,16 @@ class configuration(object):
     def get_dict(self):
         return self.conf_d
 
-@st.experimental_memo
 def extract_os_details(file):
     with open(file, 'r') as sar_file:
         for nr, line in enumerate(sar_file):
             if "Linux" in line:
                 return line.split()
 
-@st.experimental_memo
 def get_osdetails(file):
     os_details = " ".join(extract_os_details(file))
     return os_details
 
-@st.experimental_memo
 def merge_headers(header_field):
     # initialize with first field
     first = set(header_field[0])
@@ -96,7 +93,6 @@ def check_sub_items(headers, multi_sarfile_dict):
     
     return headers
 
-@st.experimental_memo
 def translate_headers(field):
     '''
     takes list of headers , db lookup for the aliases
@@ -177,7 +173,6 @@ def get_selected_header(select_box_title, headers, col=None, key=None):
             selected = key
             break
     return (selected, ph)
-
 
 @st.experimental_singleton
 def get_metric_desc_from_manpage():
@@ -272,7 +267,7 @@ def prepare_pd_data(data):
     pd_dict = {}
     for x in data:
         t = Thread(target=prepare_pd_threaded, args=(x, pd_dict))
-        add_report_ctx(t)
+        add_script_run_ctx(t)
         t.start()
         threads.append(t)
     for t in threads:
@@ -367,13 +362,14 @@ def set_stile(df, restart_rows=None):
     sub_index = [ x for x in df.index if x not in multi_index ]
     df = df.style.apply(highlight_ind, dim='min',
         subset=pd.IndexSlice[sub_index, :]).apply(highlight_ind,
-        subset=pd.IndexSlice[sub_index,:]).\
-        apply(highlight_min_ind, subset=pd.IndexSlice[sub_index, :]).\
+         subset=pd.IndexSlice[sub_index,:]).\
+         apply(highlight_min_ind, subset=pd.IndexSlice[sub_index, :]).\
         apply(highlight_max_ind, subset=pd.IndexSlice[sub_index, :]).\
         apply(color_null_bg, subset=pd.IndexSlice[sub_index, :]).\
         apply(color_null_fg, subset=pd.IndexSlice[sub_index, :]).\
-        apply(color_restart, subset=pd.IndexSlice[multi_index, :]).\
         format(precision=4)
+    if restart_rows:
+        df = df.apply(color_restart, subset=pd.IndexSlice[multi_index, :])
    
     return(df)
 
