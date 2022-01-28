@@ -36,7 +36,8 @@ def df_reset_date(df, os_details):
             f'{date_str} {old_val}', format=format)
         new_index.append(z)
     df['date'] = new_index
-    df.set_index('date', new_index, inplace=True,
+    #df.set_index('date', new_index, inplace=True,
+    df.set_index('date', inplace=True,
                 verify_integrity=False)
     
     return df
@@ -104,8 +105,8 @@ def insert_row(row_num, orig_df, row_to_add):
         row_num= min(max(0, row_num), len(orig_df))
         df_part_1 = orig_df[orig_df.index[0]: orig_df.index[row_num]]
         df_part_2 = orig_df[orig_df.index[row_num +1]: orig_df.index[-1]]
-        df_final = df_part_1.append(row_to_add, ignore_index = False)
-        df_final = df_final.append(df_part_2, ignore_index = False)
+        df_final = pd.concat([df_part_1, row_to_add, df_part_2], ignore_index=False)
     else:
-        df_final = orig_df.append(row_to_add, ignore_index = False)
+        #df_final = orig_df.append(row_to_add, ignore_index = False)
+        df_final = pd.concat([orig_df,row_to_add], ignore_index = False)
     return df_final
