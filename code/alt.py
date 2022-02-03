@@ -231,7 +231,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel):
                     rule_fields.append(rule_field)
                     z_fields.append([z_field, filename])
             
-        b_df = b_df.append(df)
+        b_df = pd.concat([b_df, df], ignore_index=False)
 
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
                             fields=['date'], empty='none')
@@ -247,7 +247,6 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel):
     color_x = alt.condition(selection,
                             alt.Color(f'{color_item}:N', legend=None),
                             alt.value('',))
-
     opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
 
     c = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
