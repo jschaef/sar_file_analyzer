@@ -92,8 +92,9 @@ def do_metrics(config_dict, username):
             mph.display_stats_data(collect_field)
 
             if st.checkbox('Show Metric descriptions from man page'):
-                for index in range(len(collect_field[0])-1):
-                    metric = collect_field[index][0].columns[0]
+                for field in collect_field:
+                    metric = field[2]
                     helpers.metric_expander(metric, expand=False)
+                    
 
                 
