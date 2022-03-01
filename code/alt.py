@@ -450,7 +450,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel):
                     rule_field, z_field, y_pos = create_reboot_rule(
                         df, property, header[0], header[1], col=color_item, col_value=filename)
 
-        b_df = b_df.append(df)
+        b_df = pd.concat([b_df, df], ignore_index=False)
 
     b_df['date'] = b_df.index
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
