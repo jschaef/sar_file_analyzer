@@ -415,6 +415,11 @@ def extract_restart_header(headers):
 
 def restart_headers(df, os_details, restart_headers=None, display=True):
 
+    # check and remove duplicates
+    dup_check = df[df.index.duplicated()]
+    if not dup_check.empty:
+        df = df[~df.index.duplicated(keep='first')].copy()
+
     if restart_headers:
         rdf = df.copy()
         rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
