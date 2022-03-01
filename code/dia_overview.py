@@ -162,6 +162,7 @@ def show_dia_overview(username):
                                 df_field.append([df, device])
 
                         for df_tuple in df_field:
+                            dup_bool = 0
                             if df_tuple[1]:
                                 st.markdown(f'##### {df_tuple[1]}')
                             df = df_tuple[0]
@@ -169,13 +170,24 @@ def show_dia_overview(username):
                                 df = df[start:end]
                             if statistics:
                                 df_display = df.copy()
+                                dup_check = df_display[df_display.index.duplicated()]
+                                # remove duplicate indexes
+                                if not dup_check.empty:
+                                    dup_bool = 1
+                                    df = df[~df.index.duplicated(keep='first')].copy()
+
                             helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                            st.altair_chart(alt.overview_v1(df, restart_headers, os_details))
+                            col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
+                            col1.altair_chart(alt.overview_v1(df, restart_headers, os_details))
                             if pdf_saving:
                                 helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
                             if statistics:
                                 st.markdown(f'###### Sar Data')
+                                if dup_bool:
+                                    col1.warning('Be aware that your data contains multiple indexes')
+                                    col1.write('Multi index table:')
+                                    col1.write(dup_check)
                                 helpers.restart_headers(df_display, os_details, restart_headers=restart_headers, )
                                 st.markdown(f'###### Statistics')
                                 st.write(df_display.describe())
