@@ -96,7 +96,7 @@ def get_data_frames(file_name, user_name):
     elif pickle_file.exists():
         sar_structure = pickle.load(open(pickle_file, 'rb'))
     else:
-        st.write('no redis')
+        st.info('no redis server configured, hence data will be saved/retrieved to/from disk')
         sar_structure = data_cooker(full_path, user_name)
         if sar_structure:
             set_data_frames(full_path, user_name, sar_structure)
