@@ -54,6 +54,7 @@ def single_f(config_obj, username):
     else:
         header_add =''
 
+    title = f"{aitem[selected]} {sub_item}" if sub_item else aitem[selected]
     if selected_content == 'Summary':
         col1, col2, col3, col4 = st.columns(4)
         df_displ = df.copy()
@@ -72,7 +73,8 @@ def single_f(config_obj, username):
         width, height = helpers.diagram_expander(1200, 400, 'Diagram Width', 'Diagram Hight', cols[0])
         font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
         
-        chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size, width=width, height=height)
+        chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size, width=width, 
+            height=height, title=title)
         st.altair_chart(chart)
         lh.pdf_download(pdf_name, chart)
         if lh.show_checkbox('Show Statistical Data and Raw Sar Data', ):
@@ -110,7 +112,7 @@ def single_f(config_obj, username):
         font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
 
         chart = alt.draw_single_chart_v1(
-            df_part, prop, restart_headers, os_details, width, hight, font_size=font_size)
+            df_part, prop, restart_headers, os_details, width, hight, font_size=font_size, title=title)
 
         st.altair_chart(chart)
 

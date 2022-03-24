@@ -11,8 +11,7 @@ my_tz = time.tzname[0]
 alt.data_transformers.disable_max_rows()
 
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
-                         ylabelpadd=10, xlabelpadd=10, font_size=None):
-                         #ylabelpadd=10, xlabelpadd=10, font_size=None):
+                         ylabelpadd=10, font_size=None, title=None):
 
     #df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
     rule_field, z_field, y_pos = create_reboot_rule(
@@ -47,6 +46,7 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     ).properties(
     width = width,
     height = hight,
+    title=title
     )
 
     legend = alt.Chart(df).mark_point().encode(
@@ -89,10 +89,8 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     return (mlayer | legend
             ).configure_axis(
         labelFontSize=font_size,
-        titleFontSize=font_size
-    )
-
-
+        titleFontSize=font_size,
+    ).configure_title(fontSize=font_size)
 
 def create_reboot_rule(df, property, restart_headers, os_details, col=None, col_value=None):
     y_pos = df[property].max()/2
@@ -126,7 +124,8 @@ def return_reboot_text(z_field, y_pos, col=None, col_value=None):
         reboot_text = None
     return reboot_text
 
-def overview_v1(df, restart_headers, os_details, font_size=None, width=None, height=None):
+def overview_v1(df, restart_headers, os_details, font_size=None, width=None, height=None,
+        title=None):
     df['date_utc'] = df['date'].dt.tz_localize('UTC')
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
@@ -143,7 +142,8 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
         alt.Y('y:Q'),
         opacity = opacity_x
     ).properties(
-        width=width, height=height
+        width=width, height=height,
+        title=title
     )
 
     final_line = line.mark_line(strokeWidth=2).add_selection(selection_new).encode(
@@ -221,9 +221,9 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
     return mlayer.configure_axis(
         labelFontSize=font_size,
         titleFontSize=font_size
-    )
+    ).configure_title(fontSize=font_size)
 
-def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size):
+def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, title=None):
     color_item = lsel
     b_df = pd.DataFrame()
     z_fields = []
@@ -271,7 +271,8 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size):
               ),
         opacity=opacity_x
     ).properties(
-        width=width, height=height
+        width=width, height=height,
+        title=title
     )
 
     final_img = c.mark_line(strokeWidth=2).add_selection(selection).encode(
@@ -340,7 +341,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size):
     return (mlayer | legend).configure_axis(
         labelFontSize=font_size,
         titleFontSize=font_size
-    )
+    ).configure_title(fontSize=font_size)
 
 def overview_v4(collect_field, reboot_headers, width, height, font_size):
     color_item = 'metric'
@@ -451,7 +452,7 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
         titleFontSize=font_size
     )
 
-def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size):
+def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, title=None):
     color_item = lsel
     b_df = pd.DataFrame()
     for data in collect_field:
@@ -492,7 +493,8 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size):
         alt.Y(f'{property}:Q'),
         opacity=opacity_x
     ).properties(
-        width=width, height=height
+        width=width, height=height,
+        title=title,
     )
 
     final_line = line.mark_line(strokeWidth=2).add_selection(selection).encode(
@@ -552,4 +554,4 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size):
     return (mlayer | legend).configure_axis(
         labelFontSize=font_size,
         titleFontSize=font_size
-    )
+    ).configure_title(fontSize=font_size)

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from matplotlib.pyplot import title
 import streamlit as st
 import alt
 import sar_data_crafter as sdc
@@ -146,6 +147,7 @@ def show_dia_overview(username):
                         if 'generic' in sar_structure[headers[entry]].keys():
                             df = sar_structure[headers[entry]]['generic']
                             df_field.append([df,0])
+                            title=entry
                         else:
                             device_list = list(sar_structure[headers[entry]].keys())
                             device_list.sort()
@@ -167,7 +169,8 @@ def show_dia_overview(username):
                         for df_tuple in df_field:
                             dup_bool = 0
                             if df_tuple[1]:
-                                st.markdown(f'##### {df_tuple[1]}')
+                                #st.markdown(f'##### {df_tuple[1]}')
+                                title = df_tuple[1]
                             df = df_tuple[0]
                             if start in df.index and end in df.index:
                                 df = df[start:end]
@@ -183,9 +186,10 @@ def show_dia_overview(username):
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                             col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
                             st.altair_chart(alt.overview_v1(df, restart_headers, os_details, font_size=font_size, 
-                                width=width, height=height))
+                                width=width, height=height, title=title))
                             if pdf_saving:
-                                helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
+                                helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details, 
+                                    font_size=font_size, width=width, height=height, title=title))
                             if statistics:
                                 st.markdown(f'###### Sar Data')
                                 if dup_bool:

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+from re import S
 from matplotlib.pyplot import axis
 
 from pyparsing import col
@@ -73,6 +74,7 @@ def single_multi(config_dict, username):
             st.sidebar.markdown('---')
             selected, ph_1 = helpers.get_selected_header('Sar Headings', headers)
             aitem = helpers.translate_headers([selected])
+            main_title = aitem[selected]
 
 
             # find data frames
@@ -93,6 +95,7 @@ def single_multi(config_dict, username):
             else:
                 generic_items = helpers.merge_headers(generic_item_field)
                 header_add = ''
+                sub_item = None
 
             if not generic_items:
                 sub_item = st.sidebar.selectbox(
@@ -111,8 +114,7 @@ def single_multi(config_dict, username):
             prop_box = st.sidebar.empty()
             prop = prop_box.selectbox(
                 'metric', [col for col in df.columns], key='prop')
-
-
+            title = f"{main_title} {sub_item}" if sub_item else main_title
             # choose diagram size
             if multi_sar_dict:
                 chart_field = []
@@ -174,7 +176,9 @@ def single_multi(config_dict, username):
 
                     st.markdown('___')
                     cols = st.columns(8)
-                    font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[0], 
+                    width, height = helpers.diagram_expander(
+                         800, 400, 'Diagram Width', 'Diagram Hight', col=cols[0])
+                    font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1], 
                         key=f"slider_{key}")
                     for data in collect_field:
                         for key in data:
@@ -189,8 +193,8 @@ def single_multi(config_dict, username):
                                     restart_headers = event[0]
                                     os_details = event[1]
                                     break
-
-                            chart = alt.overview_v1(df, restart_headers, os_details, font_size)
+                            chart = alt.overview_v1(df, restart_headers, os_details, font_size, 
+                                    width=width, height=height, title=title)
                             st.altair_chart(chart)
                             col1, col2, col3, col4 = st.columns(4)
                             col2.write(''); col3.write(''), col4.write()
@@ -224,7 +228,7 @@ def single_multi(config_dict, username):
                             12, "Change Axis Font Size", "font size", cols[1])
                         width, hight = helpers.diagram_expander(
                              800, 400, 'Diagram Width', 'Diagram Hight', col=cols[0])
-                        img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file', font_size)
+                        img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file', font_size, title=title)
                         img = img.configure_axisY(labelLimit=400)
 
                         st.write(img)
