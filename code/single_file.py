@@ -67,7 +67,12 @@ def single_f(config_obj, username):
         df = df.reset_index().melt('date', var_name='metrics', value_name='y')
 
         st.write('Graphical overview')
-        chart = alt.overview_v1(df, restart_headers, os_details)
+        st.markdown('___')
+        cols = st.columns(8)
+        width, height = helpers.diagram_expander(1200, 400, 'Diagram Width', 'Diagram Hight', cols[0])
+        font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
+        
+        chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size, width=width, height=height)
         st.altair_chart(chart)
         lh.pdf_download(pdf_name, chart)
         if lh.show_checkbox('Show Statistical Data and Raw Sar Data', ):
@@ -98,11 +103,14 @@ def single_f(config_obj, username):
         df_part['file'] = os_details.split()[2].strip('()')
         df_part['date'] = df_part.index
         df_part['metric'] = prop
-        # choose diagram size
-        width, hight = helpers.diagram_expander(1200, 400, 'Diagram Width', 'Diagram Hight')
+
+        st.markdown('___')
+        cols = st.columns(8)
+        width, hight = helpers.diagram_expander(1200, 400, 'Diagram Width', 'Diagram Hight', cols[0])
+        font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
 
         chart = alt.draw_single_chart_v1(
-            df_part, prop, restart_headers, os_details, width, hight)
+            df_part, prop, restart_headers, os_details, width, hight, font_size=font_size)
 
         st.altair_chart(chart)
 

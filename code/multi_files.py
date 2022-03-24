@@ -172,6 +172,10 @@ def single_multi(config_dict, username):
                             helpers.restart_headers(df, os_details, restart_headers=reboot_header, display=False)
                     st.write(f'Diagram Overview for selected files and selected heading')
 
+                    st.markdown('___')
+                    cols = st.columns(8)
+                    font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[0], 
+                        key=f"slider_{key}")
                     for data in collect_field:
                         for key in data:
                             st.text('')
@@ -186,7 +190,7 @@ def single_multi(config_dict, username):
                                     os_details = event[1]
                                     break
 
-                            chart = alt.overview_v1(df, restart_headers, os_details)
+                            chart = alt.overview_v1(df, restart_headers, os_details, font_size)
                             st.altair_chart(chart)
                             col1, col2, col3, col4 = st.columns(4)
                             col2.write(''); col3.write(''), col4.write()
@@ -213,9 +217,14 @@ def single_multi(config_dict, username):
                         date_collect_field = []
                         col1, col2, col3, col4 = st.columns(4)
                         col3.write(''), col4.write()
+
+                        st.markdown('___')
+                        cols = st.columns(8)
+                        font_size = helpers.font_expander(
+                            12, "Change Axis Font Size", "font size", cols[1])
                         width, hight = helpers.diagram_expander(
-                             800, 400, 'Diagram Width', 'Diagram Hight', col=col1)
-                        img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file')
+                             800, 400, 'Diagram Width', 'Diagram Hight', col=cols[0])
+                        img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file', font_size)
                         img = img.configure_axisY(labelLimit=400)
 
                         st.write(img)
@@ -244,4 +253,4 @@ def single_multi(config_dict, username):
                                     header = filename
                                     object_field.append([table, stats, header])
                             lh.arrange_grid_entries(object_field, 4)
-                        lh.show_metrics([prop], col=col1)
+                        lh.show_metrics([prop],)

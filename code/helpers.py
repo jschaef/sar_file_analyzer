@@ -200,7 +200,8 @@ def get_metric_desc_from_manpage():
     for metric in mh_dict.keys():
         yield (metric, " ".join(mh_dict[metric]).rstrip())
 
-def metric_expander(prop, expand=False):
+def metric_expander(prop, expand=False, col=None):
+    col = col if col else st
     description = sql_stuff.ret_metric_description(prop)
     exp_desc = f"{prop}"
 
@@ -209,9 +210,9 @@ def metric_expander(prop, expand=False):
         exp_desc, expanded=expand)
     with my_expander:
         if description:
-            st.write(description)
+            col.write(description)
         else:
-            st.write(f'metric {prop} has no description at the moment')
+            col.write(f'metric {prop} has no description at the moment')
 
 
 def create_data_frame(data, index, heading):
@@ -300,7 +301,7 @@ def get_sar_files(user_name, col=None):
 def diagram_expander(default_width, default_hight, text1, text2, col=None):
     st.markdown('___')
     col = col if col else st
-    dia_expander = col.expander('Change Size')
+    dia_expander = col.expander('Change Diagram Size')
     st.markdown('')
     with dia_expander:
         width = st.slider(text1,
@@ -309,6 +310,16 @@ def diagram_expander(default_width, default_hight, text1, text2, col=None):
             400, 1600, (400), 200)
 
         return width, hight
+
+def font_expander(default_size, title, description, col=None, key=None):
+    col = col if col else st
+    font_expander = col.expander(title)
+    st.markdown('')
+    with font_expander:
+        size = st.select_slider(description,
+                          range(8,25), value=default_size, key=key)
+
+        return size
 
 def rename_sar_file(file_path, col=None):
     col = col if col else st

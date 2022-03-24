@@ -11,7 +11,8 @@ my_tz = time.tzname[0]
 alt.data_transformers.disable_max_rows()
 
 def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight,
-                         ylabelpadd=10, xlabelpadd=10):
+                         ylabelpadd=10, xlabelpadd=10, font_size=None):
+                         #ylabelpadd=10, xlabelpadd=10, font_size=None):
 
     #df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
     rule_field, z_field, y_pos = create_reboot_rule(
@@ -85,7 +86,11 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     if reboot_text:
         c += reboot_text
     mlayer = alt.layer(c, selectors,points, rules, text, ).interactive()
-    return mlayer|legend
+    return (mlayer | legend
+            ).configure_axis(
+        labelFontSize=font_size,
+        titleFontSize=font_size
+    )
 
 
 
@@ -121,7 +126,7 @@ def return_reboot_text(z_field, y_pos, col=None, col_value=None):
         reboot_text = None
     return reboot_text
 
-def overview_v1(df, restart_headers, os_details):
+def overview_v1(df, restart_headers, os_details, font_size=None, width=None, height=None):
     df['date_utc'] = df['date'].dt.tz_localize('UTC')
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
@@ -138,7 +143,7 @@ def overview_v1(df, restart_headers, os_details):
         alt.Y('y:Q'),
         opacity = opacity_x
     ).properties(
-        width=1200, height=400
+        width=width, height=height
     )
 
     final_line = line.mark_line(strokeWidth=2).add_selection(selection_new).encode(
@@ -181,7 +186,7 @@ def overview_v1(df, restart_headers, os_details):
         align = "left",
         dx = -30,
         dy = -15,
-        fontSize = 11,
+        fontSize = font_size,
         lineBreak = "\n",
     ).encode(
         text = alt.condition(nearest, 
@@ -209,10 +214,16 @@ def overview_v1(df, restart_headers, os_details):
         final_line += reboot_text
     
     mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
-    mlayer = mlayer|legend
-    return mlayer
+    #mlayer = mlayer|legend
+    mlayer = alt.hconcat(mlayer, legend).configure_concat(
+        spacing=50
+    )
+    return mlayer.configure_axis(
+        labelFontSize=font_size,
+        titleFontSize=font_size
+    )
 
-def overview_v3(collect_field, reboot_headers, width, height, lsel):
+def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size):
     color_item = lsel
     b_df = pd.DataFrame()
     z_fields = []
@@ -290,7 +301,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel):
         align="left",
         dx=-10,
         dy=-25,
-        fontSize=11,
+        fontSize=font_size,
         lineBreak="\n",
     ).encode(
         text=alt.condition(nearest,
@@ -326,9 +337,12 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel):
     else:
         mlayer = alt.layer(final_img, selectors, rules, xpoints,
                        tooltip_text).interactive()
-    return mlayer|legend
+    return (mlayer | legend).configure_axis(
+        labelFontSize=font_size,
+        titleFontSize=font_size
+    )
 
-def overview_v4(collect_field, reboot_headers, width, height):
+def overview_v4(collect_field, reboot_headers, width, height, font_size):
     color_item = 'metric'
     b_df = pd.DataFrame()
     for data in collect_field:
@@ -401,7 +415,7 @@ def overview_v4(collect_field, reboot_headers, width, height):
         align="left",
         dx=-10,
         dy=-25,
-        fontSize=11,
+        fontSize=font_size,
         lineBreak="\n",
     ).encode(
         text=alt.condition(nearest,
@@ -432,9 +446,12 @@ def overview_v4(collect_field, reboot_headers, width, height):
     else:
         mlayer = alt.layer(final_line, selectors, rules, xpoints, 
                            tooltip_text).interactive()
-    return mlayer|legend
+    return (mlayer | legend).configure_axis(
+        labelFontSize=font_size,
+        titleFontSize=font_size
+    )
 
-def overview_v5(collect_field, reboot_headers, width, height, lsel):
+def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size):
     color_item = lsel
     b_df = pd.DataFrame()
     for data in collect_field:
@@ -503,7 +520,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel):
         align="left",
         dx=-10,
         dy=-25,
-        fontSize=11,
+        fontSize=font_size,
         lineBreak="\n",
     ).encode(
         text=alt.condition(nearest,
@@ -532,4 +549,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel):
     else:
         mlayer = alt.layer(final_line, selectors, rules, xpoints,
                            tooltip_text).interactive()
-    return mlayer | legend
+    return (mlayer | legend).configure_axis(
+        labelFontSize=font_size,
+        titleFontSize=font_size
+    )

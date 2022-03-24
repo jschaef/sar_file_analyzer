@@ -15,11 +15,11 @@ def show_metrics(prop_list, col=None, key=None):
     if key:
         if col.checkbox('Show Metric descriptions from man page', key=key):
             for metric in prop_list:
-                helpers.metric_expander(metric)
+                helpers.metric_expander(metric, col=col)
     else:
         if col.checkbox('Show Metric descriptions from man page'):
             for metric in prop_list:
-                helpers.metric_expander(metric)
+                helpers.metric_expander(metric, col=col)
 
 def show_checkbox(text, col=None, key=None):
     col = col if col else st

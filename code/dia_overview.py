@@ -19,7 +19,6 @@ def show_dia_overview(username):
     op_ph = col1.empty()
     op_ph1 = col1.empty()
     col1, col2, col3, col4 = lh.create_columns(4, [0, 1, 1, 1])
-    #sar_file = helpers.get_sar_files(username, col=col4)
     st.write('')
     st.write('')
     if sar_file != file_chosen:
@@ -133,6 +132,10 @@ def show_dia_overview(username):
             'IFACE older distributions', 'Block Devices (older SAR versions)']
 
         st.markdown('')
+        cols = st.columns(8)
+        width, height = helpers.diagram_expander(800, 400, 'Diagram Width',
+            'Diagram Hight', cols[0])
+        font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
         submitted = st.form_submit_button('Submit')
         if submitted:
             with st.spinner(text='Please be patient until all graphs are constructed ...'):
@@ -179,7 +182,8 @@ def show_dia_overview(username):
                             helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                             col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
-                            col1.altair_chart(alt.overview_v1(df, restart_headers, os_details))
+                            col1.altair_chart(alt.overview_v1(df, restart_headers, os_details, font_size=font_size, 
+                                width=width, height=height))
                             if pdf_saving:
                                 helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
                             if statistics:

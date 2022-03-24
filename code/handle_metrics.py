@@ -64,9 +64,13 @@ def do_metrics(config_dict, username):
             chart_field, collect_field, prop = mph.create_metric_menu(cols, multi_sar_dict, rand_file, 
                 headers, os_details=os_details, reboot_headers=reboot_headers)
 
+            st.markdown('___')
+            cols = st.columns(8)
+            
             width, hight = helpers.diagram_expander(800, 400, 'Diagram Width',
-              'Diagram Hight')
-            chart= alt.overview_v5(chart_field, restart_headers, width, hight, 'device')
+              'Diagram Hight', cols[0])
+            font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
+            chart= alt.overview_v5(chart_field, restart_headers, width, hight, 'device', font_size)
             st.write(chart)
             if st.checkbox('Enable PDF saving'):
                 helpers.pdf_download(pdf_name, chart)
@@ -80,9 +84,13 @@ def do_metrics(config_dict, username):
             cols = st.columns(4)
             collect_field, chart_field = mph.build_diff_metrics_menu(multi_sar_dict, 
                                          headers, rand_file, cols, os_details, reboot_headers)
+            st.markdown('___')
+            cols = st.columns(8)
+            
             width, hight = helpers.diagram_expander(800, 400, 'Diagram Width',
-                          'Diagram Hight')
-            chart = alt.overview_v4(chart_field, restart_headers, width, hight)
+                          'Diagram Hight', cols[0])
+            font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
+            chart = alt.overview_v4(chart_field, restart_headers, width, hight, font_size)
             st.markdown(f'###### {filename}')
             st.write(chart)
 
