@@ -182,7 +182,7 @@ def show_dia_overview(username):
                             helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
                             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
                             col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
-                            col1.altair_chart(alt.overview_v1(df, restart_headers, os_details, font_size=font_size, 
+                            st.altair_chart(alt.overview_v1(df, restart_headers, os_details, font_size=font_size, 
                                 width=width, height=height))
                             if pdf_saving:
                                 helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details))
