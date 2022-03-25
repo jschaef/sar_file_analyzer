@@ -1,2 +1,1 @@
-python3-tk
-tk
+libtk8.6
