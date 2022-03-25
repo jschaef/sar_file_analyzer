@@ -2,6 +2,11 @@
 The app is using streamlit, altair, pandas and other great python modules   
 for graphical presentation of various metrics from ascii sar files.
 
+## live demo
+you might have a look here:
+https://share.streamlit.io/jschaef/sar_file_analyzer/main/code/first_st.py.
+Create your own account and upload a sar file or use admin/password
+
 ## requirements
 * pyhton3 
 * python3x-pip* 
