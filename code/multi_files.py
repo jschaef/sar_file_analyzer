@@ -47,7 +47,6 @@ def single_multi(config_dict, username):
             for file in sel_field:
                 file = f'{upload_dir}/{file}'
                 th = Thread(target=sdc.data_cooker_multi, args=(file, multi_sar_dict, username))
-                st.script_run_context.add_script_run_ctx(th)
                 th.start()
                 threads.append(th)
             for th in threads:

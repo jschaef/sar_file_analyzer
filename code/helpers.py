@@ -267,8 +267,6 @@ def prepare_pd_data(data):
     pd_dict = {}
     for x in data:
         t = Thread(target=prepare_pd_threaded, args=(x, pd_dict))
-        ctx = st.get_script_run_ctx()
-        ctx(t)
         t.start()
         threads.append(t)
     for t in threads:
