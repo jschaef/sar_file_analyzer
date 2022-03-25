@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from matplotlib.pyplot import title
 import streamlit as st
 import alt
 import sar_data_crafter as sdc
@@ -169,7 +168,6 @@ def show_dia_overview(username):
                         for df_tuple in df_field:
                             dup_bool = 0
                             if df_tuple[1]:
-                                #st.markdown(f'##### {df_tuple[1]}')
                                 title = df_tuple[1]
                             df = df_tuple[0]
                             if start in df.index and end in df.index:

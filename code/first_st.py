@@ -58,7 +58,7 @@ def start():
                 elif task == "Analyze Data":
                     analyze.analyze(upload_dir, config_c, username)
                 elif task == "DB Management":
-                    db_mng.db_mgmt(username, col2)
+                    db_mng.db_mgmt()
                 elif task == "TODO":
                     todo.todo()
                 elif task == "Redis Management":
