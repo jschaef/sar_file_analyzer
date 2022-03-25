@@ -89,6 +89,7 @@ streamlit
 terminado
 testpath
 Everything-Tkinter
+tk
 toml
 toolz
 tornado
