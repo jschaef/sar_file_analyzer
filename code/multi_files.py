@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 import os
 from re import S
-from matplotlib.pyplot import axis
-
-from pyparsing import col
 import alt
 import streamlit as st
 from threading import Thread
@@ -11,7 +8,6 @@ import sar_data_crafter as sdc
 import helpers
 import dataframe_funcs as dff
 import layout_helper as lh
-import metric_page_helpers as mph
 from config import Config
 
 def single_multi(config_dict, username):

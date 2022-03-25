@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-#from streamlit import cache as st_cache
 import sys
 import os
 import streamlit as st
@@ -10,7 +9,6 @@ import re
 from datetime import datetime
 from altair_saver import save
 from threading import Thread
-from streamlit import cache as st_cache
 from config import Config
 import sql_stuff
 import download as dow

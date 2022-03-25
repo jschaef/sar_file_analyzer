@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # DB Management
+import os
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,12 +10,21 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-import streamlit as st
 import hashing as hash
+import streamlit as st
 
+def find_db():
+    curr_dir = os.getcwd()
+    db_name = "data.db"
+    for root, dirs, files in os.walk(curr_dir):
+        if db_name in files:
+            return os.path.join(root, db_name)
+data_db = find_db()
+    
 def get_connection():
     engine = create_engine(
-        'sqlite:///data.db', connect_args={'check_same_thread': False} )
+        #'sqlite:///data.db', connect_args={'check_same_thread': False} )
+        f"sqlite:///{data_db}", connect_args={'check_same_thread': False} )
     return engine
 
 engine = get_connection()
