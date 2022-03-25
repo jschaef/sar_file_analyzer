@@ -56,6 +56,7 @@ def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reb
     
     collect_field, chart_field = build_device_dataframes(headers, multi_sar_dict, selected_1, 
         sub_item_1, prop, chart_field, collect_field, stats=1, os_details=os_details, reboot_headers=reboot_headers)
+    collect_field[0].append(prop)
 
     sub_item_list.append(sub_item_1)
     for line in range(even_lines):
@@ -72,6 +73,7 @@ def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reb
                 sub_item = display_select_boxes(col, multi_sar_dict, rand_file, selected_1, sub_item_list, key_pref, counter)
                 collect_field, chart_field = build_device_dataframes(headers, multi_sar_dict, selected_1, 
                     sub_item, prop, chart_field, collect_field, stats=1, os_details=os_details, reboot_headers=reboot_headers)
+                collect_field[-1].append(prop)
         # less than cols_per_line found
         elif number_cols < cols_per_line and number_cols >1:
             pcols.append(st.columns(1)[0])
@@ -84,6 +86,7 @@ def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reb
                     nindex = cols_per_line - nindex -1
                     # for layout indentation
                     pcols[nindex].write('')
+                collect_field[-1].append(prop)
 
     if remaining_cols:
         pcols = st.columns(cols_per_line)
@@ -93,6 +96,7 @@ def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reb
             sub_item = display_select_boxes(wcol, multi_sar_dict, rand_file, selected_1, sub_item_list, key_pref, counter)
             collect_field, chart_field = build_device_dataframes(headers, multi_sar_dict, selected_1, 
                 sub_item, prop, chart_field, collect_field, stats=1, os_details=os_details, reboot_headers=reboot_headers)
+            collect_field[-1].append(prop)
             # for layout indentation
             for nindex in range(1, empty_cols +1):
                 nindex = cols_per_line - nindex
@@ -208,7 +212,6 @@ def display_diff_sboxes(col, pcols, counter, alias_dict, multi_sar_dict, rand_fi
                 'metric', [x for x in s_header_heading.split() if x not in 
                            prop_item_dict[sub_item]], key=f'prop_{counter}')
             prop_item_dict[sub_item].append(prop)
-
     return s_header, sub_item, prop
 
 
@@ -241,6 +244,8 @@ def build_device_dataframes(headers, multi_sar_dict, selected, sub_item, prop, c
     for sar_data in multi_sar_dict:
         counter += counter
         header = helpers.translate_aliases([selected], headers)[selected]
+        alias  = helpers.translate_headers(headers)
+        main_item = alias[header]
         df = multi_sar_dict[sar_data][header][sub_item]
         df['device'] = sub_item
         file = sar_data.split('/')[-1]
@@ -252,7 +257,7 @@ def build_device_dataframes(headers, multi_sar_dict, selected, sub_item, prop, c
             df_displ = df_displ.drop(columns='device')
             df_ds = df_displ.describe()
             collect_field.append([helpers.restart_headers_v1(df_displ, os_details,
-                restart_headers=reboot_headers), df_ds, sub_item])
+                restart_headers=reboot_headers), df_ds,  sub_item, main_item ])
         chart_field.append([df_part, prop])
     return collect_field, chart_field
 

@@ -11,7 +11,6 @@ from datetime import datetime
 from altair_saver import save
 from threading import Thread
 from streamlit import cache as st_cache
-from streamlit.script_run_context import add_script_run_ctx
 from config import Config
 import sql_stuff
 import download as dow
@@ -268,7 +267,8 @@ def prepare_pd_data(data):
     pd_dict = {}
     for x in data:
         t = Thread(target=prepare_pd_threaded, args=(x, pd_dict))
-        add_script_run_ctx(t)
+        ctx = st.get_script_run_ctx()
+        ctx(t)
         t.start()
         threads.append(t)
     for t in threads:
