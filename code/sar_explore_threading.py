@@ -21,7 +21,7 @@ reg_average = re.compile('average|durchsch|\<sum\>', re.IGNORECASE)
 
 ### program code
 
-def parse_sar_file(content, myfile, username):
+def parse_sar_file(content):
     mydict = {}
     mark = 0
     dict_idx = ""
@@ -159,17 +159,17 @@ keys = all| <something subtype>| generic
 dict contains [[row1],[...], [row n]]
 '''
 
-def create_data_collection(content, myfile, username):
+def create_data_collection(content, myfile):
 
-    mydict = parse_sar_file(content, myfile, username)
+    mydict = parse_sar_file(content)
     os_details = get_osdetails(myfile)
 
     data_collection = []
     for key in mydict.keys():
-        data = return_sar_section(key, mydict[key])
         # ignore some keys, don't put data into resultset
         if reg_ignore.search(key):
             continue
+        data = return_sar_section(key, mydict[key])
         if reg_for_splines.search(key):
             data_collection.append([key, handle_diff_type(key, data)])
         else:

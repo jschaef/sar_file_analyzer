@@ -14,7 +14,7 @@ import dataframe_funcs as ddf
 
 def data_cooker(file, username):
     content = initialize(file)
-    sar_data = create_data_collection(content, file, username)
+    sar_data = create_data_collection(content, file)
     os_details = sar_data.pop()
     pds = prepare_pd_data(sar_data)
     # replace index (strings) by datetime objects 

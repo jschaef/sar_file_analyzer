@@ -27,7 +27,7 @@ def format_date(os_details):
             date_str = '2000-01-01'
     return(date_str, format)
 
-def df_reset_date(df, os_details):
+def df_reset_date_org(df, os_details):
     new_index = []
     date_str, format = format_date(os_details)
     for x in range(len(df.index)):
@@ -41,6 +41,17 @@ def df_reset_date(df, os_details):
                 verify_integrity=False)
     
     return df
+
+
+def df_reset_date(df, os_details):
+    date_str, format = format_date(os_details)
+
+    df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
+        f"{date_str} {x}", format=format))
+    df.set_index('date', inplace=True,
+                verify_integrity=False)
+    return df
+
 
 def set_unique_date(dataframe, time_obj):
     """
