@@ -1,5 +1,8 @@
 [server]
 maxUploadSize = 600
+enableWebsocketCompression = false
+[runner]
+fastReruns = false
 
 [theme]
 primaryColor="#6eb52f"
