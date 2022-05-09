@@ -209,7 +209,7 @@ def single_multi(config_dict, username):
                             for entry in display_field:
                                 if entry[0] == key:
                                     df_display = entry[1]
-                                    lh.show_metrics(list(df_display.columns), key=key, col=col1)
+                                    lh.show_metrics(list(df_display.columns), key=key, )
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:
