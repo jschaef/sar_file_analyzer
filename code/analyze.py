@@ -34,7 +34,7 @@ def analyze(upload_dir, config_c, username):
     if not len(sar_files) or not files_exists:
         st.write('')
         st.warning('Nothing to analyze at the moment. You currently have no sar file uploaded.\n\
-                   Upload a file in the "Manage Sar Files" menu on the right frame')
+                   Upload a file in the "Manage Sar Files" menu on the left frame')
     else:
         if single_multi == 'Graphical Overview':
             dia_overview.show_dia_overview(username)
