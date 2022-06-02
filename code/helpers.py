@@ -6,7 +6,9 @@ import streamlit as st
 import pandas as pd
 import time
 import re
+import asyncio
 from datetime import datetime
+#from streamlit.script_runner.script_run_context import add_script_run_ctx
 from altair_saver import save
 from threading import Thread
 from config import Config
@@ -260,15 +262,53 @@ def prepare_pd_threaded(x, pd_dict):
             pd_dict[pd_id] = {}
         pd_dict[pd_id][mtype] = mtype_dict
 
-def prepare_pd_data(data):
-    threads = []
+async def prepare_pd_threaded_v1(x, pd_dict):
+    # x comes from (for x in data)
+    # multithreading could be done here
+    # generic counts as multitype also in this loop
+    multi_types = x[1].keys()
+    for mtype in multi_types:
+        mtype_dict = {}
+        row_indexes = []
+        df_data = []
+        if mtype != 'generic':
+            headings = x[0].split()[1:]
+        else:
+            headings = x[0].split()
+        for measure in x[1][mtype]:
+            row_index = measure[0]
+            row_data = measure[1:]
+            #some times there are more columns as expected due to some wrong sar insertions
+            if len(headings) != len(row_data):
+                print(row_index, "XXXX", headings)
+                sys.exit(1)
+            row_indexes.append(row_index)
+            #row_data = map(float,row_data)
+            for index in range(len(row_data)):
+                try:
+                    row_data[index] = float(row_data[index])
+                except ValueError:
+                    # need a correct error handling here
+                    None
+
+            df_data.append(row_data)
+
+        pd_id = (" ".join(headings))
+        my_pd = create_data_frame(df_data, row_indexes, headings)
+        # a mapping between the different measure types (headers) and the qualifier for the web interface needs to be done
+        mtype_dict = my_pd
+        if not pd_dict.get(pd_id, None):
+            pd_dict[pd_id] = {}
+        pd_dict[pd_id][mtype] = mtype_dict
+
+async def prepare_pd_data(data):
     pd_dict = {}
+    tasks = []
     for x in data:
-        t = Thread(target=prepare_pd_threaded, args=(x, pd_dict))
-        t.start()
-        threads.append(t)
-    for t in threads:
-        t.join()
+        if not isinstance(x, str):
+            tasks.append(asyncio.create_task(prepare_pd_threaded_v1(x, pd_dict)))
+    for t in tasks:
+        await t
     return(pd_dict)
 
 def measure_time(prop='start', start_time=None):

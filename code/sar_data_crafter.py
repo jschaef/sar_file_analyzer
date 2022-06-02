@@ -5,18 +5,17 @@ import os
 from pathlib import Path
 import redis_mng
 import streamlit as st
+import asyncio
 from datetime import datetime
-from sar_explore_threading import initialize, create_data_collection
+from sar_explore_threading import return_main
 from config import Config
 from helpers import prepare_pd_data
 import dataframe_funcs as ddf
 
-
-def data_cooker(file, username):
-    content = initialize(file)
-    sar_data = create_data_collection(content, file)
+def data_cooker(file):
+    sar_data = return_main(file)
     os_details = sar_data.pop()
-    pds = prepare_pd_data(sar_data)
+    pds = asyncio.run(prepare_pd_data(sar_data))
     # replace index (strings) by datetime objects 
     for key in pds.keys():
         for df in pds[key].keys():
@@ -25,10 +24,10 @@ def data_cooker(file, username):
     pds['os_details'] = os_details
     return(pds)
 
-
 def data_cooker_multi(file, sar_data_dict, username):
     pds = get_data_frames(file, username)
     sar_data_dict[file] = pds
+    return [file, pds]
 
 def set_data_frames(file_name, user_name, sar_structure):
     """
@@ -90,14 +89,14 @@ def get_data_frames(file_name, user_name):
                     f'could not connect to redis server or save {file_name_df} to redis server')
 
         else:
-            sar_structure = data_cooker(full_path, user_name)
+            sar_structure = data_cooker(full_path)
             if sar_structure:
                 set_data_frames(full_path, user_name, sar_structure)
     elif pickle_file.exists():
         sar_structure = pickle.load(open(pickle_file, 'rb'))
     else:
         st.info('no redis server configured, hence data will be saved/retrieved to/from disk')
-        sar_structure = data_cooker(full_path, user_name)
+        sar_structure = data_cooker(full_path)
         if sar_structure:
             set_data_frames(full_path, user_name, sar_structure)
 
@@ -112,8 +111,6 @@ if __name__ == '__main__':
         sys.exit(1)
         sf = 'sar31'
 
-    content = initialize(sf)
-    sar_data = create_data_collection(content, sf)
-    # dictionary
-    pds = prepare_pd_data(sar_data)
+    sar_data = return_main(sf)
+    pds = asyncio.run(prepare_pd_data(sar_data))
     print(pds)

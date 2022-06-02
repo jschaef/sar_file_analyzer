@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 from re import S
+import multiprocessing
 import alt
 import streamlit as st
 from threading import Thread
@@ -39,16 +40,18 @@ def single_multi(config_dict, username):
     if answer:
         if sel_field:
             multi_sar_dict = {}
-            threads = []
+            def gather_results(result_field):
+                file, pds = result_field[0], result_field[1]
+                multi_sar_dict[file] = pds
+            # compute all files at once    
+            pool = multiprocessing.Pool()
             for file in sel_field:
                 file = f'{upload_dir}/{file}'
-                th = Thread(target=sdc.data_cooker_multi, args=(file, multi_sar_dict, username))
-                th.start()
-                threads.append(th)
-            for th in threads:
-                th.join()
+                pool.apply_async(sdc.data_cooker_multi, args=(
+                    file, multi_sar_dict, username), callback=gather_results)
+            pool.close()
+            pool.join()
 
-                #sanity + get_file_info
             x = []
 
             # merge headers of all sar files to be able to compare them

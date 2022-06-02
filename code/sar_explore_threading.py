@@ -2,13 +2,17 @@
 
 import sys
 import re
+import aiofiles
+import asyncio
+import time
 from datetime import datetime
+from typing import IO
 from helpers import get_osdetails
 
-
-def initialize(myfile):
-    with open(myfile, 'r') as mf:
-        content = mf.readlines()
+async def main(my_file):
+    async with aiofiles.open(my_file, mode='r') as f:
+        contents = await f.read()
+    content = await create_data_collection(my_file, contents)
     return content
 
 reg_for_splines = re.compile('^(cpu|iface|dev|intr|bus|tty|fchost)', re.IGNORECASE)
@@ -19,14 +23,14 @@ reg_delete = re.compile(' AM | PM ', re.IGNORECASE)
 reg_linux_restart = re.compile('LINUX RESTART')
 reg_average = re.compile('average|durchsch|\<sum\>', re.IGNORECASE)
 
-### program code
+# ### program code
 
 def parse_sar_file(content):
     mydict = {}
     mark = 0
     dict_idx = ""
     fibre_key=""
-    for line in content:
+    for line in content.split("\n"):
         line = line.strip()
         # Convert time to 24hour if AM and PM are given
         # and delete AM and PM from line
@@ -78,7 +82,7 @@ def parse_sar_file(content):
     return mydict
 
 
-def return_sar_section(key, data):
+async def return_sar_section(key, data):
     col_names = key.split()
     stats_data = {}
     line_nr = 0
@@ -106,7 +110,7 @@ def return_sar_section(key, data):
     return stats_data
 
 
-def handle_diff_type(key, data):
+def handle_diff_type(data):
     '''
     Some sar data are for different NICS, INTERUPTS, CPU's
     They need to be extracted and treated different
@@ -132,7 +136,7 @@ def handle_diff_type(key, data):
     return(same_type)
 
 
-def handle_generic_type(key, data):
+def handle_generic_type(data):
     '''
     set a generic type to equalize the returning data structure compared
     to non generic types
@@ -147,38 +151,49 @@ def handle_generic_type(key, data):
     return(same_type)
 
 
-'''
-Create the big Field which contains the final data
-structured as:
-[['CPU %usr %nice %sys %iowait %steal %irq %soft %guest %gnice %idle', \
-{'all': [['00:01:00', '0.23', '5.49', '0.44', '0.02', '0.28', '0.00', \
- '0.01', '0.00', '0.00', '93.53'],[...]]},{...}], ['proc/s, {...}], [...]]
-len(field1) = 2
-len(dict) = 1
-keys = all| <something subtype>| generic
-dict contains [[row1],[...], [row n]]
-'''
+async def collect_sections(key, mydict):
+    data = await return_sar_section(key, mydict[key])
+    if reg_for_splines.search(key):
+        section = [key, handle_diff_type(data)]
+    else:
+        section = [key, handle_generic_type(data)]
 
-def create_data_collection(content, myfile):
+    return section
 
+async def create_data_collection(my_file: IO, content: str) -> list:
+    '''
+    Create the big Field which contains the final data
+    structured as:
+    [['CPU %usr %nice %sys %iowait %steal %irq %soft %guest %gnice %idle', \
+    {'all': [['00:01:00', '0.23', '5.49', '0.44', '0.02', '0.28', '0.00', \
+     '0.01', '0.00', '0.00', '93.53'],[...]]},{...}], ['proc/s, {...}], [...]]
+    len(field1) = 2
+    len(dict) = 1
+    keys = all| <something subtype>| generic
+    dict contains [[row1],[...], [row n]]
+    '''
+
+    os_details = get_osdetails(my_file)
     mydict = parse_sar_file(content)
-    os_details = get_osdetails(myfile)
 
     data_collection = []
+    tasks = []
     for key in mydict.keys():
-        # ignore some keys, don't put data into resultset
         if reg_ignore.search(key):
             continue
-        data = return_sar_section(key, mydict[key])
-        if reg_for_splines.search(key):
-            data_collection.append([key, handle_diff_type(key, data)])
-        else:
-            data_collection.append([key, handle_generic_type(key, data)])
+        tasks.append(asyncio.create_task(collect_sections(key, mydict)))
+    for t in tasks:
+        result = await t
+        data_collection.append(result)
 
     # put os_details as last field
     data_collection.append(os_details)
     return(data_collection)
+#
+#
 
+def return_main(file):
+    return asyncio.run(main(file))
 
 if __name__ == '__main__':
 
@@ -187,11 +202,11 @@ if __name__ == '__main__':
     except(IndexError):
         print(f'Please specify a sar file')
         sys.exit(1)
-    content = initialize(sf)
-    # dict spec: {generic|all|et0|sda1|...[time, value1,...,value n]}
-    #print([x[1].keys() for x in data_collection if len(x[1]) == 9])
-    #print([x[0] for x in data_collection if len(x[1]) == 9])
-    #print([x[0] for x in data_collection if x[1].get('generic')])
-    #print([x[0] for x in data_collection if not x[1].get('generic')])
-    #print([x[1]['all'][0] for x in data_collection if len(x[1]) == 9])
-    sar_data = create_data_collection(content, sf)
+    
+    start = time.perf_counter()
+    aio_ret = asyncio.run(main(sf))
+    end = time.perf_counter() - start
+    print(f"aiofiles: {end}")
+
+    print(hash(str(aio_ret)))
+    #print(aio_ret)

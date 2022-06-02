@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
 import streamlit as st
-import alt
+import multiprocessing
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
+import mp5
 import layout_helper as lh
 from config import Config
 
@@ -12,6 +13,7 @@ sar_structure = []
 os_details = ""
 file_chosen = ""
 def show_dia_overview(username):
+    collect_list = []
     global sar_structure, os_details, file_chosen
     st.subheader('Overview of important metrics from SAR data')
     col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 0])
@@ -66,6 +68,9 @@ def show_dia_overview(username):
     else:
         statistics = 0
 
+    def collect_results(result):
+        collect_list.append(result)
+    
     col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
     h_expander = st.expander(label='Select SAR Metrics to display',expanded=False)
     with h_expander:
@@ -139,66 +144,79 @@ def show_dia_overview(username):
         submitted = st.form_submit_button('Submit')
         if submitted:
             with st.spinner(text='Please be patient until all graphs are constructed ...'):
+                # doing multiprocessing
+                pool = multiprocessing.Pool()
                 for entry in sel_field:
-                    df_field = []
-                    if sar_structure.get(headers[entry], None):
-                        st.markdown(f'#### {entry}')
-                        if 'generic' in sar_structure[headers[entry]].keys():
-                            df = sar_structure[headers[entry]]['generic']
-                            df_field.append([df,0])
-                            title=entry
-                        else:
-                            device_list = list(sar_structure[headers[entry]].keys())
-                            device_list.sort()
-                            if entry in wanted_sub_devices:
-                                for device in device_list:
-                                    df = sar_structure[headers[entry]][device]
-                                    df_field.append([df, device])
+                    pool.apply_async(mp5.final_overview, args=(sar_structure, headers, entry,
+                        wanted_sub_devices, start, end, statistics, os_details, restart_headers,
+                        font_size, width, height, show_metric), callback=collect_results)
+                pool.close()
+                pool.join()
+                #st.write(collect_list)
+                for item in collect_list:
+                    header = item[0]['header']
+                    device = item[0]['title']
+                    device_count = item[0]['device_num']
+                    if len(item) == 1:
+                        chart = item[0]['chart']
+                        st.markdown(f'#### {header}')
+                        if device == 'all':
+                            st.markdown(f'###### all of {device_count}')
+                        st.altair_chart(chart)
 
-                            elif 'all' in device_list:
-                                device = 'all'
-                                st.markdown(f'###### all of {len(device_list) -1}')
-                                df = sar_structure[headers[entry]][device]
-                                df_field.append([df, device])
-                            else:
-                                device = device_list[0]
-                                df = sar_structure[headers[entry]][device]
-                                df_field.append([df, device])
+                        if pdf_saving:
+                            helpers.pdf_download(pdf_name, chart)
+                        if statistics:
+                            dup_bool = item[0]['dup_bool']
+                            dup_check = item[0]['dup_check']
+                            df_display = item[0]['df_display']
+                            df_describe = item[0]['df_describe']
 
-                        for df_tuple in df_field:
-                            dup_bool = 0
-                            if df_tuple[1]:
-                                title = df_tuple[1]
-                            df = df_tuple[0]
-                            if start in df.index and end in df.index:
-                                df = df[start:end]
-                            if statistics:
-                                df_display = df.copy()
-                                dup_check = df_display[df_display.index.duplicated()]
-                                # remove duplicate indexes
-                                if not dup_check.empty:
-                                    dup_bool = 1
-                                    df = df[~df.index.duplicated(keep='first')].copy()
+                            col1, col2, col3, col4 = lh.create_columns(
+                                4, [0, 0, 1, 1])
+                            
+                            col1.markdown(f'###### Sar Data')
+                            helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
+                            if dup_bool:
+                               col1.warning('Be aware that your data contains multiple indexes')
+                               col1.write('Multi index table:')
+                               col1.write(dup_check)
+                            st.markdown(f'###### Statistics')
+                            st.write(df_describe)
 
-                            helpers.restart_headers(df, os_details, restart_headers=restart_headers, display=False)
-                            df = df.reset_index().melt('date', var_name='metrics', value_name='y')
-                            col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
-                            st.altair_chart(alt.overview_v1(df, restart_headers, os_details, font_size=font_size, 
-                                width=width, height=height, title=title))
+                        if show_metric:
+                            metrics =  item[0]['metrics']
+                            for metric in metrics:
+                                helpers.metric_expander(metric)
+                    else:
+                        st.markdown(f'#### {header}')
+                        for subitem in item:
+                            chart = subitem['chart']
+                            st.altair_chart(chart)
+
                             if pdf_saving:
-                                helpers.pdf_download(pdf_name, alt.overview_v1(df, restart_headers, os_details, 
-                                    font_size=font_size, width=width, height=height, title=title))
+                                helpers.pdf_download(pdf_name, chart)
+
                             if statistics:
-                                st.markdown(f'###### Sar Data')
+                                dup_bool = subitem['dup_bool']
+                                dup_check = subitem['dup_check']
+                                df_display = subitem['df_display']
+                                df_describe = subitem['df_describe']
+
+                                col1, col2, col3, col4 = lh.create_columns(
+                                    4, [0, 0, 1, 1])
+
+                                col1.markdown(f'###### Sar Data')
+                                helpers.restart_headers(
+                                    df_display, os_details, restart_headers=restart_headers,)
                                 if dup_bool:
-                                    col1.warning('Be aware that your data contains multiple indexes')
-                                    col1.write('Multi index table:')
-                                    col1.write(dup_check)
-                                helpers.restart_headers(df_display, os_details, restart_headers=restart_headers, )
+                                   col1.warning(
+                                       'Be aware that your data contains multiple indexes')
+                                   col1.write('Multi index table:')
+                                   col1.write(dup_check)
                                 st.markdown(f'###### Statistics')
-                                st.write(df_display.describe())
-                                
-                            metrics = df['metrics'].drop_duplicates().tolist()
+                                st.write(df_describe)
                             if show_metric:
+                                metrics =  subitem['metrics']
                                 for metric in metrics:
                                     helpers.metric_expander(metric)
