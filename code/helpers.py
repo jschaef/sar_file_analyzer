@@ -394,9 +394,10 @@ def pdf_download(file, dia):
     st.markdown(download_button_str, unsafe_allow_html=True)
 
 def set_stile(df, restart_rows=None):
-    def color_null_bg(val):
-        is_null = val == 0
-        return ['background-color: "",' if v else '' for v in is_null]
+    # left as example
+    #def color_null_bg(val):
+    #    is_null = val == 0
+    #    return ['background-color: "",' if v else '' for v in is_null]
     
     def color_null_fg(val):
         is_null = val == 0
@@ -412,8 +413,6 @@ def set_stile(df, restart_rows=None):
          subset=pd.IndexSlice[sub_index,:]).\
          apply(highlight_min_ind, subset=pd.IndexSlice[sub_index, :]).\
         apply(highlight_max_ind, subset=pd.IndexSlice[sub_index, :]).\
-        apply(color_null_bg, subset=pd.IndexSlice[sub_index, :]).\
-        apply(color_null_fg, subset=pd.IndexSlice[sub_index, :]).\
         format(precision=4)
     if restart_rows:
         df = df.apply(color_restart, subset=pd.IndexSlice[multi_index, :])

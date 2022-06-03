@@ -175,13 +175,13 @@ def show_dia_overview(username):
                             col1, col2, col3, col4 = lh.create_columns(
                                 4, [0, 0, 1, 1])
                             
-                            col1.markdown(f'###### Sar Data')
+                            col1.markdown(f'###### Sar Data for {header}')
                             helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
                             if dup_bool:
                                col1.warning('Be aware that your data contains multiple indexes')
                                col1.write('Multi index table:')
                                col1.write(dup_check)
-                            st.markdown(f'###### Statistics')
+                            st.markdown(f'###### Statistics for {header}')
                             st.write(df_describe)
 
                         if show_metric:
@@ -202,11 +202,12 @@ def show_dia_overview(username):
                                 dup_check = subitem['dup_check']
                                 df_display = subitem['df_display']
                                 df_describe = subitem['df_describe']
+                                title = subitem['title']
 
                                 col1, col2, col3, col4 = lh.create_columns(
                                     4, [0, 0, 1, 1])
 
-                                col1.markdown(f'###### Sar Data')
+                                col1.markdown(f'###### Sar Data for {title}')
                                 helpers.restart_headers(
                                     df_display, os_details, restart_headers=restart_headers,)
                                 if dup_bool:
@@ -214,7 +215,7 @@ def show_dia_overview(username):
                                        'Be aware that your data contains multiple indexes')
                                    col1.write('Multi index table:')
                                    col1.write(dup_check)
-                                st.markdown(f'###### Statistics')
+                                st.markdown(f'###### Statistics for {title}')
                                 st.write(df_describe)
                             if show_metric:
                                 metrics =  subitem['metrics']

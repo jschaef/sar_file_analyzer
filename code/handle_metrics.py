@@ -18,7 +18,8 @@ def do_metrics(config_dict, username):
 
     col3, col4 = st.columns(2)
 
-    radio_result = col4.radio('Choose, what to compare', ['Compare Different Metrics','Compare same Metrics on Different Devices'])
+    radio_result = col4.radio('Choose, what to compare', ['Compare Different Metrics',
+        'Compare same Metrics on Different Devices'], horizontal=True)
     if radio_result == 'Compare Different Metrics':
         col3.subheader('Compare Different Metrics')
         op_ph = col3.empty()
