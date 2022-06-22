@@ -10,20 +10,21 @@ Create your own account and upload a sar file or use admin/password
 ## requirements
 * pyhton3 
 * python3x-pip* 
+* python3x-tk*
 * sar files with '.' as decimal separator (LC_NUMERIC en,us)
 * 8GB RAM for better user experience
 
 ## build
-* <code>python -m venv venv</code> 
+* <code>python3x -m venv venv</code> 
 * <code>source venv/bin/activate</code> 
 * <code>pip install -U pip</code>
-* <code>pip install six appdirs packaging ordered-set</code>
 * <code>pip install -r requirements.txt</code>
 * <code>install nodejs-common via your package manager (you need the npm binary)</code>
 * <code>npm install vega-lite vega-cli canvas</code>
 
 ## configure
 * edit config.py
+* edit code/.streamlit/config.toml
 ## run
 * <code>streamlit run first_st.py</code>
 
