@@ -4,3 +4,6 @@ pip install -U pip
 pip install -r requirements.txt
 npm install vega-lite vega-cli canvas
 
+in case tkinter is missing you need to install python3-tk,
+e.g. zypper in python310-tk (SUSE)
+
