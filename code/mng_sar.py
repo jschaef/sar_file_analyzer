@@ -26,8 +26,7 @@ def file_mng(upload_dir, col, username):
         st.set_option(
             'deprecation.showfileUploaderEncoding', False)
         sar_files = [col1.file_uploader(
-            "Please upload your SAR files", key='sar_uploader',
-            #accept_multiple_files=False)]
+            "Please upload your SAR files, (Posix format, decimal seperator must be '.')", key='sar_uploader',
             accept_multiple_files=True)]
         if col1.button('Submit'):
             if sar_files:
