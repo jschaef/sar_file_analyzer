@@ -112,7 +112,8 @@ def insert_restarts_into_df(os_details, df, restart_headers):
 # example from https://pythoninoffice.com/insert-rows-into-a-dataframe/
 def insert_row(row_num, orig_df, row_to_add):
     if row_num == 0:
-        df_final = row_to_add.append(orig_df)
+        #df_final = row_to_add.append(orig_df)
+        df_final = pd.concat([row_to_add, orig_df], ignore_index=False)
     elif len(orig_df.index) -1 > row_num:
         # split original data frame into two parts and insert the restart pd.series
         row_num= min(max(0, row_num), len(orig_df))
