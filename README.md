@@ -15,7 +15,8 @@ Create your own account and upload a sar file or use admin/password
 * 8GB RAM for better user experience
 
 ## build
-* <code>python3x -m venv venv</code> 
+* <code>cd sar_file_analyzer/code</code>
+* <code>python3x -m venv venv, e.g. python3.10 -m venv venv</code> 
 * <code>source venv/bin/activate</code> 
 * <code>pip install -U pip</code>
 * <code>pip install -r requirements.txt</code>
