@@ -78,6 +78,7 @@ def create_metric_menu(cols, multi_sar_dict, rand_file, headers, os_details, reb
         elif number_cols < cols_per_line and number_cols >1:
             pcols.append(st.columns(1)[0])
             for index in range(number_cols -1):
+                counter += 1
                 sub_item = display_select_boxes(pcols[index], multi_sar_dict, rand_file, selected_1, sub_item_list, key_pref, counter)
                 collect_field, chart_field = build_device_dataframes(headers, multi_sar_dict, selected_1, 
                     sub_item, prop, chart_field, collect_field, stats=1, os_details=os_details, 
