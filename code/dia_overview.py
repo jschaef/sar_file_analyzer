@@ -12,16 +12,17 @@ from config import Config
 sar_structure = []
 os_details = ""
 file_chosen = ""
-def show_dia_overview(username):
+def show_dia_overview(username, sar_file_col):
     collect_list = []
     global sar_structure, os_details, file_chosen
+    sar_file = helpers.get_sar_files(username, col=sar_file_col, key="dia_overview")
     st.subheader('Overview of important metrics from SAR data')
-    col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 0])
-    sar_file = helpers.get_sar_files(username, col=col4)
+    col1, col2, col3 = lh.create_columns(3, [0.7, 0.1, 0.4])
+    #sar_file = helpers.get_sar_files(username, col=col4)
     op_ph = col1.empty()
-    op_ph1 = col1.empty()
+    op_ph3= col3.empty()
+    pdf_check = col3.empty()
     col1, col2, col3, col4 = lh.create_columns(4, [0, 1, 1, 1])
-    st.write('')
     st.write('')
     if sar_file != file_chosen:
         sar_structure = []
@@ -33,8 +34,8 @@ def show_dia_overview(username):
     if not sar_structure:
         sar_structure = sdc.get_data_frames(sar_file, username)
         os_details = sar_structure.pop('os_details')
-    op_ph.text("Operating System Details:")
-    op_ph1.text(os_details)
+    #op_ph.text(f"Operating System Details: {os_details}")
+    sar_file_col.text(f"Operating System Details: {os_details}")
     headers = [header for header in sar_structure.keys()]
     restart_headers = helpers.extract_restart_header(headers)
 
@@ -53,26 +54,21 @@ def show_dia_overview(username):
     if count_lines > 0:
         count_lines = int(count_lines + 1)
    
-    col1, col2, col3, col4 = st.columns(4)
-    col4.write('')
-    if col1.checkbox('Show Metric descriptions from man page'):
-        show_metric = 1
+    op_ph3.markdown("**Choose if you need to save your diagrams as PDF**")
+    if pdf_check.checkbox('Enable PDF saving'):
+        enable_pdf = 1
     else:
-        show_metric = 0
-    if col2.checkbox('Enable PDF saving'):
-        pdf_saving = 1
-    else:
-        pdf_saving = 0
-    if lh.show_checkbox('Show Statistical Data and Raw Sar Data', col=col3 ):
-        statistics = 1
-    else:
-        statistics = 0
+        enable_pdf = 0
+    show_metric = 1
+    statistics = 1
+    #      statistics = 0
 
     def collect_results(result):
         collect_list.append(result)
     
     col1, col2, col3, col4 = lh.create_columns(4, [0, 0, 1, 1])
-    h_expander = st.expander(label='Select SAR Metrics to display',expanded=False)
+    st.markdown("**Select which metrics to display**")
+    h_expander = st.expander(label='Choose SAR Metrics',expanded=False)
     with h_expander:
         col5, col6 = st.columns(2)
         ph_col3 = col5.empty()
@@ -81,7 +77,6 @@ def show_dia_overview(username):
             initial_aliases = full_alias_l[:]
         elif ph_col4.checkbox('Deselect All'):
             initial_aliases = []
-        st.write('  \n')
         st.markdown('***')
         for line in range(count_lines):
             cols = st.columns(boxes_per_line)
@@ -99,11 +94,11 @@ def show_dia_overview(username):
                     if selected:
                         sel_field.append(label)
 
-    st.markdown('___')                
     headers = helpers.translate_aliases(sel_field, sar_structure.keys())
 
     # pick time frame
-    time_expander = st.expander(label='Change Start and End Time',expanded=False)
+    st.markdown("**Change Start/End Time**")
+    time_expander = st.expander(label='Choose Time',expanded=False)
     with time_expander:
         df_len = 0
         tmp_dict = {}
@@ -136,12 +131,18 @@ def show_dia_overview(username):
         wanted_sub_devices = ['IFACE', 'Block Devices', 'Fibrechannel', 'IFACE Errors', \
             'IFACE older distributions', 'Block Devices (older SAR versions)']
 
-        st.markdown('')
+        st.markdown("**Customize Diagrams**")
         cols = st.columns(8)
         width, height = helpers.diagram_expander(800, 400, 'Diagram Width',
             'Diagram Hight', cols[0])
         font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
+
+        if st.checkbox('Show diagrams on submit', value=True):
+            show_diagrams = 1
+        else:
+            show_diagrams = 0
         submitted = st.form_submit_button('Submit')
+        st.markdown("___")
         if submitted:
             with st.spinner(text='Please be patient until all graphs are constructed ...'):
                 # doing multiprocessing
@@ -154,70 +155,96 @@ def show_dia_overview(username):
                 pool.join()
                 #st.write(collect_list)
                 for item in collect_list:
+
                     header = item[0]['header']
                     device = item[0]['title']
                     device_count = item[0]['device_num']
+
                     if len(item) == 1:
-                        chart = item[0]['chart']
                         st.markdown(f'#### {header}')
-                        if device == 'all':
-                            st.markdown(f'###### all of {device_count}')
-                        st.altair_chart(chart)
+                        if show_diagrams:
+                            tab1, tab2, tab3, tab4 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                        else:
+                            tab0, tab1, tab2, tab3, tab4 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                        with tab1:
+                            chart = item[0]['chart']
+                            if device == 'all':
+                                st.markdown(f'###### all of {device_count}')
+                            st.altair_chart(chart)
+                            # if st.checkbox('Enable PDF saving', key=item):
+                            #     helpers.pdf_download(pdf_name, chart)
+                        with tab2:
+                            if statistics:
+                                dup_bool = item[0]['dup_bool']
+                                dup_check = item[0]['dup_check']
+                                df_display = item[0]['df_display']
+                                df_describe = item[0]['df_describe']
 
-                        if pdf_saving:
-                            helpers.pdf_download(pdf_name, chart)
-                        if statistics:
-                            dup_bool = item[0]['dup_bool']
-                            dup_check = item[0]['dup_check']
-                            df_display = item[0]['df_display']
-                            df_describe = item[0]['df_describe']
-
-                            col1, col2, col3, col4 = lh.create_columns(
-                                4, [0, 0, 1, 1])
-                            
-                            col1.markdown(f'###### Sar Data for {header}')
-                            helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
-                            if dup_bool:
-                               col1.warning('Be aware that your data contains multiple indexes')
-                               col1.write('Multi index table:')
-                               col1.write(dup_check)
-                            st.markdown(f'###### Statistics for {header}')
-                            st.write(df_describe)
-
-                        if show_metric:
-                            metrics =  item[0]['metrics']
-                            for metric in metrics:
-                                helpers.metric_expander(metric)
+                                col1, col2, col3, col4 = lh.create_columns(
+                                    4, [0, 0, 1, 1])
+                                
+                                col1.markdown(f'###### Sar Data for {header}')
+                                helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
+                                if dup_bool:
+                                   col1.warning('Be aware that your data contains multiple indexes')
+                                   col1.write('Multi index table:')
+                                   col1.write(dup_check)
+                                st.markdown(f'###### Statistics for {header}')
+                                st.write(df_describe)
+                        with tab3:
+                            if show_metric:
+                                metrics =  item[0]['metrics']
+                                for metric in metrics:
+                                    helpers.metric_expander(metric)
+                        with tab4:
+                            if enable_pdf:
+                                helpers.pdf_download(pdf_name, chart)
+                            else:
+                                st.write("You have to enable the PDF checkbox on the top. It is disabled\
+                                         by default because the current implementation is quite performance intensive")
                     else:
                         st.markdown(f'#### {header}')
                         for subitem in item:
                             chart = subitem['chart']
-                            st.altair_chart(chart)
+                            if show_diagrams:
+                                tab1, tab2, tab3, tab4 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                            else:
+                                tab0, tab1, tab2, tab3, tab4 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                            with tab1:
+                                tab1.altair_chart(chart)
+                            with tab2:
+                                if statistics:
+                                    dup_bool = subitem['dup_bool']
+                                    dup_check = subitem['dup_check']
+                                    df_display = subitem['df_display']
+                                    df_describe = subitem['df_describe']
+                                    title = subitem['title']
 
-                            if pdf_saving:
-                                helpers.pdf_download(pdf_name, chart)
+                                    col1, col2, col3, col4 = lh.create_columns(
+                                        4, [0, 0, 1, 1])
 
-                            if statistics:
-                                dup_bool = subitem['dup_bool']
-                                dup_check = subitem['dup_check']
-                                df_display = subitem['df_display']
-                                df_describe = subitem['df_describe']
-                                title = subitem['title']
-
-                                col1, col2, col3, col4 = lh.create_columns(
-                                    4, [0, 0, 1, 1])
-
-                                col1.markdown(f'###### Sar Data for {title}')
-                                helpers.restart_headers(
-                                    df_display, os_details, restart_headers=restart_headers,)
-                                if dup_bool:
-                                   col1.warning(
-                                       'Be aware that your data contains multiple indexes')
-                                   col1.write('Multi index table:')
-                                   col1.write(dup_check)
-                                st.markdown(f'###### Statistics for {title}')
-                                st.write(df_describe)
-                            if show_metric:
-                                metrics =  subitem['metrics']
-                                for metric in metrics:
-                                    helpers.metric_expander(metric)
+                                    col1.markdown(f'###### Sar Data for {title}')
+                                    helpers.restart_headers(
+                                        df_display, os_details, restart_headers=restart_headers,)
+                                    if dup_bool:
+                                       col1.warning(
+                                           'Be aware that your data contains multiple indexes')
+                                       col1.write('Multi index table:')
+                                       col1.write(dup_check)
+                                    st.markdown(f'###### Statistics for {title}')
+                                    st.write(df_describe)
+                            with tab3:
+                                if show_metric:
+                                    metrics =  subitem['metrics']
+                                    for metric in metrics:
+                                        helpers.metric_expander(metric)
+                            with tab4:
+                                if enable_pdf:
+                                    helpers.pdf_download(pdf_name, chart)
+                                else:
+                                    st.write("You have to enable the PDF checkbox on the top. It is disabled\
+                                             by default because the current implementation is quite performance intensive")
+                    st.markdown("___")
+        # if st.button('Back to top'):
+            if st.form_submit_button('Back to top'):
+                st.experimental_rerun()

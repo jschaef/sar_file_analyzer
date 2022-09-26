@@ -39,7 +39,8 @@ def parse_sar_file(content):
             time_str = " ".join(line.split()[0:2])
             format = '%I:%M:%S %p'
             new_time = datetime.strptime(time_str, format)
-            new_time = new_time.strftime('%H:%M:%S-%z')
+            #new_time = new_time.strftime('%H:%M:%S-%z')
+            new_time = new_time.strftime('%H:%M:%S')
             line = re.sub('AM |PM ', '', line)
             line = re.sub(short_time, new_time, line)
         # an empty line has been found before

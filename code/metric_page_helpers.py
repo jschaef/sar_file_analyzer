@@ -1,4 +1,3 @@
-from re import sub
 import helpers
 import streamlit as st
 from config import Config as config
@@ -174,8 +173,8 @@ def build_diff_metrics_menu(multi_sar_dict, headers, rand_file,  cols, os_detail
 
 def display_select_boxes(st_col, multi_sar_dict, rand_file, selected, sub_item_list, key_pref, counter):
     sub_item = st_col.selectbox('Choose devices', [key for key in
-                                                   multi_sar_dict[rand_file][selected].keys() if key not in sub_item_list],
-                                key=f'{key_pref}{counter}')
+        multi_sar_dict[rand_file][selected].keys() if key not in sub_item_list],
+        key=f'{key_pref}{counter}')
     sub_item_list.append(sub_item)
     return sub_item
 
@@ -263,39 +262,38 @@ def build_device_dataframes(headers, multi_sar_dict, selected, sub_item, prop, c
     return collect_field, chart_field
 
 def display_stats_data(collect_field):
-     if st.checkbox('Show Raw Sar Data'):
-        cols_per_line = Config.cols_per_line
-        cols = st.columns(cols_per_line)
-        even_lines = int(len(collect_field)/cols_per_line)
-        remaining_cols = len(collect_field) % cols_per_line
-        empty_cols = cols_per_line - remaining_cols
+    cols_per_line = Config.cols_per_line
+    cols = st.columns(cols_per_line)
+    even_lines = int(len(collect_field)/cols_per_line)
+    remaining_cols = len(collect_field) % cols_per_line
+    empty_cols = cols_per_line - remaining_cols
 
-        for line in range(even_lines):
-            for col in cols:
-                f_index = cols.index(col)
-                col.markdown(f'###### {collect_field[f_index][2]}')
-                #col.markdown(f'###### {collect_field[f_index][0].columns[0]}')
-                col.write(collect_field[f_index][0])
-                col.write(collect_field[f_index][1])
-        if remaining_cols and not even_lines:
-            for index in range(remaining_cols):
-                col = cols[index]
-                col.markdown(f'###### {collect_field[index][2]}')
-                #col.markdown(f'###### {collect_field[index][0].columns[0]}')
-                col.write(collect_field[index][0])
-                for nindex in range(1, empty_cols + 1):
-                    nindex = cols_per_line - nindex
-                    cols[nindex].write('')
-                col.write(collect_field[index][1])
-        elif remaining_cols and even_lines:
-            for index in range(1, remaining_cols + 1):
-                col = cols[index - 1]
-                col.markdown(f'___ ')
-                f_index = len(collect_field) - index
-                col.markdown(f'###### {collect_field[f_index][2]}')
-                #col.markdown(f'###### {collect_field[f_index][0].columns[0]}')
-                col.write(collect_field[f_index][0])
-                col.write(collect_field[f_index][1])
+    for line in range(even_lines):
+        for col in cols:
+            f_index = cols.index(col)
+            col.markdown(f'###### data for {collect_field[f_index][2]}')
+            col.write(collect_field[f_index][0])
+            col.markdown(f'###### statistics for {collect_field[f_index][2]}')
+            col.write(collect_field[f_index][1])
+    if remaining_cols and not even_lines:
+        for index in range(remaining_cols):
+            col = cols[index]
+            col.markdown(f'###### data for {collect_field[index][2]}')
+            col.write(collect_field[index][0])
+            for nindex in range(1, empty_cols + 1):
+                nindex = cols_per_line - nindex
+                cols[nindex].write('')
+            col.markdown(f'###### statistics for {collect_field[index][2]}')
+            col.write(collect_field[index][1])
+    elif remaining_cols and even_lines:
+        for index in range(1, remaining_cols + 1):
+            col = cols[index - 1]
+            col.markdown(f'___ ')
+            f_index = len(collect_field) - index
+            col.markdown(f'###### data for {collect_field[f_index][2]}')
+            col.write(collect_field[f_index][0])
+            col.markdown(f'###### statistics for {collect_field[f_index][2]}')
+            col.write(collect_field[f_index][1])
 
 # for future usage
 def change_start_end(df_list, col1, col2):

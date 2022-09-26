@@ -1,8 +1,9 @@
+aiofiles
 altair
-pandas
-streamlit
 altair_saver
+pandas
 python-magic
 redis
-aiofiles
 SQLAlchemy
+streamlit
+streamlit-option-menu

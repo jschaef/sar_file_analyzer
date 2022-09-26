@@ -61,7 +61,6 @@ def merge_headers(header_field):
         arr.insert(0,'all')
     return(arr)
 
-
 def check_sub_items(headers, multi_sarfile_dict):
     '''
     If provided fields of headers have subitems check if there 
@@ -203,7 +202,6 @@ def metric_expander(prop, expand=False, col=None):
     col = col if col else st
     description = sql_stuff.ret_metric_description(prop)
     exp_desc = f"{prop}"
-
     ph_expander = st.empty()
     my_expander = ph_expander.expander(
         exp_desc, expanded=expand)
@@ -319,7 +317,7 @@ def measure_time(prop='start', start_time=None):
         end = time.perf_counter()
         st.write(f'process_time: {round(end-start_time, 4)}')
 
-def get_sar_files(user_name, col=None):
+def get_sar_files(user_name, col=None, key=None):
     sar_files = [x for x in os.listdir(f'{Config.upload_dir}/{user_name}') \
         if os.path.isfile(f'{Config.upload_dir}/{user_name}/{x}') ]
     sar_files_pre = [x for x in sar_files if not x.endswith('.df') ]
@@ -328,22 +326,21 @@ def get_sar_files(user_name, col=None):
     if not col:
         col1, col2, col3 = st.columns([2,1, 1])
         col1.write(''), col3.write('')
-        selection = col2.selectbox('sar files', sar_files)
+        selection = col2.selectbox('sar file', sar_files, key=key)
     else:
-        selection = col.selectbox('sar files', sar_files)
+        selection = col.selectbox('sar file', sar_files, key=key)
     return selection
 
 
-def diagram_expander(default_width, default_hight, text1, text2, col=None):
-    st.markdown('___')
+def diagram_expander(default_width, default_hight, text1, text2, col=None, key=None):
     col = col if col else st
     dia_expander = col.expander('Change Diagram Size')
     st.markdown('')
     with dia_expander:
         width = st.slider(text1,
-            400, 1600, (1200), 200)
+            400, 1600, (1200), 200, key=f"{key}_w")
         hight = st.slider(text2,
-            400, 1600, (400), 200)
+            400, 1600, (400), 200, key=f"{key}_h")
 
         return width, hight
 
@@ -460,12 +457,10 @@ def extract_restart_header(headers):
         header) ]
 
 def restart_headers(df, os_details, restart_headers=None, display=True):
-
     # check and remove duplicates
     dup_check = df[df.index.duplicated()]
     if not dup_check.empty:
         df = df[~df.index.duplicated(keep='first')].copy()
-
     if restart_headers:
         rdf = df.copy()
         rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
@@ -497,11 +492,74 @@ def restart_headers_v1(df, os_details, restart_headers=None):
         rdf, new_rows = dff.insert_restarts_into_df(os_details, rdf,
                       restart_headers)
         return set_stile(rdf, restart_rows=new_rows)
-        #code1 = f'''\nreboot:\t{" ,".join([restart.split()[-1] for restart in restart_headers])}'''
     else:
         return set_stile(df)
 
+def datetime_intersection(list_of_sets: list) -> list:
+    """not in use atm 
 
+    Args:
+        list_of_sets (list): list of sets which needs to be intersected
+    Returns:
+        list: list of intersected values from the provided sets
+    """
+    fset = set(list_of_sets.pop(0))
+    for _ in range(len(list_of_sets)):
+        intersection = set.intersection(fset, list_of_sets.pop(0))
+        fset = intersection
+    return list(fset)
+
+def get_start_end_date(date_list: list, point: str="start") -> pd.datetime:
+    """compares pd.dateTime objects and returns either the min or the max val 
+
+    Args:
+        date_list (list): _description_
+        point (str, optional): _description_. Defaults to "start".
+
+    Returns:
+        pd.datetime: _description_
+    """
+    pd_index = pd.DatetimeIndex(date_list)
+    if "multi_start" not in st.session_state:
+        if point == "start":
+            st.session_state.multi_start = pd_index.max()
+    if "multi_end" not in st.session_state:
+        if point == "end":
+            st.session_state.multi_end = pd_index.min()
+    
+    if st.session_state.get('multi_start') and point == "start": 
+        return st.session_state.multi_start
+    if st.session_state.get('multi_end') and point == "end": 
+        return st.session_state.multi_end
+    return pd_index.min() if point == "end" else pd_index.max()
+
+def get_df_from_start_end(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    start, end = dff.replace_ymt(start, end, df)
+    start_index = pd.Timestamp.now()
+    end_index = pd.Timestamp.now()
+    for x_start in range(len(df.index)):
+        if df.index[x_start] >=start:
+            start_index = df.index[x_start]
+            break
+    for x_end in range(len(df.index)-1,-1,-1):
+        if df.index[x_end] <=end:
+            end_index = df.index[x_end]
+            break
+    return df[start_index:end_index]
+
+def create_start_end_time_list(start: pd.DatetimeIndex, end: pd.DatetimeIndex, col1: object, col2: object):
+    start_d = start.replace(microsecond=0, second=0, minute=0)
+    end_d = end.replace(microsecond=0, second=0, minute=0, hour=end.hour)
+    x = pd.date_range(start_d, end_d, freq='H')
+    x = x.delete(0).insert(0,start).append(pd.date_range(pd.Timestamp(end), periods=1))
+    start_time = col1.selectbox('Start', x, key=start)
+    tmp_x = x.to_series(index=range(len(x)))
+    for index in range(len(tmp_x)):
+        if tmp_x[index] == start_time:
+            break
+    end_choice = x[index+1:]
+    end_time  = col2.selectbox('End', end_choice, index=len(end_choice)-1, key=f"{end}_end")
+    return start_time, end_time
 
 if __name__ == '__main__':
     pass

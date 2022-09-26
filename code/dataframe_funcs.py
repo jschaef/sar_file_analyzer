@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import re
+from this import d
 import pandas as pd
 from datetime import timedelta
 
@@ -45,7 +46,6 @@ def df_reset_date_org(df, os_details):
 
 def df_reset_date(df, os_details):
     date_str, format = format_date(os_details)
-
     df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
         f"{date_str} {x}", format=format))
     df.set_index('date', inplace=True,
@@ -67,9 +67,9 @@ def set_unique_date(dataframe, time_obj):
     return dataframe
 
 def translate_dates_into_list(df):
-    hours = [date for date in df.index if date.minute == 10]
+    hours = [date for date in df.index if date.minute <= 5]
     if not hours:
-        hours = [date for date in df.index if date.minute == 30]
+        hours = [date for date in df.index if date.minute <= 30]
     hours.append(df.index[-1])
     return hours
 
@@ -122,3 +122,24 @@ def insert_row(row_num, orig_df, row_to_add):
     else:
         df_final = pd.concat([orig_df,row_to_add], ignore_index = False)
     return df_final
+
+def replace_ymt(start_date, end_date, df):
+    """replaces year, month, day in start_date and/or end_date
+
+    Args:
+        start_date (date_object): the date object which is used as start
+        end_date (date_object): the date object which is used as end
+        df: pandas dataframe
+    Returns:
+        start, end with same year, month, day as dataframe
+    """
+    df = df.copy()
+
+    s_field = [s_year, s_month, s_day] = start_date.year, start_date.month, start_date.day
+    e_field = [e_year, e_month, e_day] = end_date.year, end_date.month, end_date.day
+    df_field = [df_year, df_month, df_day] = df.index[0].year, df.index[0].month, df.index[0].day
+    if s_field != df_field:
+        start_date = start_date.replace(year=df_year, month=df_month, day=df_day)
+    if e_field != df_field:
+        end_date = end_date.replace(year=df_year, month=df_month, day=df_day)
+    return start_date, end_date

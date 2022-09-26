@@ -1,0 +1,55 @@
+/* streamlit secondary background color #E0E0EF */
+body {
+    color: #fff;
+    background-color: #4F8BF9;
+}
+
+/* .stButton>button {
+    color: #4F8BF9;
+    border-radius: 50%;
+    height: 3em;
+    width: 3em;
+} */
+
+.stTextInput>div>div>input {
+    color: black;
+}
+
+.stTextInput>label {
+    /*font-family: Georgia, 'Times New Roman', Times, serif;*/
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; 
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.stSelectbox>label {
+    /*font-family: Georgia, 'Times New Roman', Times, serif;*/
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; 
+    font-weight: bold;;
+    font-size: 16px;
+}
+
+ul[data-baseweb="accordion"]>li>div[role="button"] {
+    background-color: #e3ede2;
+    /* background-color: #f3e3c5 !important; */
+    font-size: 16px;
+}
+
+div[data-baseweb="select"]>div {
+    background-color: #f3e3c5 !important;
+    /* background-color: #91cfec !important; */
+}
+
+div[data-baseweb="notification"] {
+    background-color: #f3e3c5 !important;
+    /* background-color: #91cfec !important; */
+}
+
+button[kind="formSubmit"] {
+    background-color: #f3e3c5 !important;
+}
+
+/* Not working */
+div[data-baseweb="select"]>div:hover> {
+    background-color: #f3e3c5 !important;
+}

@@ -1,6 +1,7 @@
 from email import header
 import streamlit as st
 import helpers
+import pandas as pd
 def pdf_download(pdf_name, chart, col=None, key=None):
     col = col if col else st
     if key:
@@ -10,16 +11,19 @@ def pdf_download(pdf_name, chart, col=None, key=None):
         if col.checkbox('Enable PDF download',):
             helpers.pdf_download(pdf_name, chart)
 
-def show_metrics(prop_list, col=None, key=None):
+def show_metrics(prop_list, col=None, key=None, checkbox=None):
     col = col if col else st
     if key:
         if col.checkbox('Show Metric descriptions from man page', key=key):
             for metric in prop_list:
                 helpers.metric_expander(metric, col=col)
-    else:
+    elif checkbox != "off":
         if col.checkbox('Show Metric descriptions from man page'):
             for metric in prop_list:
                 helpers.metric_expander(metric, col=col)
+    else:
+        for metric in prop_list:
+            helpers.metric_expander(metric, col=col)
 
 def show_checkbox(text, col=None, key=None):
     col = col if col else st
@@ -71,6 +75,7 @@ def arrange_grid_entries(object_field, cols_per_line):
                 if header:
                     pcols[index].markdown(f'###### {header}')
                 pcols[index].write(object)
+                pcols[index].markdown(f'###### statistics')
                 pcols[index].write(stats)
 
         # less than cols_per_line found
@@ -89,6 +94,7 @@ def arrange_grid_entries(object_field, cols_per_line):
                         nindex = cols_per_line - nindex
                         pcols[nindex].write('')
                 pcols[index].write(object)
+                pcols[index].markdown(f'###### statistics')
                 pcols[index].write(stats)
 
 
@@ -111,6 +117,40 @@ def arrange_grid_entries(object_field, cols_per_line):
                     nindex = cols_per_line - nindex
                     pcols[nindex].write('')
             pcols[index].write(object)
+            pcols[index].markdown(f'###### statistics')
             pcols[index].write(stats)
+
+def display_averages(dia_field, prop, main_title, sub_item):
+    final_dfs = []
+    final_dfs_sum = []
+    col1, col2 = st.columns([0.3,0.7])
+    if sub_item:
+        col1.markdown(f'##### Average statistics for {main_title}/{sub_item}/{prop}')
+        col2.markdown(f'##### Average statistics for {main_title}/{sub_item}')
+    else:
+        col1.markdown(f'##### Average statistics for {main_title}/{prop}')
+        col2.markdown(f'##### Average statistics for {main_title}')
+
+    st.write("\n")
+    
+    for entry in range(len(dia_field)):
+        st.markdown(f'- {dia_field[entry][0]}')
+
+    st.write("\n")
+    
+    for entry in range(len(dia_field)):
+        df = dia_field[entry][1][prop]
+        df_sum = dia_field[entry][1]
+        df = df.reset_index()
+        df_sum = df_sum.reset_index()
+        final_dfs.append(df)
+        final_dfs_sum.append(df_sum)
+    final_df = pd.concat(final_dfs)
+    final_dfs_sum = pd.concat(final_dfs_sum)
+    col1, col2 = st.columns([0.3,0.7])
+    col1.write(final_df.describe())
+    col2.write(final_dfs_sum.describe())
+
+        
         
 
