@@ -25,12 +25,13 @@ def single_multi(config_dict, username):
     sar_files = [x.rstrip('.df') for x in sar_files if x.endswith('.df')]
     sar_files.extend(sar_files_pre)
 
-    sel_all = st.checkbox('Select All')
+    sel_all = st.checkbox('Select All', key='select_all')
     st.write('\n')
     has_clicked = True if sel_all else False
     for file in sar_files:
+        key = f'sel_{sar_files.index(file)}_{file}'
         sel = st.checkbox(sar_files[sar_files.index(
-            file)], key=f'sel_{sar_files.index(file)}', value=has_clicked)
+            file)], key=key, value=has_clicked)
         if sel == True:
             sel_field.append(sar_files[sar_files.index(file)])
 
