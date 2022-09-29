@@ -64,14 +64,19 @@ def start():
 
     if choice == "Help":
         help.help()
+    if choice == 'Logout':
+        if st.session_state.get('username'):
+            st.session_state.pop('username')
     elif choice == "Login":
         ph_username = st.sidebar.empty()
         ph_password = st.sidebar.empty()
         ph_login = st.sidebar.empty()
         username = ph_username.text_input("Username")
         password = ph_password.text_input("Password", type='password')
-        if st.session_state.get(username):
-                main_body(username, config_c)
+        if st.session_state.get('username', None) == username:
+            ph_username.empty()
+            ph_password.empty()
+            main_body(username, config_c)
         else:
             if ph_login.checkbox("Login", key='login'):
                 if sql_stuff.login_user(username, password):
