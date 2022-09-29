@@ -40,6 +40,11 @@ div[data-baseweb="select"]>div {
     /* background-color: #91cfec !important; */
 }
 
+label[data-baseweb="checkbox"]>span>option:checked {
+    --hover-color:  rgb(26 124 120);
+    /* background-color: #91cfec !important; */
+}
+
 div[data-baseweb="notification"] {
     background-color: #f3e3c5 !important;
     /* background-color: #91cfec !important; */
