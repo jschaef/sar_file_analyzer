@@ -72,7 +72,7 @@ def start():
         ph_login = st.sidebar.empty()
         username = ph_username.text_input("Username")
         password = ph_password.text_input("Password", type='password')
-        if ph_login.checkbox("Login"):
+        if ph_login.checkbox("Login", key='login'):
             if sql_stuff.login_user(username, password):
                 ph_username.empty()
                 ph_password.empty()
