@@ -242,7 +242,6 @@ def single_multi(config_dict, username):
                         st.write(img)
                         lh.pdf_download(pdf_name, img, key=key)
                     with tab2:
-                        date_collect_field = []
                         object_field = []
                         if chart_field:
                             prop = chart_field[0][1]
@@ -253,7 +252,7 @@ def single_multi(config_dict, username):
                                 df_stat = index[1]
                                 df_new = df_stat[[prop]].copy()
                                 df_time = helpers.get_df_from_start_end(df_new.copy(), start, end)
-                                date_collect_field.append(df_time)
+                                index[1][prop] = df_time
                                 for event in reboot_headers:
                                     hostname = event[1].split()[2].strip("()")
                                     date = event[1].split()[3]
