@@ -1,7 +1,7 @@
-from email import header
 import streamlit as st
 import helpers
 import pandas as pd
+#from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 def pdf_download(pdf_name, chart, col=None, key=None):
     col = col if col else st
     if key:
@@ -106,7 +106,6 @@ def arrange_grid_entries(object_field, cols_per_line):
                 object = object_field.pop()
                 collect_field.append(object)
         for index in range(len(collect_field)): 
-            #pcols[index].markdown('___')
             object = collect_field[index][0]
             stats = collect_field[index][1]
             header = collect_field[index][2]
@@ -151,6 +150,31 @@ def display_averages(dia_field, prop, main_title, sub_item):
     col1.write(final_df.describe())
     col2.write(final_dfs_sum.describe())
 
+# def use_aggrid(df):
+#     gb = GridOptionsBuilder.from_dataframe(df)
+#     #gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination
+#     #gb.configure_pagination(paginationPageSize=20)  # Add pagination
+#     #gb.configure_side_bar()  # Add a sidebar
+#     gb.configure_selection('multiple', use_checkbox=False,
+#         groupSelectsChildren="Group checkbox select children")  # Enable multi-row selection
+#     gridOptions = gb.build()
+
+#     grid_response = AgGrid(
+#         df,
+#         gridOptions=gridOptions,
+#         data_return_mode='AS_INPUT',
+#         update_mode='MODEL_CHANGED',
+#         fit_columns_on_grid_load=True,
+#         # material, alpine, balham
+#         theme='balham',  # Add theme color to the table
+#         enable_enterprise_modules=True,
+#         height=700,
+#         width='100%',
+#         reload_data=True
+#     )
+
+#     #data = grid_response['data']
+#     data = grid_response['data']
         
         
 

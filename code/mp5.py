@@ -54,16 +54,19 @@ def final_overview(sar_structure, headers, entry, wanted_sub_devices, start, end
                 if not dup_check.empty:
                     dup_bool = 1
                     df = df[~df.index.duplicated(keep='first')].copy()
+                df_dis = helpers.restart_headers(
+                    df_display, os_details, restart_headers=restart_headers, display=False)
             helpers.restart_headers(
                 df, os_details, restart_headers=restart_headers, display=False)
+
             df = df.reset_index().melt('date', var_name='metrics', value_name='y')
             chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size,
                 width=width, height=height, title=title)
             if show_metric:
                 metrics = df['metrics'].drop_duplicates().tolist()
             collect_field.append({'df' :df, 'chart' : chart, 'title' : title , 'metrics' : metrics, 
-                'header': header, 'df_display': df_display, 'device_num' : device_num, 'dup_bool':
-                dup_bool, 'dup_check' : dup_check, 'df_describe' : df_describe, })
+                'header': header, 'device_num' : device_num, 'dup_bool':
+                dup_bool, 'dup_check' : dup_check, 'df_describe' : df_describe, 'df_stat' : df_dis })
         return collect_field
 
 

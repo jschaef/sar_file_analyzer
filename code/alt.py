@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 import time
-from turtle import title
 import altair as alt
 import dataframe_funcs as ddf
 import pandas as pd
-from helpers import restart_headers
 
 my_tz = time.tzname[0]
 #https://altair-viz.github.io/user_guide/faq.html#maxrowserror-how-can-i-plot-large-datasets
@@ -190,13 +188,12 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
         lineBreak = "\n",
     ).encode(
         text = alt.condition(nearest, 
-        alt.Text('y:Q',),
+        alt.Text('y:Q'),
         alt.value(' '),
     ),
         opacity=alt.condition(selection_new, alt.value(1), alt.value(0)),
         color = color_x
     )
-    import streamlit as st
     for rule in rule_field:
         rule = rule.encode(
             color=alt.Color('dummy:N', legend=None)
@@ -213,7 +210,7 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
 
         final_line += reboot_text
     
-    mlayer = alt.layer(final_line, selectors, rules, xpoints, tooltip_text).interactive()
+    mlayer = alt.layer(final_line, selectors, rules,  tooltip_text).interactive()
     #mlayer = mlayer|legend
     mlayer = alt.hconcat(mlayer, legend).configure_concat(
         spacing=50

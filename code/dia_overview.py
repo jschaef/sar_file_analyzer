@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 
 import streamlit as st
-import multiprocessing
+#import multiprocessing
+import multiprocessing_on_dill as multiprocessing
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
 import mp5
 import layout_helper as lh
 from config import Config
+#from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 sar_structure = []
 os_details = ""
@@ -18,7 +20,6 @@ def show_dia_overview(username, sar_file_col):
     sar_file = helpers.get_sar_files(username, col=sar_file_col, key="dia_overview")
     st.subheader('Overview of important metrics from SAR data')
     col1, col2, col3 = lh.create_columns(3, [0.7, 0.1, 0.4])
-    #sar_file = helpers.get_sar_files(username, col=col4)
     op_ph = col1.empty()
     op_ph3= col3.empty()
     pdf_check = col3.empty()
@@ -34,7 +35,6 @@ def show_dia_overview(username, sar_file_col):
     if not sar_structure:
         sar_structure = sdc.get_data_frames(sar_file, username)
         os_details = sar_structure.pop('os_details')
-    #op_ph.text(f"Operating System Details: {os_details}")
     sar_file_col.text(f"Operating System Details: {os_details}")
     headers = [header for header in sar_structure.keys()]
     restart_headers = helpers.extract_restart_header(headers)
@@ -61,7 +61,6 @@ def show_dia_overview(username, sar_file_col):
         enable_pdf = 0
     show_metric = 1
     statistics = 1
-    #      statistics = 0
 
     def collect_results(result):
         collect_list.append(result)
@@ -153,7 +152,6 @@ def show_dia_overview(username, sar_file_col):
                         font_size, width, height, show_metric), callback=collect_results)
                 pool.close()
                 pool.join()
-                #st.write(collect_list)
                 for item in collect_list:
 
                     header = item[0]['header']
@@ -170,21 +168,20 @@ def show_dia_overview(username, sar_file_col):
                             chart = item[0]['chart']
                             if device == 'all':
                                 st.markdown(f'###### all of {device_count}')
-                            st.altair_chart(chart)
-                            # if st.checkbox('Enable PDF saving', key=item):
-                            #     helpers.pdf_download(pdf_name, chart)
+                            st.altair_chart(chart, use_container_width=True)
                         with tab2:
                             if statistics:
                                 dup_bool = item[0]['dup_bool']
                                 dup_check = item[0]['dup_check']
-                                df_display = item[0]['df_display']
                                 df_describe = item[0]['df_describe']
+                                df_stat  = item[0]['df_stat']
 
                                 col1, col2, col3, col4 = lh.create_columns(
                                     4, [0, 0, 1, 1])
                                 
                                 col1.markdown(f'###### Sar Data for {header}')
-                                helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
+                                #helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
+                                st.write(df_stat)
                                 if dup_bool:
                                    col1.warning('Be aware that your data contains multiple indexes')
                                    col1.write('Multi index table:')
@@ -216,16 +213,17 @@ def show_dia_overview(username, sar_file_col):
                                 if statistics:
                                     dup_bool = subitem['dup_bool']
                                     dup_check = subitem['dup_check']
-                                    df_display = subitem['df_display']
                                     df_describe = subitem['df_describe']
+                                    df_stat  = subitem['df_stat']
                                     title = subitem['title']
 
                                     col1, col2, col3, col4 = lh.create_columns(
                                         4, [0, 0, 1, 1])
 
                                     col1.markdown(f'###### Sar Data for {title}')
-                                    helpers.restart_headers(
-                                        df_display, os_details, restart_headers=restart_headers,)
+                                    # helpers.restart_headers(
+                                    #     df_display, os_details, restart_headers=restart_headers,)
+                                    st.write(df_stat)
                                     if dup_bool:
                                        col1.warning(
                                            'Be aware that your data contains multiple indexes')

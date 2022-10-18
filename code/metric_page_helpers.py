@@ -267,32 +267,44 @@ def display_stats_data(collect_field):
     even_lines = int(len(collect_field)/cols_per_line)
     remaining_cols = len(collect_field) % cols_per_line
     empty_cols = cols_per_line - remaining_cols
-
+    f_index = 0
     for line in range(even_lines):
         for col in cols:
-            f_index = cols.index(col)
-            col.markdown(f'###### data for {collect_field[f_index][2]}')
+            if len(collect_field[0]) >=4:
+                header_part = collect_field[f_index][3]
+            else:
+                header_part = ''
+            col.markdown(f'###### data for {header_part} {collect_field[f_index][2]}')
             col.write(collect_field[f_index][0])
-            col.markdown(f'###### statistics for {collect_field[f_index][2]}')
+            col.markdown(f'###### statistics for {header_part} {collect_field[f_index][2]}')
             col.write(collect_field[f_index][1])
+            f_index +=1
     if remaining_cols and not even_lines:
         for index in range(remaining_cols):
+            if len(collect_field[0]) >=4:
+                header_part = collect_field[index][3]
+            else:
+                header_part = ''
             col = cols[index]
-            col.markdown(f'###### data for {collect_field[index][2]}')
+            col.markdown(f'###### data for {header_part} {collect_field[index][2]}')
             col.write(collect_field[index][0])
             for nindex in range(1, empty_cols + 1):
                 nindex = cols_per_line - nindex
                 cols[nindex].write('')
-            col.markdown(f'###### statistics for {collect_field[index][2]}')
+            col.markdown(f'###### data for {header_part} {collect_field[index][2]}')
             col.write(collect_field[index][1])
     elif remaining_cols and even_lines:
         for index in range(1, remaining_cols + 1):
+            if len(collect_field[0]) >=4:
+                header_part = collect_field[f_index][3]
+            else:
+                header_part = ''
             col = cols[index - 1]
             col.markdown(f'___ ')
             f_index = len(collect_field) - index
-            col.markdown(f'###### data for {collect_field[f_index][2]}')
+            col.markdown(f'###### data for {header_part} {collect_field[f_index][2]}')
             col.write(collect_field[f_index][0])
-            col.markdown(f'###### statistics for {collect_field[f_index][2]}')
+            col.markdown(f'###### statistics for {header_part} {collect_field[f_index][2]}')
             col.write(collect_field[f_index][1])
 
 # for future usage
