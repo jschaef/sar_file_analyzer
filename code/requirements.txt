@@ -7,4 +7,5 @@ python-magic
 redis
 SQLAlchemy
 streamlit
+streamlit-aggrid
 streamlit-option-menu

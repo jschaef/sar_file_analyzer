@@ -152,6 +152,7 @@ def show_dia_overview(username, sar_file_col):
                         font_size, width, height, show_metric), callback=collect_results)
                 pool.close()
                 pool.join()
+                counter = 0
                 for item in collect_list:
 
                     header = item[0]['header']
@@ -161,9 +162,9 @@ def show_dia_overview(username, sar_file_col):
                     if len(item) == 1:
                         st.markdown(f'#### {header}')
                         if show_diagrams:
-                            tab1, tab2, tab3, tab4 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                            tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF", " 📃 grid-table"])
                         else:
-                            tab0, tab1, tab2, tab3, tab4 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                            tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF", " 📃 grid-table"])
                         with tab1:
                             chart = item[0]['chart']
                             if device == 'all':
@@ -175,12 +176,12 @@ def show_dia_overview(username, sar_file_col):
                                 dup_check = item[0]['dup_check']
                                 df_describe = item[0]['df_describe']
                                 df_stat  = item[0]['df_stat']
+                                df_display       = item[0]['df_display']
 
                                 col1, col2, col3, col4 = lh.create_columns(
                                     4, [0, 0, 1, 1])
                                 
                                 col1.markdown(f'###### Sar Data for {header}')
-                                #helpers.restart_headers(df_display, os_details, restart_headers=restart_headers,)
                                 st.write(df_stat)
                                 if dup_bool:
                                    col1.warning('Be aware that your data contains multiple indexes')
@@ -199,14 +200,18 @@ def show_dia_overview(username, sar_file_col):
                             else:
                                 st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                          by default because the current implementation is quite performance intensive")
+                        with tab5:
+                            lh.use_aggrid(df_display, restart_headers, f'generic_{counter}')
+                        counter += 1
                     else:
                         st.markdown(f'#### {header}')
+                        counter = 0
                         for subitem in item:
                             chart = subitem['chart']
                             if show_diagrams:
-                                tab1, tab2, tab3, tab4 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                                tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF", " 📃 grid-table"])
                             else:
-                                tab0, tab1, tab2, tab3, tab4 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF"])
+                                tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF", " 📃 grid-table"])
                             with tab1:
                                 tab1.altair_chart(chart)
                             with tab2:
@@ -215,14 +220,13 @@ def show_dia_overview(username, sar_file_col):
                                     dup_check = subitem['dup_check']
                                     df_describe = subitem['df_describe']
                                     df_stat  = subitem['df_stat']
+                                    df_display = subitem['df_display']
                                     title = subitem['title']
 
                                     col1, col2, col3, col4 = lh.create_columns(
                                         4, [0, 0, 1, 1])
 
                                     col1.markdown(f'###### Sar Data for {title}')
-                                    # helpers.restart_headers(
-                                    #     df_display, os_details, restart_headers=restart_headers,)
                                     st.write(df_stat)
                                     if dup_bool:
                                        col1.warning(
@@ -242,6 +246,9 @@ def show_dia_overview(username, sar_file_col):
                                 else:
                                     st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                              by default because the current implementation is quite performance intensive")
+                            with tab5:
+                                lh.use_aggrid(df_display, restart_headers, f"{subitem}_{counter}")
+                            counter +=1
                     st.markdown("___")
         # if st.button('Back to top'):
             if st.form_submit_button('Back to top'):

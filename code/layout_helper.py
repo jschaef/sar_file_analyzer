@@ -1,7 +1,7 @@
 import streamlit as st
 import helpers
 import pandas as pd
-#from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 def pdf_download(pdf_name, chart, col=None, key=None):
     col = col if col else st
     if key:
@@ -150,31 +150,74 @@ def display_averages(dia_field, prop, main_title, sub_item):
     col1.write(final_df.describe())
     col2.write(final_dfs_sum.describe())
 
-# def use_aggrid(df):
-#     gb = GridOptionsBuilder.from_dataframe(df)
-#     #gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination
-#     #gb.configure_pagination(paginationPageSize=20)  # Add pagination
-#     #gb.configure_side_bar()  # Add a sidebar
-#     gb.configure_selection('multiple', use_checkbox=False,
-#         groupSelectsChildren="Group checkbox select children")  # Enable multi-row selection
-#     gridOptions = gb.build()
+def use_aggrid(df, restart_headers, key):
+    df =  df.reset_index()
+    for col in df.columns:
+        max = f"{col}_max"
+        min = f"{col}_min"
+        df[max] = df[col].max()
+        df[min] = df[col].min()
 
-#     grid_response = AgGrid(
-#         df,
-#         gridOptions=gridOptions,
-#         data_return_mode='AS_INPUT',
-#         update_mode='MODEL_CHANGED',
-#         fit_columns_on_grid_load=True,
-#         # material, alpine, balham
-#         theme='balham',  # Add theme color to the table
-#         enable_enterprise_modules=True,
-#         height=700,
-#         width='100%',
-#         reload_data=True
-#     )
 
-#     #data = grid_response['data']
-#     data = grid_response['data']
+    cellstyle_jscode = JsCode("""
+        function(params) {
+            var max = params.column.colDef.headerName + '_max'; 
+            var min = params.column.colDef.headerName + '_min';
+            if (params.value == params.data[max]) {
+                return {
+                    'color': 'black',
+                    'backgroundColor': 'lightblue',
+                }
+            }
+            else if (params.value == params.data[min]) {
+                return {
+                    'color': 'black',
+                    'backgroundColor': 'yellow',
+                }
+            } else {
+                return {
+                    'color': 'black',
+                    'backgroundColor': 'white'
+                }
+            }
+        };
+        """)
+    
+    gb = GridOptionsBuilder.from_dataframe(df)
+    #gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination
+    #gb.configure_pagination(paginationPageSize=20)  # Add pagination
+    #gb.configure_side_bar()  # Add a sidebar
+    gb.configure_selection('multiple', use_checkbox=False,
+        groupSelectsChildren="Group checkbox select children")  # Enable multi-row selection
+
+    for column in df:
+        if "_max" in column or "_min" in column:
+            gb.configure_column(column, hide=True)
+        gb.configure_column(column, cellStyle=cellstyle_jscode)
+        #gb.configure_column(column, cellRenderer=cellrenderer_jscode)
+            
+    gridOptions = gb.build()
+
+    grid_response = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        data_return_mode='AS_INPUT',
+        update_mode='MODEL_CHANGED',
+        fit_columns_on_grid_load=True,
+        # material, alpine, balham
+        theme='balham',  # Add theme color to the table
+        enable_enterprise_modules=True,
+        height=700,
+        width='100%',
+        reload_data=True,
+        suppressColumnVirtualisation=True,
+        allow_unsafe_jscode=True,
+        sizeColumnsToFit=True,
+        key = key,
+    )
+
+    #data = grid_response['data']
+    data = grid_response['data']
         
         
 

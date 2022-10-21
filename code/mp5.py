@@ -66,7 +66,8 @@ def final_overview(sar_structure, headers, entry, wanted_sub_devices, start, end
                 metrics = df['metrics'].drop_duplicates().tolist()
             collect_field.append({'df' :df, 'chart' : chart, 'title' : title , 'metrics' : metrics, 
                 'header': header, 'device_num' : device_num, 'dup_bool':
-                dup_bool, 'dup_check' : dup_check, 'df_describe' : df_describe, 'df_stat' : df_dis })
+                dup_bool, 'dup_check' : dup_check, 'df_describe' : df_describe, 'df_stat' : df_dis, 
+                'df_display' : df_display })
         return collect_field
 
 
