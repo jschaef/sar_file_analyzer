@@ -57,6 +57,26 @@ secondaryBackgroundColor="#e0e0ef"
 textColor="#262730"
 font="sans serif"
 ```
+## behind nginx
+```
+server {
+    listen              443 ssl;
+    server_name         <fqdn of your server>;
+    ssl_certificate     /etc/ssl/server/<pub_cert>.crt.pem;
+    ssl_certificate_key /etc/ssl/private/<priv_key>.key.pem;
+    
+    location / {
+            client_max_body_size 2048M;
+            proxy_pass http://127.0.0.1:8501;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_read_timeout 86400;
+    }
+}
+```
 
 ## bugs
 In case the app is throwing an error about helpers.py line 381 <code>format(precision=4)</code>
