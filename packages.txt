@@ -1,2 +1,3 @@
 libtk8.6
 python3-tk
+python310-tk
