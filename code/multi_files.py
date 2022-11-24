@@ -221,15 +221,15 @@ def single_multi(config_dict, username):
 
                 elif pd_or_dia == 'Diagram':
                     if chart_field:
-                        start_list = [chart_field[x][0].index[0] for x in range(len(chart_field))]
-                        end_list = [chart_field[x][0].index[-1] for x in range(len(chart_field))]
+                        start_list = [chart_field[x][0].sort_index().index[0] for x in range(len(chart_field))]
+                        end_list = [chart_field[x][0].sort_index().index[-1] for x in range(len(chart_field))]
                         start = helpers.get_start_end_date(start_list, "start")
                         end   = helpers.get_start_end_date(end_list, "end")
                         col1, col2, col3, col4, *_ = st.columns(8)
                         start, end = helpers.create_start_end_time_list(start, end, col1, col2)
                         for item in range(len(chart_field)):
                             df_date = helpers.get_df_from_start_end(chart_field[item][0], start, end)
-                            chart_field[item][0] = df_date
+                            chart_field[item][0] = df_date.sort_index()
                         col1, col2, col3, col4 = st.columns(4)
                         col3.write(''), col4.write()
                         tab1, tab2, tab3, tab4 = st.tabs(["📈 Chart", "🗃 Data", "🧮 Statistics", " 📔 man page"])
@@ -276,3 +276,10 @@ def single_multi(config_dict, username):
                             lh.show_metrics([prop], checkbox='off', col=col1)
                 #if st.button('back to top', on_click=goto_top, args=('show',False)):
                 #    st.experimental_rerun()
+    else:
+        keys_to_delete = []
+        for key in st.session_state:
+            if key.endswith('_end') or key.endswith('_start'):
+                keys_to_delete.append(key)
+        helpers.clean_session_state('multi_start','multi_end')
+        helpers.clean_session_state(keys_to_delete)

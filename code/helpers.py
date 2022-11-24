@@ -8,9 +8,7 @@ import time
 import re
 import asyncio
 from datetime import datetime
-#from streamlit.script_runner.script_run_context import add_script_run_ctx
 from altair_saver import save
-from threading import Thread
 from config import Config
 import sql_stuff
 import download as dow
@@ -509,7 +507,7 @@ def datetime_intersection(list_of_sets: list) -> list:
         fset = intersection
     return list(fset)
 
-def get_start_end_date(date_list: list, point: str="start") -> pd.datetime:
+def get_start_end_date(date_list: list, point: str="start") -> datetime:
     """compares pd.dateTime objects and returns either the min or the max val 
 
     Args:
@@ -552,14 +550,19 @@ def create_start_end_time_list(start: pd.DatetimeIndex, end: pd.DatetimeIndex, c
     end_d = end.replace(microsecond=0, second=0, minute=0, hour=end.hour)
     x = pd.date_range(start_d, end_d, freq='H')
     x = x.delete(0).insert(0,start).append(pd.date_range(pd.Timestamp(end), periods=1))
-    start_time = col1.selectbox('Start', x, key=start)
+    start_key = f"{start}_start"
+    start_time = col1.selectbox('Start', x, key=start_key)
     tmp_x = x.to_series(index=range(len(x)))
     for index in range(len(tmp_x)):
         if tmp_x[index] == start_time:
             break
     end_choice = x[index+1:]
-    end_time  = col2.selectbox('End', end_choice, index=len(end_choice)-1, key=f"{end}_end")
+    end_key = f"{end}_end"
+    end_time  = col2.selectbox('End', end_choice, index=len(end_choice)-1, key=end_key)
     return start_time, end_time
 
+def clean_session_state(*args):
+    for entry in args:
+        st.session_state.pop(entry, None)
 if __name__ == '__main__':
     pass
