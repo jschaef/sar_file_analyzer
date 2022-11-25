@@ -25,7 +25,7 @@ def single_multi(config_dict, username):
     sar_files = [x.rstrip('.df') for x in sar_files if x.endswith('.df')]
     sar_files.extend(sar_files_pre)
 
-    sel_all = st.checkbox('Select All', key='select_all')
+    sel_all = st.checkbox('***Select All***', key='select_all')
     st.write('\n')
     has_clicked = True if sel_all else False
     for file in sar_files:
@@ -43,7 +43,7 @@ def single_multi(config_dict, username):
     col3.write('')
     col4.write('')
     ph_show = col1.empty()
-    if ph_show.checkbox('show',key='Show'):
+    if ph_show.checkbox('***show***',key='Show'):
         if sel_field:
             multi_sar_dict = {}
             def gather_results(result_field):
