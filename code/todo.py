@@ -23,6 +23,6 @@ def todo():
     st.markdown('* Enhance "Update Header" functionality :heavy_check_mark:')
     st.markdown("* Implement password change :heavy_check_mark:")
     st.markdown("* Implement display reboot in dia and data frames:heavy_check_mark:")
-    st.markdown("* Enhance multiple files view by specifying start end times")
+    st.markdown("* Enhance multiple files view by specifying start end times :heavy_check_mark:")
     st.markdown("* Implement PDF download for multiple charts on summary page")
-    st.markdown("* Looking again into threading")
+    st.markdown("* Looking again into threading :heavy_check_mark:")
