@@ -247,7 +247,7 @@ def show_dia_overview(username, sar_file_col):
                                     st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                              by default because the current implementation is quite performance intensive")
                             with tab5:
-                                lh.use_aggrid(df_display, restart_headers, f"{subitem}_{counter}")
+                                lh.use_aggrid(df_display, restart_headers, f"{counter}")
                             counter +=1
                     st.markdown("___")
         # if st.button('Back to top'):

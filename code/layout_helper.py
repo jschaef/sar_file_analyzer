@@ -1,6 +1,7 @@
 import streamlit as st
 import helpers
 import pandas as pd
+from random import random
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 def pdf_download(pdf_name, chart, col=None, key=None):
     col = col if col else st
@@ -151,6 +152,7 @@ def display_averages(dia_field, prop, main_title, sub_item):
     col2.write(final_dfs_sum.describe())
 
 def use_aggrid(df, restart_headers, key):
+    key = f"{key}_{random()}"
     df =  df.reset_index()
     for col in df.columns:
         max = f"{col}_max"
@@ -197,7 +199,6 @@ def use_aggrid(df, restart_headers, key):
         #gb.configure_column(column, cellRenderer=cellrenderer_jscode)
             
     gridOptions = gb.build()
-
     grid_response = AgGrid(
         df,
         gridOptions=gridOptions,
