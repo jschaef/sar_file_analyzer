@@ -199,26 +199,5 @@ def use_aggrid(df, restart_headers, key):
         #gb.configure_column(column, cellRenderer=cellrenderer_jscode)
             
     gridOptions = gb.build()
-    grid_response = AgGrid(
-        df,
-        gridOptions=gridOptions,
-        data_return_mode='AS_INPUT',
-        update_mode='MODEL_CHANGED',
-        fit_columns_on_grid_load=True,
-        # material, alpine, balham
-        theme='balham',  # Add theme color to the table
-        enable_enterprise_modules=True,
-        height=700,
-        width='100%',
-        reload_data=True,
-        suppressColumnVirtualisation=True,
-        allow_unsafe_jscode=True,
-        sizeColumnsToFit=True,
-        key = key,
-    )
-
-    #data = grid_response['data']
-    data = grid_response['data']
-        
-        
+    return df, gridOptions, key
 

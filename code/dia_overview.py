@@ -9,6 +9,7 @@ import helpers
 import mp5
 import layout_helper as lh
 from config import Config
+from st_aggrid import AgGrid
 #from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 sar_structure = []
@@ -158,6 +159,7 @@ def show_dia_overview(username, sar_file_col):
                     header = item[0]['header']
                     device = item[0]['title']
                     device_count = item[0]['device_num']
+                    #grid = item[0]['grid']
 
                     if len(item) == 1:
                         st.markdown(f'#### {header}')
@@ -201,7 +203,26 @@ def show_dia_overview(username, sar_file_col):
                                 st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                          by default because the current implementation is quite performance intensive")
                         with tab5:
-                            lh.use_aggrid(df_display, restart_headers, f'generic_{counter}')
+                            #lh.use_aggrid(df_display, restart_headers, f'generic_{counter}')
+                            df, gridOptions, key = item[0]['grid']
+                            AgGrid (
+                                    df,
+                                    gridOptions=gridOptions,
+                                    data_return_mode='AS_INPUT',
+                                    update_mode='MODEL_CHANGED',
+                                    fit_columns_on_grid_load=True,
+                                    # material, alpine, balham
+                                    theme='balham',  # Add theme color to the table
+                                    enable_enterprise_modules=True,
+                                    height=700,
+                                    width='100%',
+                                    reload_data=True,
+                                    suppressColumnVirtualisation=True,
+                                    allow_unsafe_jscode=True,
+                                    sizeColumnsToFit=True,
+                                    key = key,
+                            )
+
                         counter += 1
                     else:
                         st.markdown(f'#### {header}')
@@ -220,7 +241,6 @@ def show_dia_overview(username, sar_file_col):
                                     dup_check = subitem['dup_check']
                                     df_describe = subitem['df_describe']
                                     df_stat  = subitem['df_stat']
-                                    df_display = subitem['df_display']
                                     title = subitem['title']
 
                                     col1, col2, col3, col4 = lh.create_columns(
@@ -247,7 +267,26 @@ def show_dia_overview(username, sar_file_col):
                                     st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                              by default because the current implementation is quite performance intensive")
                             with tab5:
-                                lh.use_aggrid(df_display, restart_headers, f"{counter}")
+                                #lh.use_aggrid(df_display, restart_headers, f"{counter}")
+                                df, gridOptions, key = subitem['grid']
+                                AgGrid(
+                                    df,
+                                    gridOptions=gridOptions,
+                                    data_return_mode='AS_INPUT',
+                                    update_mode='MODEL_CHANGED',
+                                    fit_columns_on_grid_load=True,
+                                    # material, alpine, balham
+                                    theme='balham',  # Add theme color to the table
+                                    enable_enterprise_modules=True,
+                                    height=700,
+                                    width='100%',
+                                    reload_data=True,
+                                    suppressColumnVirtualisation=True,
+                                    allow_unsafe_jscode=True,
+                                    sizeColumnsToFit=True,
+                                    key=key,
+                                )
+
                             counter +=1
                     st.markdown("___")
         # if st.button('Back to top'):

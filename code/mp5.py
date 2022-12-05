@@ -1,4 +1,5 @@
 import helpers
+import layout_helper
 import alt
 
 def final_overview(sar_structure, headers, entry, wanted_sub_devices, start, end, statistics,
@@ -64,10 +65,11 @@ def final_overview(sar_structure, headers, entry, wanted_sub_devices, start, end
                 width=width, height=height, title=title)
             if show_metric:
                 metrics = df['metrics'].drop_duplicates().tolist()
+            grid = layout_helper.use_aggrid(df_display, restart_headers, device_num)
             collect_field.append({'df' :df, 'chart' : chart, 'title' : title , 'metrics' : metrics, 
                 'header': header, 'device_num' : device_num, 'dup_bool':
                 dup_bool, 'dup_check' : dup_check, 'df_describe' : df_describe, 'df_stat' : df_dis, 
-                'df_display' : df_display })
+                'df_display' : df_display , 'grid' : grid})
         return collect_field
 
 

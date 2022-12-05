@@ -67,9 +67,9 @@ def set_unique_date(dataframe, time_obj):
     return dataframe
 
 def translate_dates_into_list(df):
-    hours = [date for date in df.index if date.minute <= 5]
-    if not hours:
-        hours = [date for date in df.index if date.minute <= 30]
+    minute = df.index[0].minute
+    hours = [date for date in df.index[0:] if date.minute <= minute-1]
+    hours.insert(0, df.index[0])
     hours.append(df.index[-1])
     return hours
 
