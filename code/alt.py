@@ -12,6 +12,7 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
                          ylabelpadd=10, font_size=None, title=None):
 
     #df['date'] = df['date'].dt.tz_localize('UTC', ambiguous=True)
+    df['date_utc'] = df['date'].dt.tz_localize('UTC')
     rule_field, z_field, y_pos = create_reboot_rule(
         df, property, restart_headers, os_details)
 
@@ -21,17 +22,17 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
         color_item = 'file'
 
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
+                            fields=['date_utc'], empty='none')
 
     selectors = alt.Chart(df).mark_point().encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
     ).add_selection(
         nearest
     )
 
     c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal',
+        alt.X('utchoursminutes(date_utc)', type='temporal',
               scale=alt.Scale(zero=False),
               axis=alt.Axis(domain=True, labelBaseline='line-top',
                             title='date')),
@@ -54,7 +55,7 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
 
 
     rules = alt.Chart(df).mark_rule(color='gray').encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
     ).transform_filter(
         nearest
     )
@@ -227,6 +228,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
     rule_fields = []
     for data in collect_field:
         df = data[0]
+        df['date_utc'] = df['date'].dt.tz_localize('UTC')
         property = data[1]
         filename = df['file'][0]
         for header in reboot_headers:
@@ -242,10 +244,10 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
         b_df = pd.concat([b_df, df], ignore_index=False)
 
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
+                            fields=['date_utc'], empty='none')
 
     selectors = alt.Chart(b_df).mark_point().encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
     ).add_selection(
         nearest
@@ -258,7 +260,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
     opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
 
     c = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal',
+        alt.X('utchoursminutes(date_utc)', type='temporal',
               scale=alt.Scale(zero=False),
               axis=alt.Axis(domain=True, labelBaseline='line-top',
                             title='date')),
@@ -277,7 +279,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
     )
 
     rules = alt.Chart(b_df).mark_rule(color='gray').encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
     ).transform_filter(
         nearest
     )
@@ -359,12 +361,13 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
         b_df[property] = df[property]
     
     b_df = b_df.reset_index().melt('date', var_name='metrics', value_name='y')
+    b_df['date_utc'] = b_df['date'].dt.tz_localize('UTC')
     
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
+                            fields=['date_utc'], empty='none')
 
     selectors = alt.Chart(b_df).mark_point().encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
     ).add_selection(
         nearest
@@ -379,7 +382,7 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
 
     #line = alt.Chart(b_df).encode(
     line = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal', title='date'),
+        alt.X('utchoursminutes(date_utc)', type='temporal', title='date'),
         alt.Y('y:Q'),
         opacity=opacity_x
         ).properties(
@@ -391,7 +394,7 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
     )
 
     rules = alt.Chart(b_df).mark_rule(color='gray').encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
     ).transform_filter(
         nearest
     )
@@ -468,8 +471,9 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
         b_df = pd.concat([b_df, df], ignore_index=False)
 
     b_df['date'] = b_df.index
+    b_df['date_utc'] = b_df['date'].dt.tz_localize('UTC')
     nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
+                            fields=['date_utc'], empty='none')
 
     selectors = alt.Chart(b_df).mark_point().encode(
         alt.X('utchoursminutes(date)', type='temporal'),
@@ -486,7 +490,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
     opacity_x = alt.condition(selection, alt.value(1.0), alt.value(0))
 
     line = alt.Chart(b_df).mark_line(point=False, interpolate='natural').encode(
-        alt.X('utchoursminutes(date)', type='temporal', title='date'),
+        alt.X('utchoursminutes(date_utc)', type='temporal', title='date'),
         alt.Y(f'{property}:Q'),
         opacity=opacity_x
     ).properties(
@@ -498,7 +502,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
         color=color_x
     )
     rules = alt.Chart(b_df).mark_rule(color='gray').encode(
-        alt.X('utchoursminutes(date)', type='temporal'),
+        alt.X('utchoursminutes(date_utc)', type='temporal'),
     ).transform_filter(
         nearest
     )

@@ -72,8 +72,8 @@ def do_metrics(config_dict, username):
             font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
             chart= alt.overview_v5(chart_field, restart_headers, width, hight, 'device', font_size, title=title)
             st.markdown(f'###### {filename}')
-            st.write(chart)
-            helpers.pdf_download(pdf_name, chart)
+            st.altair_chart(chart, theme=None)
+            lh.pdf_download(pdf_name, chart)
 
         with tab2:
             mph.display_stats_data(collect_field)
@@ -96,8 +96,8 @@ def do_metrics(config_dict, username):
             font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
             chart = alt.overview_v4(chart_field, restart_headers, width, hight, font_size )
             st.markdown(f'###### {filename}')
-            st.write(chart)
-            helpers.pdf_download(pdf_name, chart)
+            st.altair_chart(chart, theme=None)
+            lh.pdf_download(pdf_name, chart)
         with tab2:
             mph.display_stats_data(collect_field)
         with tab3:

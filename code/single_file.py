@@ -16,7 +16,7 @@ def single_f(config_obj, username):
     col1, col2, col3, col4 = st.columns([1,1,1, 1])
     des_text = 'Show a Summary of the chosen header or Details of the chosen metric in the left frame'
     selected_content = col1.selectbox(
-            des_text, ['Summary', 'Details'], key='diagr')
+            des_text, ['Details','Summary'], key='diagr')
     col2.write('')
     selection = helpers.get_sar_files(username, col=col3)
     st.sidebar.markdown('---')
@@ -67,7 +67,7 @@ def single_f(config_obj, username):
             font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
             chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size, width=width, 
                 height=height, title=title)
-            st.altair_chart(chart)
+            st.altair_chart(chart, theme=None)
             lh.pdf_download(pdf_name, chart)
         with tab2:
             st.markdown(f'###### Dataset for {aitem[selected]} {header_add}')
@@ -103,7 +103,7 @@ def single_f(config_obj, username):
             font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
             chart = alt.draw_single_chart_v1(
                 df_part, prop, restart_headers, os_details, width, hight, font_size=font_size, title=title)
-            st.altair_chart(chart)
+            st.altair_chart(chart, theme=None)
             lh.pdf_download(pdf_name, chart)
         with tab2:
             st.markdown(f'###### Dataset for {aitem[selected]} {header_add} {prop}')

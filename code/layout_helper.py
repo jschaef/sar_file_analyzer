@@ -1,16 +1,56 @@
 import streamlit as st
+import os
 import helpers
 import pandas as pd
 from random import random
+from altair_saver import save
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
-def pdf_download(pdf_name, chart, col=None, key=None):
-    col = col if col else st
-    if key:
-        if col.checkbox('Enable PDF download', key=key):
-            helpers.pdf_download(pdf_name, chart)
+
+global fobject
+
+def create_pdf(file: str, chart: object) -> list:
+   if not st.session_state.get('download'):
+        mimetype = 'text/plain'
+        return ['dummy', mimetype]
+   else:
+        global fobject
+        mimetype = 'application/x-binary'
+        save(chart, file)
+        fobject = open(file, 'rb')
+        st.session_state.download = False
+        return [fobject, mimetype]
+
+
+def pdf_download(file: str, chart: object,key=None):
+    """creates a download button and a checkbox. Using function create_pdf()
+    to create the file for download if the checkbox has been enabled.
+
+    Args:
+        file (str): filepath where to save the pdf
+        chart (altair object): image/chart created from the altair library
+        key (widget key, optional): widget key for streamlit api. Defaults to None.
+    """
+    disabled=True
+    st.session_state.download = False
+    col1, col2, *_ = st.columns([0.1,0.1,0.8])
+    col2 = col2 if col2 else st
+    save_dir = os.path.dirname(file)
+    if not os.path.exists(save_dir):
+        os.system(f'mkdir -p {save_dir}')
+    dkey = f"pdf_{random()}_d"
+    clicked = col2.checkbox('*Enable Download*', key='check_download')
+    if clicked:
+        st.session_state.download = True
+        disabled = False
+
+    col1.download_button(label='Download PDF', file_name='sar_chart.pdf', data=create_pdf(file, chart)[0],
+        mime='application/x-binary',key=dkey, disabled=disabled)
+    try:
+        fobject
+    except NameError:
+        pass
     else:
-        if col.checkbox('Enable PDF download',):
-            helpers.pdf_download(pdf_name, chart)
+        fobject.close()
 
 def show_metrics(prop_list, col=None, key=None, checkbox=None):
     col = col if col else st

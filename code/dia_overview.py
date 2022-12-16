@@ -171,7 +171,7 @@ def show_dia_overview(username, sar_file_col):
                             chart = item[0]['chart']
                             if device == 'all':
                                 st.markdown(f'###### all of {device_count}')
-                            st.altair_chart(chart, use_container_width=True)
+                            st.altair_chart(chart, use_container_width=True, theme=None)
                         with tab2:
                             if statistics:
                                 dup_bool = item[0]['dup_bool']
@@ -234,7 +234,7 @@ def show_dia_overview(username, sar_file_col):
                             else:
                                 tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(["✌️", "📈 Chart", "🗃 Data", " 📔 man page", " 📊 PDF", " 📃 grid-table"])
                             with tab1:
-                                tab1.altair_chart(chart)
+                                st.altair_chart(chart, theme=None)
                             with tab2:
                                 if statistics:
                                     dup_bool = subitem['dup_bool']

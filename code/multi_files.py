@@ -199,8 +199,8 @@ def single_multi(config_dict, username):
                                     key=f"slider_{key}")
                                 chart = alt.overview_v1(df, restart_headers, os_details, font_size, 
                                     width=width, height=height, title=title)
-                                st.altair_chart(chart)
-                                lh.pdf_download(pdf_name, chart, )
+                                st.altair_chart(chart, theme=None)
+                                lh.pdf_download(pdf_name, chart)
                             with tab2:
                                 for entry in display_field:
                                     if entry[0] == key:
@@ -241,8 +241,8 @@ def single_multi(config_dict, username):
                                  800, 400, 'Diagram Width', 'Diagram Hight', col=cols[0])
                             img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file', font_size, title=title)
                             img = img.configure_axisY(labelLimit=400)
-                            st.write(img)
-                            lh.pdf_download(pdf_name, img, key=key)
+                            st.altair_chart(img, theme=None)
+                            lh.pdf_download(pdf_name, img)
                         with tab2:
                             object_field = []
                             if chart_field:
