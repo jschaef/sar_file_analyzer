@@ -200,6 +200,7 @@ def single_multi(config_dict, username):
                                 chart = alt.overview_v1(df, restart_headers, os_details, font_size, 
                                     width=width, height=height, title=title)
                                 st.altair_chart(chart, theme=None)
+                                key = f"dia_{collect_field.index(data)}"
                                 lh.pdf_download(pdf_name, chart)
                             with tab2:
                                 for entry in display_field:

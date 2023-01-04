@@ -38,7 +38,7 @@ def pdf_download(file: str, chart: object,key=None):
     if not os.path.exists(save_dir):
         os.system(f'mkdir -p {save_dir}')
     dkey = f"pdf_{random()}_d"
-    clicked = col2.checkbox('*Enable Download*', key='check_download')
+    clicked = col2.checkbox('*Enable Download*', key=key)
     if clicked:
         st.session_state.download = True
         disabled = False
