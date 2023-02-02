@@ -7,3 +7,6 @@ npm install vega-lite vega-cli canvas
 in case tkinter is missing you need to install python3-tk,
 e.g. zypper in python310-tk (SUSE)
 
+# as long as the altair_saver problem exists
+# https://github.com/anmol098/waka-readme-stats/issues/337
+patch ./venv/lib/python3.10/site-packages/altair_saver/savers/_node.py altair_saver.patch

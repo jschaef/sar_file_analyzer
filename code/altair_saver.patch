@@ -1,0 +1,10 @@
+--- ./venv/lib/python3.10/site-packages/altair_saver/savers/_node.py	2023-02-02 12:50:36.657886786 +0000
++++ ./venv/lib/python3.10/site-packages/altair_saver/savers/_node_1.py	2023-02-02 12:51:17.718033709 +0000
+@@ -21,6 +21,7 @@
+     cmd = [npm, "bin"]
+     if global_:
+         cmd.append("--global")
++    cmd.append("--version")
+     return check_output_with_stderr(cmd).decode().strip()
+ 
+ 
