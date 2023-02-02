@@ -381,7 +381,7 @@ def pdf_download(file, dia):
         os.system(f'rm {my_file}')
 
     save(dia, my_file)
-    filename = Config.pdf_name
+    filename = file.split('/')[-1]
     with open(my_file, 'rb') as f:
         s = f.read()
     download_button_str = dow.download_button(

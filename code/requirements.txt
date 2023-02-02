@@ -3,6 +3,7 @@ altair
 altair_saver
 multiprocessing_on_dill
 pandas
+PyPDF4
 python-magic
 redis
 SQLAlchemy

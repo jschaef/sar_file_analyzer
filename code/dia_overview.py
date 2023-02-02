@@ -159,6 +159,7 @@ def show_dia_overview(username, sar_file_col):
                     header = item[0]['header']
                     device = item[0]['title']
                     device_count = item[0]['device_num']
+                    pdf_name = f'{pdf_dir}/{header.replace(" ", "_")}.pdf'
                     #grid = item[0]['grid']
 
                     if len(item) == 1:
