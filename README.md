@@ -82,3 +82,7 @@ server {
 In case the app is throwing an error about helpers.py line 381 <code>format(precision=4)</code>
 correct it to <code>set_precision(4)</code>.
 Depending on the pandas version the second one is deprecated but the first one still not known.
+
+In case altair saver is throwing an error when trying to download PDF's
+https://github.com/anmol098/waka-readme-stats/issues/337
+patch ./venv/lib/python3.10/site-packages/altair_saver/savers/_node.py altair_saver.patch
