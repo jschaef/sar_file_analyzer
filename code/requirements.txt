@@ -2,6 +2,7 @@ aiofiles
 altair
 altair_saver
 multiprocessing_on_dill
+multiprocess
 pandas
 PyPDF4
 python-magic

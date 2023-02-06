@@ -1,16 +1,18 @@
 #!/usr/bin/python3
 
 import streamlit as st
-#import multiprocessing
-import multiprocessing_on_dill as multiprocessing
+#import multiprocessing_on_dill as multiprocessing
+# better than dill - dill sometimes did hang while multiprocess is using dill but
+# never hung in my tests. Dill is necessary for serialization
+import multiprocess as multiprocessing
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
 import helpers
 import mp5
+import multi_pdf as mpdf
 import layout_helper as lh
 from config import Config
 from st_aggrid import AgGrid
-#from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 sar_structure = []
 os_details = ""
@@ -20,19 +22,23 @@ def show_dia_overview(username, sar_file_col):
     global sar_structure, os_details, file_chosen
     sar_file = helpers.get_sar_files(username, col=sar_file_col, key="dia_overview")
     st.subheader('Overview of important metrics from SAR data')
-    col1, col2, col3 = lh.create_columns(3, [0.7, 0.1, 0.4])
+    col1, col2, col3, col4 = lh.create_columns(4, [0.7, 0.1, 0.4, 0.4])
     op_ph = col1.empty()
-    op_ph3= col3.empty()
+    op_ph3 = col3.empty()
+    op_ph4 = col4.empty()
+    multi_pdf = col4.empty()
     pdf_check = col3.empty()
+    multi_pdf_field = []
+    create_multi_pdf = 0
     col1, col2, col3, col4 = lh.create_columns(4, [0, 1, 1, 1])
     st.write('')
     if sar_file != file_chosen:
         sar_structure = []
         file_chosen = sar_file
 
+    sar_file_name = sar_file
     sar_file = f'{Config.upload_dir}/{username}/{sar_file}'
     pdf_dir = f'{Config.upload_dir}/{username}/pdf'
-    pdf_name = f'{pdf_dir}/{Config.pdf_name}'
     if not sar_structure:
         sar_structure = sdc.get_data_frames(sar_file, username)
         os_details = sar_structure.pop('os_details')
@@ -58,6 +64,9 @@ def show_dia_overview(username, sar_file_col):
     op_ph3.markdown("**Choose if you need to save your diagrams as PDF**")
     if pdf_check.checkbox('Enable PDF saving'):
         enable_pdf = 1
+        op_ph4.markdown('**Create Summary PDF from all selected diagrams**')
+        if multi_pdf.checkbox('Create PDF'):
+            create_multi_pdf = 1
     else:
         enable_pdf = 0
     show_metric = 1
@@ -159,7 +168,6 @@ def show_dia_overview(username, sar_file_col):
                     header = item[0]['header']
                     device = item[0]['title']
                     device_count = item[0]['device_num']
-                    pdf_name = f'{pdf_dir}/{header.replace(" ", "_")}.pdf'
                     #grid = item[0]['grid']
 
                     if len(item) == 1:
@@ -199,6 +207,9 @@ def show_dia_overview(username, sar_file_col):
                                     helpers.metric_expander(metric)
                         with tab4:
                             if enable_pdf:
+                                pdf_name = f'{pdf_dir}/{sar_file_name}_{header.replace(" ", "_")}.pdf'
+                                if create_multi_pdf:
+                                    multi_pdf_field.append(pdf_name)
                                 helpers.pdf_download(pdf_name, chart)
                             else:
                                 st.write("You have to enable the PDF checkbox on the top. It is disabled\
@@ -263,6 +274,10 @@ def show_dia_overview(username, sar_file_col):
                                         helpers.metric_expander(metric)
                             with tab4:
                                 if enable_pdf:
+                                    title = subitem['title']
+                                    pdf_name = f'{pdf_dir}/{sar_file_name}_{title.replace(" ", "_")}.pdf'
+                                    if create_multi_pdf:
+                                        multi_pdf_field.append(pdf_name)
                                     helpers.pdf_download(pdf_name, chart)
                                 else:
                                     st.write("You have to enable the PDF checkbox on the top. It is disabled\
@@ -290,6 +305,12 @@ def show_dia_overview(username, sar_file_col):
 
                             counter +=1
                     st.markdown("___")
-        # if st.button('Back to top'):
+                if create_multi_pdf:
+                    download_name = f"{sar_file_name}_diagrams.pdf"
+                    pdf_file = f"{pdf_dir}/{download_name}"
+                    outfile = mpdf.create_multi_pdf(multi_pdf_field, pdf_file)
+                    helpers.multi_pdf_download(outfile)
+                st.markdown("___")
+
             if st.form_submit_button('Back to top'):
                 st.experimental_rerun()

@@ -73,7 +73,9 @@ def do_metrics(config_dict, username):
             chart= alt.overview_v5(chart_field, restart_headers, width, hight, 'device', font_size, title=title)
             st.markdown(f'###### {filename}')
             st.altair_chart(chart, theme=None)
-            lh.pdf_download(pdf_name, chart)
+            title = f"{filename}_{title}"
+            download_name = f"{helpers.validate_convert_names(title)}.pdf"
+            lh.pdf_download(pdf_name, chart, download_name=download_name)
 
         with tab2:
             mph.display_stats_data(collect_field)
@@ -91,13 +93,22 @@ def do_metrics(config_dict, username):
         tab1, tab2, tab3 = st.tabs(["📈 Chart", "🗃 Data", " 📔 man page"])
         with tab1:
             cols = st.columns(8)
+            metrics_string = ''
             width, hight = helpers.diagram_expander(800, 400, 'Diagram Width',
                           'Diagram Hight', cols[0])
             font_size = helpers.font_expander(12, "Change Axis Font Size", "font size", cols[1])
             chart = alt.overview_v4(chart_field, restart_headers, width, hight, font_size )
             st.markdown(f'###### {filename}')
             st.altair_chart(chart, theme=None)
-            lh.pdf_download(pdf_name, chart)
+            for field in collect_field:
+                metric = field[2]
+                if metrics_string:
+                    metrics_string = f"{metrics_string}-{metric}"
+                else:
+                    metrics_string = f"{metric}"
+            download_name = f"{filename}_{metrics_string}"
+            download_name = f"{helpers.validate_convert_names(download_name)}.pdf"
+            lh.pdf_download(pdf_name, chart, download_name=download_name)
         with tab2:
             mph.display_stats_data(collect_field)
         with tab3:

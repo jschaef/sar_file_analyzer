@@ -377,15 +377,21 @@ def pdf_download(file, dia):
     save_dir = os.path.dirname(file)
     if not os.path.exists(save_dir):
         os.system(f'mkdir -p {save_dir}')
-    if os.path.exists(my_file):
-        os.system(f'rm {my_file}')
-
-    save(dia, my_file)
+    if not os.path.exists(my_file):
+        save(dia, my_file)
     filename = file.split('/')[-1]
     with open(my_file, 'rb') as f:
         s = f.read()
     download_button_str = dow.download_button(
         s, filename, f'Click here to download PDF')
+    st.markdown(download_button_str, unsafe_allow_html=True)
+
+def multi_pdf_download(file):
+    filename = file.split('/')[-1]
+    with open(file, 'rb') as f:
+        s = f.read()
+    download_button_str = dow.download_button(
+        s, filename, f'Click here to download the multi PDF')
     st.markdown(download_button_str, unsafe_allow_html=True)
 
 def set_stile(df, restart_rows=None):
@@ -564,5 +570,10 @@ def create_start_end_time_list(start: pd.DatetimeIndex, end: pd.DatetimeIndex, c
 def clean_session_state(*args):
     for entry in args:
         st.session_state.pop(entry, None)
+
+def validate_convert_names(subject: str)-> str:
+    subject = subject.replace(" ", "_").replace('%',"percent_").replace('/s',"_per_second_").replace('_-',"-")
+    return subject
+
 if __name__ == '__main__':
     pass

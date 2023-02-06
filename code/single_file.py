@@ -68,7 +68,8 @@ def single_f(config_obj, username):
             chart = alt.overview_v1(df, restart_headers, os_details, font_size=font_size, width=width, 
                 height=height, title=title)
             st.altair_chart(chart, theme=None)
-            lh.pdf_download(pdf_name, chart)
+            download_name = f"{selection}_{helpers.validate_convert_names(title)}.pdf"
+            lh.pdf_download(pdf_name, chart, download_name=download_name)
         with tab2:
             st.markdown(f'###### Dataset for {aitem[selected]} {header_add}')
             helpers.restart_headers(df_displ, os_details, restart_headers=restart_headers)
@@ -104,7 +105,9 @@ def single_f(config_obj, username):
             chart = alt.draw_single_chart_v1(
                 df_part, prop, restart_headers, os_details, width, hight, font_size=font_size, title=title)
             st.altair_chart(chart, theme=None)
-            lh.pdf_download(pdf_name, chart)
+            title = f"{title}_{prop}"
+            download_name = f"{selection}_{helpers.validate_convert_names(title)}.pdf"
+            lh.pdf_download(pdf_name, chart, download_name=download_name)
         with tab2:
             st.markdown(f'###### Dataset for {aitem[selected]} {header_add} {prop}')
             helpers.restart_headers(df_displ, os_details, restart_headers=restart_headers)

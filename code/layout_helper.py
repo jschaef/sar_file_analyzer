@@ -21,7 +21,7 @@ def create_pdf(file: str, chart: object) -> list:
         return [fobject, mimetype]
 
 
-def pdf_download(file: str, chart: object,key=None):
+def pdf_download(file: str, chart: object,key=None, download_name=None):
     """creates a download button and a checkbox. Using function create_pdf()
     to create the file for download if the checkbox has been enabled.
 
@@ -43,7 +43,10 @@ def pdf_download(file: str, chart: object,key=None):
         st.session_state.download = True
         disabled = False
 
-    col1.download_button(label='Download PDF', file_name='sar_chart.pdf', data=create_pdf(file, chart)[0],
+    if not download_name:
+       download_name = 'sar_chart.pdf' 
+
+    col1.download_button(label='Download PDF', file_name=download_name, data=create_pdf(file, chart)[0],
         mime='application/x-binary',key=dkey, disabled=disabled)
     try:
         fobject

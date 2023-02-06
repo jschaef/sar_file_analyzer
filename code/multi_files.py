@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 import multiprocessing
+#import multiprocess as multiprocessing
 import alt
 import streamlit as st
 import sar_data_crafter as sdc
@@ -80,7 +81,6 @@ def single_multi(config_dict, username):
             aitem = helpers.translate_headers([selected])
             main_title = aitem[selected]
 
-
             # find data frames
             sub_item_field = []
             generic_item_field = []
@@ -122,7 +122,7 @@ def single_multi(config_dict, username):
             # choose diagram size
             if multi_sar_dict:
                 chart_field = []
-                pd_or_dia = col1.selectbox('', ['Diagram', 'Summary'], index=0)
+                pd_or_dia = col1.selectbox('dia', ['Diagram', 'Summary'], index=0, label_visibility="hidden")
                 collect_field = []
                 dia_collect_field = []
                 sum_field = []
@@ -200,8 +200,9 @@ def single_multi(config_dict, username):
                                 chart = alt.overview_v1(df, restart_headers, os_details, font_size, 
                                     width=width, height=height, title=title)
                                 st.altair_chart(chart, theme=None)
-                                key = f"dia_{collect_field.index(data)}"
-                                lh.pdf_download(pdf_name, chart)
+                                dia_key = f"dia_{collect_field.index(data)}"
+                                download_name = f"{key}_{helpers.validate_convert_names(title)}.pdf"
+                                lh.pdf_download(pdf_name, chart, download_name=download_name, key=dia_key)
                             with tab2:
                                 for entry in display_field:
                                     if entry[0] == key:
@@ -243,7 +244,11 @@ def single_multi(config_dict, username):
                             img = alt.overview_v3(chart_field, reboot_headers,width, hight, 'file', font_size, title=title)
                             img = img.configure_axisY(labelLimit=400)
                             st.altair_chart(img, theme=None)
-                            lh.pdf_download(pdf_name, img)
+                            metric = chart_field[0][1]
+                            title = f"{title}_{metric}"
+                            download_name = f"{helpers.validate_convert_names(title)}.pdf"
+                            download_name = f"multi_files_{download_name}"
+                            lh.pdf_download(pdf_name, img, download_name=download_name)
                         with tab2:
                             object_field = []
                             if chart_field:
