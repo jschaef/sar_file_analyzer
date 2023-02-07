@@ -13,7 +13,5 @@ def create_multi_pdf(pdf_field: list, outfile: str):
     merger.write(output)
     output.close()
     for file in rm_field:
-        
-        print(file)
         os.remove(file)
     return outfile
