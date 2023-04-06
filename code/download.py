@@ -8,7 +8,7 @@ import pandas as pd
 """
 https://gist.github.com/chad-m/6be98ed6cf1c4f17d09b7f6e5ca2978f
 """
-@st.experimental_memo
+@st.cache_data
 def download_button(object_to_download, download_filename, button_text):
     """
     Generates a link to download the given object_to_download.

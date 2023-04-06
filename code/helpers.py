@@ -170,7 +170,7 @@ def get_selected_header(select_box_title, headers, col=None, key=None):
             break
     return (selected, ph)
 
-@st.experimental_singleton
+@st.cache_resource
 def get_metric_desc_from_manpage():
     metric_reg = re.compile('^\.IP\s+(.*$)')
     content = re.compile('^[^\.].*$')

@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 
 import streamlit as st
-#import multiprocessing_on_dill as multiprocessing
-# better than dill - dill sometimes did hang while multiprocess is using dill but
-# never hung in my tests. Dill is necessary for serialization
 import multiprocess as multiprocessing
 import sar_data_crafter as sdc
 import dataframe_funcs as dff
