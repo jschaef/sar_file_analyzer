@@ -99,7 +99,7 @@ def create_reboot_rule(df, property, restart_headers, os_details, col=None, col_
         xval = header.split()[-1]
         date_str, format = ddf.format_date(os_details)
         z = pd.to_datetime(
-            f'{date_str} {xval}', format=format)
+            f'{date_str} {xval}', format="mixed")
         z = z.tz_localize('UTC')
         z_field.append(z)
         if col == None:

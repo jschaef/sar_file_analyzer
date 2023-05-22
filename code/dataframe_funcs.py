@@ -34,7 +34,7 @@ def df_reset_date_org(df, os_details):
     for x in range(len(df.index)):
         old_val = df.index[x]
         z = pd.to_datetime(
-            f'{date_str} {old_val}', format=format)
+            f'{date_str} {old_val}', format="mixed")
         new_index.append(z)
     df['date'] = new_index
     #df.set_index('date', new_index, inplace=True,
@@ -47,7 +47,7 @@ def df_reset_date_org(df, os_details):
 def df_reset_date(df, os_details):
     date_str, format = format_date(os_details)
     df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
-        f"{date_str} {x}", format="ISO8601"))
+        f"{date_str} {x}", format="mixed"))
     df.set_index('date', inplace=True,
                 verify_integrity=False)
     return df
@@ -81,7 +81,7 @@ def insert_restarts_into_df(os_details, df, restart_headers):
         # restart_headers have time of restart appended as last string
         # hour time, e.g.: 10:13:47
         h_time = header.split()[-1]
-        z = pd.to_datetime(f'{date_str} {h_time}', format=format)
+        z = pd.to_datetime(f'{date_str} {h_time}', format="mixed")
         ind = 0
         for x in range(len(df.index)):
             # check if date - z is the minimum
