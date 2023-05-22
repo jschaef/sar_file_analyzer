@@ -47,7 +47,7 @@ def df_reset_date_org(df, os_details):
 def df_reset_date(df, os_details):
     date_str, format = format_date(os_details)
     df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
-        f"{date_str} {x}", format=format))
+        f"{date_str} {x}", format="ISO8601"))
     df.set_index('date', inplace=True,
                 verify_integrity=False)
     return df
