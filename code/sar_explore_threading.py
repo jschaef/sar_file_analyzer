@@ -21,7 +21,7 @@ reg_ignore = re.compile(
     '^(bus.*idvendor|intr.*intr/s|temp.*device)', re.IGNORECASE)
 reg_delete = re.compile(' AM | PM ', re.IGNORECASE)
 reg_linux_restart = re.compile('LINUX RESTART')
-reg_average = re.compile('average|durchsch|\<sum\>', re.IGNORECASE)
+reg_average = re.compile('average|durchsch|\<sum\>|summary|Summe', re.IGNORECASE)
 
 # ### program code
 
