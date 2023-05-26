@@ -46,8 +46,14 @@ def df_reset_date_org(df, os_details):
 
 def df_reset_date(df, os_details):
     date_str, format = format_date(os_details)
+    yearfirst=False
+    if "-" in date_str:
+        date_field = date_str.split("-")
+        if len(date_field[0]) > 2:
+               yearfirst=True
+
     df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
-        f"{date_str} {x}", format="mixed"))
+        f"{date_str} {x}", format="mixed", yearfirst=yearfirst))
     df.set_index('date', inplace=True,
                 verify_integrity=False)
     return df
