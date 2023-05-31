@@ -260,6 +260,7 @@ def single_multi(config_dict, username):
                                     df_stat = index[1]
                                     df_new = df_stat[[prop]].copy()
                                     df_time = helpers.get_df_from_start_end(df_new.copy(), start, end)
+                                    df_time = df_time.loc[~df_time.index.duplicated(), :]
                                     index[1][prop] = df_time
                                     for event in reboot_headers:
                                         hostname = event[1].split()[2].strip("()")
