@@ -228,18 +228,19 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
     rule_fields = []
     for data in collect_field:
         df = data[0]
-        df['date_utc'] = df['date'].dt.tz_localize('UTC')
-        property = data[1]
-        filename = df['file'][0]
-        for header in reboot_headers:
-            if header[0]:
-                hostname = header[1].split()[2].strip("()")
-                date = header[1].split()[3]
-                if hostname in filename and date in filename:
-                    rule_field, z_field, y_pos = create_reboot_rule(
-                        df, property, header[0], header[1], col=color_item, col_value=filename)
-                    rule_fields.append(rule_field)
-                    z_fields.append([z_field, filename])
+        if not df.empty:
+            df['date_utc'] = df['date'].dt.tz_localize('UTC')
+            property = data[1]
+            filename = df['file'][0]
+            for header in reboot_headers:
+                if header[0]:
+                    hostname = header[1].split()[2].strip("()")
+                    date = header[1].split()[3]
+                    if hostname in filename and date in filename:
+                        rule_field, z_field, y_pos = create_reboot_rule(
+                            df, property, header[0], header[1], col=color_item, col_value=filename)
+                        rule_fields.append(rule_field)
+                        z_fields.append([z_field, filename])
             
         b_df = pd.concat([b_df, df], ignore_index=False)
 
