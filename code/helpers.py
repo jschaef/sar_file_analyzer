@@ -530,7 +530,7 @@ def get_start_end_date(date_list: list, point: str="start") -> datetime:
             st.session_state.start_date_list = date_list
     if "multi_end" not in st.session_state:
         if point == "end":
-            st.session_state.multi_end = pd_index.min()
+            st.session_state.multi_end = pd_index.max()
             st.session_state.end_date_list = date_list
     if point == "start":
         if st.session_state.get('start_date_list', None) == date_list:
@@ -541,7 +541,7 @@ def get_start_end_date(date_list: list, point: str="start") -> datetime:
         if st.session_state.get('end_date_list', None) == date_list:
             if st.session_state.get('multi_end'): 
                 return st.session_state.multi_end
-    return pd_index.min() if point == "end" else pd_index.min()
+    return pd_index.max() if point == "end" else pd_index.min()
 
 def get_df_from_start_end(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
     start, end = dff.replace_ymt(start, end, df)
