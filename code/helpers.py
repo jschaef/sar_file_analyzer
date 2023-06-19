@@ -524,23 +524,6 @@ def get_start_end_date(date_list: list, point: str="start") -> datetime:
         pd.datetime: _description_
     """
     pd_index = pd.DatetimeIndex(date_list)
-    if "multi_start" not in st.session_state:
-        if point == "start":
-            st.session_state.multi_start = pd_index.min()
-            st.session_state.start_date_list = date_list
-    if "multi_end" not in st.session_state:
-        if point == "end":
-            st.session_state.multi_end = pd_index.max()
-            st.session_state.end_date_list = date_list
-    if point == "start":
-        if st.session_state.get('start_date_list', None) == date_list:
-            if st.session_state.get('multi_start'): 
-                #return st.session_state.multi_start
-                return pd_index.min()
-    elif point == "end":
-        if st.session_state.get('end_date_list', None) == date_list:
-            if st.session_state.get('multi_end'): 
-                return st.session_state.multi_end
     return pd_index.max() if point == "end" else pd_index.min()
 
 def get_df_from_start_end(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
@@ -564,7 +547,7 @@ def create_start_end_time_list(start: pd.DatetimeIndex, end: pd.DatetimeIndex, c
     x = x.delete(0).insert(0,start).append(pd.date_range(pd.Timestamp(end), periods=1))
     y_start = pd.DataFrame(x.strftime('%H:%M:%S'), index=x)
     y_start.columns = ['time']
-    start_key = f"{start}_start"
+    start_key = "time_start"
     start_time = col1.selectbox('Start', y_start['time'], key=start_key)
     tmp_x = x.to_series(index=range(len(x)))
     for index in range(len(tmp_x)):
@@ -572,10 +555,12 @@ def create_start_end_time_list(start: pd.DatetimeIndex, end: pd.DatetimeIndex, c
             start_time = tmp_x[index]
             break
     end_choice = x[index+1:]
-    end_key = f"{end}_end"
+    date_time_col = end_choice.to_pydatetime()
+    end_key = "time_end"
     time_end_choice = pd.DataFrame(end_choice.strftime('%H:%M:%S'), index=end_choice)
     time_end_time  = col2.selectbox('End', time_end_choice, index=len(end_choice)-1, key=end_key)
-    end_time = time_end_choice.index[time_end_choice[0] == time_end_time][0]
+    time_end_choice[1] = date_time_col
+    end_time = time_end_choice[time_end_choice[0]==time_end_time][1][0]
     return start_time, end_time
 
 def clean_session_state(*args):
