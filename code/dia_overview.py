@@ -20,7 +20,6 @@ def show_dia_overview(username, sar_file_col):
     sar_file = helpers.get_sar_files(username, col=sar_file_col, key="dia_overview")
     st.subheader('Overview of important metrics from SAR data')
     col1, col2, col3, col4 = lh.create_columns(4, [0.7, 0.1, 0.4, 0.4])
-    op_ph = col1.empty()
     op_ph3 = col3.empty()
     op_ph4 = col4.empty()
     multi_pdf = col4.empty()
@@ -184,8 +183,6 @@ def show_dia_overview(username, sar_file_col):
                                 dup_check = item[0]['dup_check']
                                 df_describe = item[0]['df_describe']
                                 df_stat  = item[0]['df_stat']
-                                df_display       = item[0]['df_display']
-
                                 col1, col2, col3, col4 = lh.create_columns(
                                     4, [0, 0, 1, 1])
                                 
@@ -212,7 +209,6 @@ def show_dia_overview(username, sar_file_col):
                                 st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                          by default because the current implementation is quite performance intensive")
                         with tab5:
-                            #lh.use_aggrid(df_display, restart_headers, f'generic_{counter}')
                             df, gridOptions, key = item[0]['grid']
                             AgGrid (
                                     df,
@@ -280,7 +276,6 @@ def show_dia_overview(username, sar_file_col):
                                     st.write("You have to enable the PDF checkbox on the top. It is disabled\
                                              by default because the current implementation is quite performance intensive")
                             with tab5:
-                                #lh.use_aggrid(df_display, restart_headers, f"{counter}")
                                 df, gridOptions, key = subitem['grid']
                                 AgGrid(
                                     df,
