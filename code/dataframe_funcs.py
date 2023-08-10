@@ -51,11 +51,10 @@ def df_reset_date(df, os_details):
         date_field = date_str.split("-")
         if len(date_field[0]) > 2:
                yearfirst=True
-
-    df['date'] = df.index.to_series().apply(lambda x: pd.to_datetime(
-        f"{date_str} {x}", format="mixed", yearfirst=yearfirst))
-    df.set_index('date', inplace=True,
-                verify_integrity=False)
+    df.index = date_str + " " + df.index.astype(str)
+    df.index = pd.to_datetime(df.index, format="mixed", 
+        yearfirst=yearfirst)
+    df.index.name = 'date'
     return df
 
 
