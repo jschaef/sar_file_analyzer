@@ -102,7 +102,7 @@ def create_reboot_rule(df, property, restart_headers, os_details, col=None, col_
             f'{date_str} {xval}', format="mixed")
         z = z.tz_localize('UTC')
         z_field.append(z)
-        if col == None:
+        if col is None:
             col = 'dummy'
         mdf = pd.DataFrame({'x': [z], col:col_value})
         rule = alt.Chart(mdf).mark_rule(color='red').encode(
