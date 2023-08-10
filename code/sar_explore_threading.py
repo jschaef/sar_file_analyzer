@@ -44,6 +44,7 @@ def parse_sar_file(content):
             line = re.sub('AM |PM ', '', line)
             line = re.sub(short_time, new_time, line)
         # an empty line has been found before
+        # we meet a heading
         if mark == 1:
             fields = line.split()
             if not reg_fibre.search(line):
@@ -64,11 +65,13 @@ def parse_sar_file(content):
             dict_idx = mykey
             mark = 0
         else:
+            # heading exists and line is not empty
             if dict_idx and line:
                 # append line if heading exists
                 if dict_idx != fibre_key:
                     mydict[dict_idx].append(line)
                 else:
+                    # fibre channel data has a different structure
                     # move last column to second column
                     fchost = line.split()[-1]
                     line_f = line.split()[:-1]
@@ -152,8 +155,8 @@ def handle_generic_type(data):
     return(same_type)
 
 
-async def collect_sections(key, mydict):
-    data = await return_sar_section(key, mydict[key])
+async def collect_sections(key, key_data):
+    data = await return_sar_section(key, key_data)
     if reg_for_splines.search(key):
         section = [key, handle_diff_type(data)]
     else:
@@ -182,7 +185,7 @@ async def create_data_collection(my_file: IO, content: str) -> list:
     for key in mydict.keys():
         if reg_ignore.search(key):
             continue
-        tasks.append(asyncio.create_task(collect_sections(key, mydict)))
+        tasks.append(asyncio.create_task(collect_sections(key, mydict[key])))
     for t in tasks:
         result = await t
         data_collection.append(result)
