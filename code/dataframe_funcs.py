@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import re
-from this import d
 import pandas as pd
 from datetime import timedelta
 
@@ -28,22 +27,6 @@ def format_date(os_details):
             date_str = '2000-01-01'
     return(date_str, format)
 
-def df_reset_date_org(df, os_details):
-    new_index = []
-    date_str, format = format_date(os_details)
-    for x in range(len(df.index)):
-        old_val = df.index[x]
-        z = pd.to_datetime(
-            f'{date_str} {old_val}', format="mixed")
-        new_index.append(z)
-    df['date'] = new_index
-    #df.set_index('date', new_index, inplace=True,
-    df.set_index('date', inplace=True,
-                verify_integrity=False)
-    
-    return df
-
-
 def df_reset_date(df, os_details):
     date_str, format = format_date(os_details)
     yearfirst=False
@@ -53,10 +36,9 @@ def df_reset_date(df, os_details):
                yearfirst=True
     df.index = date_str + " " + df.index.astype(str)
     df.index = pd.to_datetime(df.index, format="mixed", 
-        yearfirst=yearfirst)
+        yearfirst=yearfirst, utc=False)
     df.index.name = 'date'
     return df
-
 
 def set_unique_date(dataframe, time_obj):
     """
@@ -68,7 +50,6 @@ def set_unique_date(dataframe, time_obj):
     new_index = [date.replace(year, month, day) for date in dataframe.index]
     dataframe.index = new_index
     dataframe.index.name = 'date'
-    
     return dataframe
 
 def translate_dates_into_list(df):
