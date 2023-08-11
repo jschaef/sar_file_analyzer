@@ -21,19 +21,19 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
     else:
         color_item = 'file'
 
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date_utc'], empty='none')
+    nearest = alt.selection_point(nearest=True, on='mouseover',
+                            fields=['date_utc'], empty=False)
 
     selectors = alt.Chart(df).mark_point().encode(
         alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
-    ).add_selection(
+    ).add_params(
         nearest
     )
 
     c = alt.Chart(df).mark_line(point=False, interpolate='natural').encode(
         alt.X('utchoursminutes(date_utc)', type='temporal',
-              scale=alt.Scale(zero=False),
+              scale=alt.Scale(zero=True),
               axis=alt.Axis(domain=True, labelBaseline='line-top',
                             title='date')),
         alt.Y(property, scale=alt.Scale(zero=False),
@@ -73,8 +73,6 @@ def draw_single_chart_v1(df, property, restart_headers, os_details, width, hight
         reboot_text = reboot_text.encode(
         color=alt.Color('dummy:N', legend=None)
     )
-
-
 
     for rule in rule_field:
         rule = rule.encode(
@@ -129,7 +127,7 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
     rule_field, z_field, y_pos = create_reboot_rule(
         df, 'y', restart_headers, os_details)
 
-    selection_new = alt.selection_multi(fields=['metrics'])
+    selection_new = alt.selection_point(fields=['metrics'])
 
     color_x = alt.condition(selection_new,
                             alt.Color('metrics:N', legend=None),
@@ -145,24 +143,24 @@ def overview_v1(df, restart_headers, os_details, font_size=None, width=None, hei
         title=title
     )
 
-    final_line = line.mark_line(strokeWidth=2).add_selection(selection_new).encode(
+    final_line = line.mark_line(strokeWidth=2).add_params(selection_new).encode(
         color=color_x
     )
     
     legend = alt.Chart(df).mark_point().encode(
         y=alt.Y('metrics:N', axis=alt.Axis(orient='right')),
         color=color_x
-    ).add_selection(
+    ).add_params(
         selection_new
     )
 
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date'], empty='none')
+    nearest = alt.selection_point(nearest=True, on='mouseover',
+                            fields=['date'], empty=False)
 
     selectors = alt.Chart(df).mark_point().encode(
         alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
-    ).add_selection(
+    ).add_params(
         nearest
     )
 
@@ -244,17 +242,17 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
             
         b_df = pd.concat([b_df, df], ignore_index=False)
 
-    nearest = alt.selection(type='single', nearest=True, on='mouseover',
-                            fields=['date_utc'], empty='none')
+    nearest = alt.selection_point(nearest=True, on='mouseover',
+                            fields=['date_utc'], empty=False)
 
     selectors = alt.Chart(b_df).mark_point().encode(
         alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
-    ).add_selection(
+    ).add_params(
         nearest
     )
 
-    selection = alt.selection_multi(fields=[color_item],)
+    selection = alt.selection_point(fields=[color_item],)
     color_x = alt.condition(selection,
                             alt.Color(f'{color_item}:N', legend=None),
                             alt.value('',))
@@ -275,7 +273,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
         title=title
     )
 
-    final_img = c.mark_line(strokeWidth=2).add_selection(selection).encode(
+    final_img = c.mark_line(strokeWidth=2).add_params(selection).encode(
         color=color_x
     )
 
@@ -288,7 +286,7 @@ def overview_v3(collect_field, reboot_headers, width, height, lsel, font_size, t
     legend = alt.Chart(b_df).mark_point().encode(
         y=alt.Y('file:N', axis=alt.Axis(orient='right')),
         color=color_x
-    ).add_selection(
+    ).add_params(
         selection
     )
     
@@ -370,11 +368,11 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
     selectors = alt.Chart(b_df).mark_point().encode(
         alt.X('utchoursminutes(date_utc)', type='temporal'),
         opacity=alt.value(0),
-    ).add_selection(
+    ).add_params(
         nearest
     )
 
-    selection = alt.selection_multi(fields=['metrics'],)
+    selection = alt.selection_point(fields=['metrics'],)
     color_x = alt.condition(selection,
                             alt.Color(f'metrics:N',legend=None),
                             alt.value('',))
@@ -390,7 +388,7 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
             width=width, height=height
         )
 
-    final_line = line.mark_line(strokeWidth=2).add_selection(selection).encode(
+    final_line = line.mark_line(strokeWidth=2).add_params(selection).encode(
         color=color_x
     )
 
@@ -403,7 +401,7 @@ def overview_v4(collect_field, reboot_headers, width, height, font_size):
     legend = alt.Chart(b_df).mark_point().encode(
         y=alt.Y('metrics:N', axis=alt.Axis(orient='right')),
         color=color_x
-    ).add_selection(
+    ).add_params(
         selection
     )
 
@@ -479,11 +477,11 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
     selectors = alt.Chart(b_df).mark_point().encode(
         alt.X('utchoursminutes(date)', type='temporal'),
         opacity=alt.value(0),
-    ).add_selection(
+    ).add_params(
         nearest
     )
 
-    selection = alt.selection_multi(fields=[lsel],)
+    selection = alt.selection_point(fields=[lsel],)
     color_x = alt.condition(selection,
                             alt.Color(f'{lsel}:N', legend=None),
                             alt.value('',))
@@ -499,7 +497,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
         title=title,
     )
 
-    final_line = line.mark_line(strokeWidth=2).add_selection(selection).encode(
+    final_line = line.mark_line(strokeWidth=2).add_params(selection).encode(
         color=color_x
     )
     rules = alt.Chart(b_df).mark_rule(color='gray').encode(
@@ -511,7 +509,7 @@ def overview_v5(collect_field, reboot_headers, width, height, lsel, font_size, t
     legend = alt.Chart(b_df).mark_point().encode(
         y=alt.Y(f'{color_item}:N', axis=alt.Axis(orient='right')),
         color=color_x
-    ).add_selection(
+    ).add_params(
         selection
     )
 
