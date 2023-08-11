@@ -36,7 +36,6 @@ def final_overview(sar_structure, headers, entry, wanted_sub_devices, start, end
                 device = device_list[0]
                 df = sar_structure[headers[entry]][device]
                 df_field.append([df, device])
-
         for df_tuple in df_field:
             if df_tuple[1]:
                 #title = f"{title} {df_tuple[1]}"
