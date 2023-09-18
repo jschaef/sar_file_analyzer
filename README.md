@@ -4,7 +4,7 @@ for graphical presentation of various metrics from ascii sar files.
 
 ## live demo
 you might have a look here:
-https://share.streamlit.io/jschaef/sar_file_analyzer/main/code/first_st.py.
+<https://share.streamlit.io/jschaef/sar_file_analyzer/main/code/first_st.py>.
 Create your own account and upload a sar file or use admin/password
 
 ## requirements
@@ -43,7 +43,7 @@ In this case do a <code>pip install -U streamlit</code>
 
 ## configuring streamlit
 below a sample config.toml. Put it into code/.streamlit/config.toml
-```
+```toml
 [global]
 dataFrameSerialization = "legacy"
 
@@ -84,5 +84,5 @@ correct it to <code>set_precision(4)</code>.
 Depending on the pandas version the second one is deprecated but the first one still not known.
 
 In case altair saver is throwing an error when trying to download PDF's
-https://github.com/anmol098/waka-readme-stats/issues/337
+<https://github.com/anmol098/waka-readme-stats/issues/337>
 patch ./venv/lib/python3.10/site-packages/altair_saver/savers/_node.py altair_saver.patch
