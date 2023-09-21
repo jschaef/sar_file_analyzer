@@ -1,3 +1,7 @@
+# deprecated
+This probject is frozen. An active maintained fork of it with performance improvements under the
+hood can be found here: <https://github.com/jschaef/sarfile_analyzer_ng>
+
 # sar_file_analyzer
 The app is using streamlit, altair, pandas and other great python modules   
 for graphical presentation of various metrics from ascii sar files.
